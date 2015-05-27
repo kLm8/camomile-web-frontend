@@ -1,9 +1,9 @@
 var express = require("express"),
     app     = express(),
     program = require('commander'),
-    fs = require('fs'),
+    fs      = require('fs'),
     request = require('request'),
-    async = require('async'),
+    async   = require('async'),
     sprintf = require('sprintf').sprintf;
 
 // remember cookie
@@ -31,18 +31,18 @@ program
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
-var login = program.login || process.env.CAMOMILE_LOGIN;
-var password = program.password || process.env.CAMOMILE_PASSWORD;
+var login        = program.login || process.env.CAMOMILE_LOGIN;
+var password     = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
-var port = parseInt(program.port || process.env.PORT || '8070', 10);
-var shot_in = program.shotIn;
-var shot_out = program.shotOut;
-var head_in = program.headIn;
-var head_out = program.headOut;
-var evidence_in = program.evidenceIn;
+var port         = parseInt(program.port || process.env.PORT || '8070', 10);
+var shot_in      = program.shotIn;
+var shot_out     = program.shotOut;
+var head_in      = program.headIn;
+var head_out     = program.headOut;
+var evidence_in  = program.evidenceIn;
 var evidence_out = program.evidenceOut;
-var label_in = program.labelIn;
-var label_out = program.labelOut;
+var label_in     = program.labelIn;
+var label_out    = program.labelOut;
 
 
 // configure express app

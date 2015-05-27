@@ -7,7 +7,8 @@ angular.module('myApp.services', ['ngResource']);
 
 angular.module(
         'myApp',
-        ['myApp.filters',
+        [
+            'myApp.filters',
             'myApp.services',
             'myApp.directives',
             'myApp.controllers',
@@ -23,7 +24,7 @@ angular.module(
         $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.when('/diff', {templateUrl:'partials/diff.html'});
         $routeProvider.when('/evidence', {templateUrl:'partials/evidence.html'});
-				$routeProvider.when('/label', {templateUrl:'partials/label.html'});
+		$routeProvider.when('/label', {templateUrl:'partials/label.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 
