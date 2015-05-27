@@ -32,8 +32,7 @@
         <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
             <label>Reference: </label>
             <select class="form-control" ng-model='model.selected_reference'>
-                <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
-                </option>
+                <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
             </select>
         </div>
 
@@ -41,8 +40,7 @@
         <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
             <label>Hypothesis: </label>
             <select class="form-control" ng-model='model.selected_hypothesis'>
-                <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
-                </option>
+                <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
             </select>
         </div>
 
@@ -54,9 +52,8 @@
 <div class="container-fluid" ng-show="model.selected_medium">
 
     <div class="row top-padding">
-        <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
-        </div>
-        <div class="col-lg-7 col-md-12 col-xs-12">
+        <!-- <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div> -->
+        <!-- <div class="col-lg-7 col-md-12 col-xs-12"> -->
             <!-- <div id="video-container" >
                 <! video player behaviour managed by cm-video-player angular attribute >
                 <video id="player"
@@ -88,25 +85,25 @@
                 </div>
             </div> -->
 
-            <div class="videogular-container">
-                <videogular>
-                    <vg-media vg-src="model.video"></vg-media>
-                    <vg-controls>
-                        <vg-play-pause-button></vg-play-pause-button>
-                        <vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
-                        <vg-scrub-bar>
-                            <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
-                        </vg-scrub-bar>
-                        <vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
-                        <vg-volume>
-                            <vg-mute-button></vg-mute-button>
-                            <vg-volume-bar></vg-volume-bar>
-                        </vg-volume>
-                    </vg-controls>
-                    <vg-overlay-play></vg-overlay-play>
-                </videogular>
-            </div>
+        <div class="videogular-container">
+            <videogular>
+                <vg-media vg-src="model.video"></vg-media>
+                <vg-controls>
+                    <vg-play-pause-button></vg-play-pause-button>
+                    <vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
+                    <vg-scrub-bar>
+                        <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+                    </vg-scrub-bar>
+                    <vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
+                    <vg-volume>
+                        <vg-mute-button></vg-mute-button>
+                        <vg-volume-bar></vg-volume-bar>
+                    </vg-volume>
+                </vg-controls>
+                <vg-overlay-play></vg-overlay-play>
+            </videogular>
         </div>
+        <!-- </div> -->
         <!-- <div class="col-lg-4 col-md-push-0 col-xs-push-0">
             <label>Restrict playback to annotations:</label>
             <button type="button" class="btn btn-default"
@@ -120,13 +117,14 @@
         </div> -->
     </div>
 
-    <!-- <div class="row top-padding">
-        <svg cm-timeline cm-context-menu>
+    <div class="row top-padding">
+        <!-- <svg cm-timeline cm-context-menu>
             <style>
                 rect { mix-blend-mode: multiply; }
             </style>
-        </svg>
-    </div> -->
+        </svg> -->
+        <vis-timeline data="model.data" options="model.options" events="model.events"></vis-timeline>
+    </div>
 
 </div>
 
