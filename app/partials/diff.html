@@ -57,8 +57,8 @@
         <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
         </div>
         <div class="col-lg-7 col-md-12 col-xs-12">
-            <div id="video-container" >
-                <!-- video player behaviour managed by cm-video-player angular attribute -->
+            <!-- <div id="video-container" >
+                <! video player behaviour managed by cm-video-player angular attribute >
                 <video id="player"
                        cm-video-player
                        ng-src={{model.video}}
@@ -70,11 +70,11 @@
                                 ng-click="model.toggle_play()">
                             {{ model.play_label }}
                         </button>
-                        <!-- use directive for quite simple way to indicate annotation to perform -->
-                        <!-- + extensible for reference layer and controls for extension to x seconds -->
+                        <! use directive for quite simple way to indicate annotation to perform >
+                        + extensible for reference layer and controls for extension to x seconds
                     </div>
-                    <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
-                    <!--see https://github.com/angular/angular.js/issues/6726-->
+                    <!!!! KNOWN PROBLEM WITH INPUT RANGE TYPE>
+                    <!see https://github.com/angular/angular.js/issues/6726>
                     <div id="control-bar">
                         <div id="controlsoverlay">
                             <input width="100%" type="range" id="seek-bar"
@@ -86,9 +86,28 @@
                         <label>{{ model.current_time_display }}</label>
                     </div>
                 </div>
+            </div> -->
+
+            <div class="videogular-container">
+                <videogular>
+                    <vg-media vg-src="model.video"></vg-media>
+                    <vg-controls>
+                        <vg-play-pause-button></vg-play-pause-button>
+                        <vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
+                        <vg-scrub-bar>
+                            <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+                        </vg-scrub-bar>
+                        <vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
+                        <vg-volume>
+                            <vg-mute-button></vg-mute-button>
+                            <vg-volume-bar></vg-volume-bar>
+                        </vg-volume>
+                    </vg-controls>
+                    <vg-overlay-play></vg-overlay-play>
+                </videogular>
             </div>
         </div>
-        <div class="col-lg-4 col-md-push-0 col-xs-push-0">
+        <!-- <div class="col-lg-4 col-md-push-0 col-xs-push-0">
             <label>Restrict playback to annotations:</label>
             <button type="button" class="btn btn-default"
                     ng-disabled="model.restrict_toggle === 0 || model.restrict_toggle === undefined"
@@ -98,16 +117,16 @@
 
             <button type="button" class="btn btn-default" ng-click="model.debugProbe()">Debug Probe</button>
 
-        </div>
+        </div> -->
     </div>
 
-    <div class="row top-padding">
+    <!-- <div class="row top-padding">
         <svg cm-timeline cm-context-menu>
             <style>
                 rect { mix-blend-mode: multiply; }
             </style>
         </svg>
-    </div>
+    </div> -->
 
 </div>
 

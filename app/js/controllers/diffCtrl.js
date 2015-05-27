@@ -189,19 +189,32 @@ angular.module('myApp.controllers')
 //				scope.model.selected_hypothesis = undefined;
 
 				if (newValue) {
+					// scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
 
-//					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
-
-                    if($scope.model.useDefaultVideoPath)
-                    {
-                        scope.model.video = $sce.trustAsResourceUrl(camomileService.getMediumURL(scope.model.selected_medium, 'webm'));
+                    if($scope.model.useDefaultVideoPath) {
+                        $scope.model.video = [{
+							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "webm")),
+							type: "video/webm"
+						}, {
+							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "mp4")),
+							type: "video/mp4"
+						}, {
+							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "ogg")),
+							type: "video/ogg"
+						}];
                     }
-                    else
-                    {
-                        camomileService.getMedium(scope.model.selected_medium, function(err, data)
-                        {
-                            $scope.model.video = $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url +'.webm');
-
+                    else {
+                        camomileService.getMedium(scope.model.selected_medium, function(err, data) {
+                            $scope.model.video = [{
+								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'webm'),
+								type: "video/webm"
+							}, {
+								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'mp4'),
+								type: "video/mp4"
+							}, {
+								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'ogg"'),
+								type: "video/ogg"
+							}];
                         });
                     }
 

@@ -15,7 +15,10 @@ angular.module(
             'ngRoute',
             'ngCookies',
             'ngSanitize',
-            'mgcrea.ngStrap'
+            'mgcrea.ngStrap',
+            'com.2fdevs.videogular',
+            'com.2fdevs.videogular.plugins.controls',
+            'com.2fdevs.videogular.plugins.overlayplay'
         ])
     .config(['$routeProvider', function ($routeProvider) {
 //        $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
