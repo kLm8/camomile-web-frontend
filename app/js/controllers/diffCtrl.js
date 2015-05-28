@@ -171,6 +171,89 @@ angular.module('myApp.controllers')
 			};
 
 
+			var activeUrl = null;
+			$scope.paused = true;
+
+			$scope.$on('wavesurferInit', function (e, wavesurfer) {
+				$scope.wavesurfer = wavesurfer;
+
+				$scope.wavesurfer.enableDragSelection({
+					// color: randomColor(0.2)
+				});
+				
+				$scope.wavesurfer.on('play', function () {
+					$scope.paused = false;
+				});
+
+				$scope.wavesurfer.on('pause', function () {
+					$scope.paused = true;
+				});
+
+				$scope.wavesurfer.on('finish', function () {
+					$scope.paused = true;
+					$scope.wavesurfer.seekTo(0);
+					$scope.$apply();
+				});
+
+				$scope.wavesurfer.on('region-click', function(region, e) {
+					e.stopPropagation();
+					// Play on click, loop on shift click
+					e.shiftKey ? region.playLoop() : region.play();
+				});
+
+				$scope.wavesurfer.on('region-created', function(region) {
+					$scope.wavesurfer.clearRegions();
+				});
+
+				// $scope.wavesurfer.on('region-click', editAnnotation);
+				// $scope.wavesurfer.on('region-updated', saveRegions);
+				// $scope.wavesurfer.on('region-removed', saveRegions);
+				// $scope.wavesurfer.on('region-in', showNote);
+
+				$scope.wavesurfer.on('region-play', function (region) {
+					region.once('out', function () {
+						$scope.wavesurfer.play(region.start);
+						$scope.wavesurfer.pause();
+					});
+				});
+
+				/* Minimap plugin */
+				$scope.wavesurfer.initMinimap({
+					height: 30,
+					waveColor: '#ddd',
+					progressColor: '#999',
+					cursorColor: '#999'
+				});
+
+				$scope.wavesurfer.on('ready', function() {
+					var wavesurferTimeline = Object.create(WaveSurfer.Timeline);
+					wavesurferTimeline.init({
+						wavesurfer: $scope.wavesurfer,
+						container: '#wavesurfer-timeline'
+					});
+				});
+			});
+
+			$scope.play = function (url) {
+				if (!$scope.wavesurfer) {
+					return;
+				}
+
+				activeUrl = url;
+
+				$scope.wavesurfer.once('ready', function () {
+					$scope.wavesurfer.play();
+					$scope.$apply();
+				});
+
+				$scope.wavesurfer.load(activeUrl);
+			};
+
+			$scope.isPlaying = function (url) {
+				return url == activeUrl;
+			};
+
+
 			// the selected corpus has changed
 			$scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
 				if (newValue) {
@@ -301,6 +384,12 @@ angular.module('myApp.controllers')
 						doubleClick: $scope.model.onDoubleClick,
 						contextmenu: $scope.model.rightClick
 					};
+
+
+				/*********************************************************************************************************/
+
+
+					$scope.wavesurfer.load("audio.wav");
 
 
 				/*********************************************************************************************************/

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="myApp">
 <head>
-    <title>Camomile @ ERRARE</title>
+    <title>Camomile Annotation Tool</title>
 
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +45,12 @@
     <script src="bower_components/vis/dist/vis.js"></script>
     <script src="bower_components/angular-visjs/angular-vis.js"></script>
 
+    <!-- Wavesurfer.js lib-->
+    <script src="bower_components/wavesurfer.js/dist/wavesurfer.min.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.timeline.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.regions.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.minimap.js"></script>
+
     <!-- Json to Human lib-->
     <script src="./bower_components/json-human/lib/crel.js"></script>
     <script src="./bower_components/json-human/src/json.human.js"></script>
@@ -83,6 +89,7 @@
     <script src="js/directives/cmTreemap.js"></script>
     <script src="js/directives/cmVideoPlayer.js"></script>
     <script src="js/directives/cmVideoThumbnail.js"></script>
+    <script src="js/directives/cmWavesurfer.js"></script>
     <script src="js/directives/ngLoginSubmit.js"></script>
     <script src="js/directives/ngRightClick.js"></script>
 
