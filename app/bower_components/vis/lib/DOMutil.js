@@ -152,29 +152,30 @@ exports.drawPoint = function(x, y, group, JSONcontainer, svgContainer, labelObj)
   if(group.options.drawPoints.styles !== undefined) {
     point.setAttributeNS(null, "style", group.group.options.drawPoints.styles);
   }
-  point.setAttributeNS(null, "class", group.className + " point");
-  //handle label 
-  var label = exports.getSVGElement('text',JSONcontainer,svgContainer);
-  if (labelObj){
-      if (labelObj.xOffset) {
-        x = x + labelObj.xOffset;
-      }
-
-      if (labelObj.yOffset) {
-        y = y + labelObj.yOffset;
-      }
-      if (labelObj.content) {
-        label.textContent = labelObj.content;
-      }
-
-      if (labelObj.className) {
-        label.setAttributeNS(null, "class", labelObj.className  + " label");
-      }
+  point.setAttributeNS(null, "class", group.className + " vis-point");
+  //handle label
 
 
+  if (labelObj) {
+    var label = exports.getSVGElement('text',JSONcontainer,svgContainer);
+    if (labelObj.xOffset) {
+      x = x + labelObj.xOffset;
+    }
+
+    if (labelObj.yOffset) {
+      y = y + labelObj.yOffset;
+    }
+    if (labelObj.content) {
+      label.textContent = labelObj.content;
+    }
+
+    if (labelObj.className) {
+      label.setAttributeNS(null, "class", labelObj.className  + " vis-label");
+    }
+    label.setAttributeNS(null, "x", x);
+    label.setAttributeNS(null, "y", y);
   }
-  label.setAttributeNS(null, "x", x);
-  label.setAttributeNS(null, "y", y);
+
   return point;
 };
 
@@ -185,7 +186,7 @@ exports.drawPoint = function(x, y, group, JSONcontainer, svgContainer, labelObj)
  * @param y
  * @param className
  */
-exports.drawBar = function (x, y, width, height, className, JSONcontainer, svgContainer) {
+exports.drawBar = function (x, y, width, height, className, JSONcontainer, svgContainer, style) {
   if (height != 0) {
     if (height < 0) {
       height *= -1;
@@ -197,5 +198,8 @@ exports.drawBar = function (x, y, width, height, className, JSONcontainer, svgCo
     rect.setAttributeNS(null, "width", width);
     rect.setAttributeNS(null, "height", height);
     rect.setAttributeNS(null, "class", className);
+    if (style) {
+      rect.setAttributeNS(null, "style", style);
+    }
   }
 };

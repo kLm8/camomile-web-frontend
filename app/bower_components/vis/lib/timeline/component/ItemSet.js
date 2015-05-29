@@ -29,12 +29,16 @@ function ItemSet(body, options) {
 
   this.defaultOptions = {
     type: null,  // 'box', 'point', 'range', 'background'
-    orientation: 'bottom',  // item orientation: 'top' or 'bottom'
+    orientation: {
+      item: 'bottom'   // item orientation: 'top' or 'bottom'
+    },
     align: 'auto', // alignment of box items
     stack: true,
     groupOrder: null,
 
     selectable: true,
+    multiselect: false,
+
     editable: {
       updateTime: false,
       updateGroup: false,
@@ -66,8 +70,7 @@ function ItemSet(body, options) {
         vertical: 10
       },
       axis: 20
-    },
-    padding: 5
+    }
   };
 
   // options is shared by this ItemSet and all its items
@@ -146,30 +149,30 @@ ItemSet.types = {
  */
 ItemSet.prototype._create = function(){
   var frame = document.createElement('div');
-  frame.className = 'itemset';
+  frame.className = 'vis-itemset';
   frame['timeline-itemset'] = this;
   this.dom.frame = frame;
 
   // create background panel
   var background = document.createElement('div');
-  background.className = 'background';
+  background.className = 'vis-background';
   frame.appendChild(background);
   this.dom.background = background;
 
   // create foreground panel
   var foreground = document.createElement('div');
-  foreground.className = 'foreground';
+  foreground.className = 'vis-foreground';
   frame.appendChild(foreground);
   this.dom.foreground = foreground;
 
   // create axis panel
   var axis = document.createElement('div');
-  axis.className = 'axis';
+  axis.className = 'vis-axis';
   this.dom.axis = axis;
 
   // create labelset
   var labelSet = document.createElement('div');
-  labelSet.className = 'labelset';
+  labelSet.className = 'vis-labelset';
   this.dom.labelSet = labelSet;
 
   // create ungrouped Group
@@ -184,21 +187,23 @@ ItemSet.prototype._create = function(){
   // Note: we bind to the centerContainer for the case where the height
   //       of the center container is larger than of the ItemSet, so we
   //       can click in the empty area to create a new item or deselect an item.
-  this.hammer = Hammer(this.body.dom.centerContainer, {
-    preventDefault: true
-  });
+  this.hammer = new Hammer(this.body.dom.centerContainer);
 
   // drag items when selected
-  this.hammer.on('touch',     this._onTouch.bind(this));
-  this.hammer.on('dragstart', this._onDragStart.bind(this));
-  this.hammer.on('drag',      this._onDrag.bind(this));
-  this.hammer.on('dragend',   this._onDragEnd.bind(this));
+  this.hammer.on('hammer.input', function (event) {
+    if (event.isFirst) {
+      this._onTouch(event);
+    }
+  }.bind(this));
+  this.hammer.on('panstart', this._onDragStart.bind(this));
+  this.hammer.on('panmove',  this._onDrag.bind(this));
+  this.hammer.on('panend',   this._onDragEnd.bind(this));
 
   // single select (or unselect) when tapping an item
   this.hammer.on('tap',  this._onSelectItem.bind(this));
 
   // multi select when holding mouse/touch, or on ctrl+click
-  this.hammer.on('hold', this._onMultiSelectItem.bind(this));
+  this.hammer.on('press', this._onMultiSelectItem.bind(this));
 
   // add item on doubletap
   this.hammer.on('doubletap', this._onAddItem.bind(this));
@@ -219,13 +224,13 @@ ItemSet.prototype._create = function(){
  *                              Alignment for the items, only applicable for
  *                              BoxItem. Choose 'center' (default), 'left', or
  *                              'right'.
- *                           {String} orientation
+ *                           {String} orientation.item
  *                              Orientation of the item set. Choose 'top' or
  *                              'bottom' (default).
  *                           {Function} groupOrder
  *                              A sorting function for ordering groups
  *                           {Boolean} stack
- *                              If true (deafult), items will be stacked on
+ *                              If true (default), items will be stacked on
  *                              top of each other.
  *                           {Number} margin.axis
  *                              Margin between the axis and the items in pixels.
@@ -241,11 +246,11 @@ ItemSet.prototype._create = function(){
  *                              and vertical direction. Default is 10.
  *                           {Number} margin
  *                              Set margin for both axis and items in pixels.
- *                           {Number} padding
- *                              Padding of the contents of an item in pixels.
- *                              Must correspond with the items css. Default is 5.
  *                           {Boolean} selectable
  *                              If true (default), items can be selected.
+ *                           {Boolean} multiselect
+ *                              If true, multiple items can be selected.
+ *                              False by default.
  *                           {Boolean} editable
  *                              Set all editable options to true or false
  *                           {Boolean} editable.updateTime
@@ -274,15 +279,15 @@ ItemSet.prototype._create = function(){
 ItemSet.prototype.setOptions = function(options) {
   if (options) {
     // copy all options that we know
-    var fields = ['type', 'align', 'order', 'padding', 'stack', 'selectable', 'groupOrder', 'dataAttributes', 'template','hide', 'snap'];
+    var fields = ['type', 'align', 'order', 'stack', 'selectable', 'multiselect', 'groupOrder', 'dataAttributes', 'template','hide', 'snap'];
     util.selectiveExtend(fields, this.options, options);
 
     if ('orientation' in options) {
       if (typeof options.orientation === 'string') {
-        this.options.orientation = options.orientation;
+        this.options.orientation.item = options.orientation === 'top' ? 'top' : 'bottom';
       }
       else if (typeof options.orientation === 'object' && 'item' in options.orientation) {
-        this.options.orientation = options.orientation.item;
+        this.options.orientation.item = options.orientation.item;
       }
     }
 
@@ -501,7 +506,7 @@ ItemSet.prototype.redraw = function() {
       range = this.body.range,
       asSize = util.option.asSize,
       options = this.options,
-      orientation = options.orientation,
+      orientation = options.orientation.item,
       resized = false,
       frame = this.dom.frame,
       editable = options.editable.updateTime || options.editable.updateGroup;
@@ -511,7 +516,7 @@ ItemSet.prototype.redraw = function() {
   this.props.left = this.body.domProps.left.width + this.body.domProps.border.left;
 
   // update class name
-  frame.className = 'itemset' + (editable ? ' editable' : '');
+  frame.className = 'vis-itemset' + (editable ? ' vis-editable' : '');
 
   // reorder the groups (if needed)
   resized = this._orderGroups() || resized;
@@ -575,7 +580,7 @@ ItemSet.prototype.redraw = function() {
  * @private
  */
 ItemSet.prototype._firstGroup = function() {
-  var firstGroupIndex = (this.options.orientation == 'top') ? 0 : (this.groupIds.length - 1);
+  var firstGroupIndex = (this.options.orientation.item == 'top') ? 0 : (this.groupIds.length - 1);
   var firstGroupId = this.groupIds[firstGroupIndex];
   var firstGroup = this.groups[firstGroupId] || this.groups[UNGROUPED];
 
@@ -703,7 +708,7 @@ ItemSet.prototype.setGroups = function(groups) {
   // unsubscribe from current dataset
   if (this.groupsData) {
     util.forEach(this.groupListeners, function (callback, event) {
-      me.groupsData.unsubscribe(event, callback);
+      me.groupsData.off(event, callback);
     });
 
     // remove all drawn groups
@@ -813,11 +818,13 @@ ItemSet.prototype._onUpdate = function(ids) {
     var type = me._getType(itemData);
 
     var constructor = ItemSet.types[type];
+    var selected;
 
     if (item) {
       // update item
       if (!constructor || !(item instanceof constructor)) {
         // item type has changed, delete the item and recreate it
+        selected = item.selected; // preserve selection of this item
         me._removeItem(item);
         item = null;
       }
@@ -832,17 +839,21 @@ ItemSet.prototype._onUpdate = function(ids) {
         item = new constructor(itemData, me.conversion, me.options);
         item.id = id; // TODO: not so nice setting id afterwards
         me._addItem(item);
+        if (selected) {
+          this.selection.push(id);
+          item.select();
+        }
       }
       else if (type == 'rangeoverflow') {
         // TODO: deprecated since version 2.1.0 (or 3.0.0?). cleanup some day
         throw new TypeError('Item type "rangeoverflow" is deprecated. Use css styling instead: ' +
-            '.vis.timeline .item.range .content {overflow: visible;}');
+            '.vis-item.vis-range .vis-item-content {overflow: visible;}');
       }
       else {
         throw new TypeError('Unknown item type "' + type + '"');
       }
     }
-  });
+  }.bind(this));
 
   this._order();
   this.stackDirty = true; // force re-stacking of all items next redraw
@@ -1027,12 +1038,13 @@ ItemSet.prototype._addItem = function(item) {
  */
 ItemSet.prototype._updateItem = function(item, itemData) {
   var oldGroupId = item.data.group;
+  var oldSubGroupId = item.data.subgroup;
 
   // update the items data (will redraw the item when displayed)
   item.setData(itemData);
 
   // update group
-  if (oldGroupId != item.data.group) {
+  if (oldGroupId != item.data.group || oldSubGroupId != item.data.subgroup) {
     var oldGroup = this.groups[oldGroupId];
     if (oldGroup) oldGroup.remove(item);
 
@@ -1083,8 +1095,9 @@ ItemSet.prototype._constructByEndArray = function(array) {
 /**
  * Register the clicked item on touch, before dragStart is initiated.
  *
- * dragStart is initiated from a mousemove event, which can have left the item
- * already resulting in an item == null
+ * dragStart is initiated from a mousemove event, AFTER the mouse/touch is
+ * already moving. Therefore, the mouse/touch can sometimes be above an other
+ * DOM element than the item itself.
  *
  * @param {Event} event
  * @private
@@ -1092,6 +1105,9 @@ ItemSet.prototype._constructByEndArray = function(array) {
 ItemSet.prototype._onTouch = function (event) {
   // store the touched item, used in _onDragStart
   this.touchParams.item = this.itemFromTarget(event);
+  this.touchParams.dragLeftItem = event.target.dragLeftItem || false;
+  this.touchParams.dragRightItem = event.target.dragRightItem || false;
+  this.touchParams.itemProps = null;
 };
 
 /**
@@ -1109,13 +1125,13 @@ ItemSet.prototype._onDragStart = function (event) {
   var props;
 
   if (item && item.selected) {
-    var dragLeftItem = event.target.dragLeftItem;
-    var dragRightItem = event.target.dragRightItem;
+    var dragLeftItem = this.touchParams.dragLeftItem;
+    var dragRightItem = this.touchParams.dragRightItem;
 
     if (dragLeftItem) {
       props = {
         item: dragLeftItem,
-        initialX: event.gesture.center.pageX,
+        initialX: event.center.x,
         dragLeft:  true,
         data: util.extend({}, item.data) // clone the items data
       };
@@ -1125,7 +1141,7 @@ ItemSet.prototype._onDragStart = function (event) {
     else if (dragRightItem) {
       props = {
         item: dragRightItem,
-        initialX: event.gesture.center.pageX,
+        initialX: event.center.x,
         dragRight: true,
         data: util.extend({}, item.data) // clone the items data
       };
@@ -1137,7 +1153,7 @@ ItemSet.prototype._onDragStart = function (event) {
         var item = me.items[id];
         var props = {
           item: item,
-          initialX: event.gesture.center.pageX,
+          initialX: event.center.x,
           data: util.extend({}, item.data) // clone the items data
         };
 
@@ -1147,7 +1163,7 @@ ItemSet.prototype._onDragStart = function (event) {
 
     event.stopPropagation();
   }
-  else if (this.options.editable.add && event.gesture.srcEvent.ctrlKey) {
+  else if (this.options.editable.add && (event.srcEvent.ctrlKey || event.srcEvent.metaKey)) {
     // create a new range item when dragging with ctrl key down
     this._onDragStartAddItem(event);
   }
@@ -1161,7 +1177,7 @@ ItemSet.prototype._onDragStart = function (event) {
 ItemSet.prototype._onDragStartAddItem = function (event) {
   var snap = this.options.snap || null;
   var xAbs = util.getAbsoluteLeft(this.dom.frame);
-  var x = event.gesture.center.pageX - xAbs - 10;  // minus 10 to compensate for the drag starting as soon as you've moved 10px
+  var x = event.center.x - xAbs - 10;  // minus 10 to compensate for the drag starting as soon as you've moved 10px
   var time = this.body.util.toTime(x);
   var scale = this.body.util.getScale();
   var step = this.body.util.getStep();
@@ -1191,7 +1207,7 @@ ItemSet.prototype._onDragStartAddItem = function (event) {
   var props = {
     item: newItem,
     dragRight: true,
-    initialX: event.gesture.center.pageX,
+    initialX: event.center.x,
     data: util.extend({}, itemData)
   };
   this.touchParams.itemProps = [props];
@@ -1205,8 +1221,6 @@ ItemSet.prototype._onDragStartAddItem = function (event) {
  * @private
  */
 ItemSet.prototype._onDrag = function (event) {
-  event.preventDefault();
-
   if (this.touchParams.itemProps) {
     event.stopPropagation();
 
@@ -1218,7 +1232,8 @@ ItemSet.prototype._onDrag = function (event) {
 
     // move
     this.touchParams.itemProps.forEach(function (props) {
-      var current = me.body.util.toTime(event.gesture.center.pageX - xOffset);
+      var newProps = {};
+      var current = me.body.util.toTime(event.center.x - xOffset);
       var initial = me.body.util.toTime(props.initialX - xOffset);
       var offset = current - initial;
 
@@ -1309,8 +1324,6 @@ ItemSet.prototype._moveToGroup = function(item, groupId) {
  * @private
  */
 ItemSet.prototype._onDragEnd = function (event) {
-  event.preventDefault();
-
   if (this.touchParams.itemProps) {
     event.stopPropagation();
 
@@ -1373,8 +1386,8 @@ ItemSet.prototype._onDragEnd = function (event) {
 ItemSet.prototype._onSelectItem = function (event) {
   if (!this.options.selectable) return;
 
-  var ctrlKey  = event.gesture.srcEvent && event.gesture.srcEvent.ctrlKey;
-  var shiftKey = event.gesture.srcEvent && event.gesture.srcEvent.shiftKey;
+  var ctrlKey  = event.srcEvent && (event.srcEvent.ctrlKey || event.srcEvent.metaKey);
+  var shiftKey = event.srcEvent && event.srcEvent.shiftKey;
   if (ctrlKey || shiftKey) {
     this._onMultiSelectItem(event);
     return;
@@ -1406,9 +1419,11 @@ ItemSet.prototype._onAddItem = function (event) {
   if (!this.options.selectable) return;
   if (!this.options.editable.add) return;
 
-  var me = this,
-      snap = this.options.snap || null,
-      item = this.itemFromTarget(event);
+  var me = this;
+  var snap = this.options.snap || null;
+  var item = this.itemFromTarget(event);
+
+  event.stopPropagation();
 
   if (item) {
     // update item
@@ -1424,7 +1439,7 @@ ItemSet.prototype._onAddItem = function (event) {
   else {
     // add item
     var xAbs = util.getAbsoluteLeft(this.dom.frame);
-    var x = event.gesture.center.pageX - xAbs;
+    var x = event.center.x - xAbs;
     var start = this.body.util.toTime(x);
     var scale = this.body.util.getScale();
     var step = this.body.util.getStep();
@@ -1465,15 +1480,18 @@ ItemSet.prototype._onAddItem = function (event) {
 ItemSet.prototype._onMultiSelectItem = function (event) {
   if (!this.options.selectable) return;
 
-  var selection,
-      item = this.itemFromTarget(event);
+  var item = this.itemFromTarget(event);
 
   if (item) {
-    // multi select items
-    selection = this.getSelection(); // current selection
+    // multi select items (if allowed)
 
-    var shiftKey = event.gesture.touches[0] && event.gesture.touches[0].shiftKey || false;
-    if (shiftKey) {
+    var selection = this.options.multiselect
+      ? this.getSelection() // take current selection
+      : [];                 // deselect current selection
+
+    var shiftKey = event.srcEvent && event.srcEvent.shiftKey || false;
+
+    if (shiftKey && this.options.multiselect) {
       // select all items between the old selection and the tapped item
 
       // determine the selection range
@@ -1575,23 +1593,23 @@ ItemSet.prototype.itemFromTarget = function(event) {
  * @return {Group | null} group
  */
 ItemSet.prototype.groupFromTarget = function(event) {
-  var pageY = event.gesture ? event.gesture.center.pageY : event.pageY;
+  var clientY = event.center ? event.center.y : event.clientY;
   for (var i = 0; i < this.groupIds.length; i++) {
     var groupId = this.groupIds[i];
     var group = this.groups[groupId];
     var foreground = group.dom.foreground;
     var top = util.getAbsoluteTop(foreground);
-    if (pageY > top && pageY < top + foreground.offsetHeight) {
+    if (clientY > top && clientY < top + foreground.offsetHeight) {
       return group;
     }
 
-    if (this.options.orientation === 'top') {
-      if (i === this.groupIds.length - 1 && pageY > top) {
+    if (this.options.orientation.item === 'top') {
+      if (i === this.groupIds.length - 1 && clientY > top) {
         return group;
       }
     }
     else {
-      if (i === 0 && pageY < top + foreground.offset) {
+      if (i === 0 && clientY < top + foreground.offset) {
         return group;
       }
     }

@@ -18,11 +18,9 @@ angular.module(
             'mgcrea.ngStrap',
             'com.2fdevs.videogular',
             'com.2fdevs.videogular.plugins.controls',
-            'com.2fdevs.videogular.plugins.overlayplay',
-            'ngVis'
+            'com.2fdevs.videogular.plugins.overlayplay'
         ])
     .config(['$routeProvider', function ($routeProvider) {
-//        $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
         $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
         $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});

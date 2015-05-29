@@ -52,41 +52,10 @@
 <div class="container-fluid" ng-show="model.selected_medium">
 
 	<div class="row top-padding">
-		<!-- <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div> -->
-		<!-- <div class="col-lg-7 col-md-12 col-xs-12"> -->
-			<!-- <div id="video-container" >
-				<! video player behaviour managed by cm-video-player angular attribute >
-				<video id="player"
-					   cm-video-player
-					   ng-src={{model.video}}
-					   height="360px">
-				</video>
-				<div class="controls">
-					<div id="play-button">
-						<button type="button" class="video-control" id="play-pause"
-								ng-click="model.toggle_play()">
-							{{ model.play_label }}
-						</button>
-						<! use directive for quite simple way to indicate annotation to perform >
-						+ extensible for reference layer and controls for extension to x seconds
-					</div>
-					<!!!! KNOWN PROBLEM WITH INPUT RANGE TYPE>
-					<!see https://github.com/angular/angular.js/issues/6726>
-					<div id="control-bar">
-						<div id="controlsoverlay">
-							<input width="100%" type="range" id="seek-bar"
-								   min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
-								   step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
-						</div>
-					</div>
-					<div id="time-display">
-						<label>{{ model.current_time_display }}</label>
-					</div>
-				</div>
-			</div> -->
-
 		<div class="videogular-container">
-			<videogular>
+			<videogular vg-player-ready="onPlayerReady($API)"
+						vg-update-time="updateTime($currentTime, $duration)"
+						vg-update-state="updateState($state)">
 				<vg-media vg-src="model.video"></vg-media>
 				<vg-controls>
 					<vg-play-pause-button></vg-play-pause-button>
@@ -103,18 +72,7 @@
 				<vg-overlay-play></vg-overlay-play>
 			</videogular>
 		</div>
-		<!-- </div> -->
-		<!-- <div class="col-lg-4 col-md-push-0 col-xs-push-0">
-			<label>Restrict playback to annotations:</label>
-			<button type="button" class="btn btn-default"
-					ng-disabled="model.restrict_toggle === 0 || model.restrict_toggle === undefined"
-					blurbtn ng-model="model.restrict_toggle"
-					data-true-value="2" data-false-value="1" bs-checkbox>Toggle
-			</button>
-
-			<button type="button" class="btn btn-default" ng-click="model.debugProbe()">Debug Probe</button>
-
-		</div> -->
+		
 		<div class="row top-padding">
 			<div id="wavesurfer-timeline"></div>
 			<cm-wavesurfer wave-color="violet" progress-color="purple" cursor-color="navy" height="90"></cm-wavesurfer>
@@ -132,12 +90,7 @@
 		</div>
 
 		<div class="row top-padding">
-			<!-- <svg cm-timeline cm-context-menu>
-				<style>
-					rect { mix-blend-mode: multiply; }
-				</style>
-			</svg> -->
-			<vis-timeline data="model.data" options="model.options" events="model.events"></vis-timeline>
+			<cm-vis-timeline data="data" options="options" events="events"></cm-vis-timeline>
 		</div>
 	</div>
 </div>

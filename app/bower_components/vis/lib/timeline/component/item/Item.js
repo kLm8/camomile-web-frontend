@@ -139,13 +139,11 @@ Item.prototype._repaintDeleteButton = function (anchor) {
     var me = this;
 
     var deleteButton = document.createElement('div');
-    deleteButton.className = 'delete';
+    deleteButton.className = 'vis-delete';
     deleteButton.title = 'Delete this item';
 
-    Hammer(deleteButton, {
-      preventDefault: true
-    }).on('tap', function (event) {
-      event.preventDefault();
+    // TODO: be able to destroy the delete button
+    new Hammer(deleteButton).on('tap', function (event) {
       event.stopPropagation();
       me.parent.removeFromDataSet(me);
     });
@@ -177,7 +175,8 @@ Item.prototype._updateContents = function (element) {
     content = this.data.content;
   }
 
-  if(content !== this.content) {
+  var changed = this._contentToString(this.content) !== this._contentToString(content);
+  if (changed) {
     // only replace the content when changed
     if (content instanceof Element) {
       element.innerHTML = '';
@@ -206,7 +205,7 @@ Item.prototype._updateTitle = function (element) {
     element.title = this.data.title || '';
   }
   else {
-    element.removeAttribute('title');
+    element.removeAttribute('vis-title');
   }
 };
 
@@ -260,6 +259,18 @@ Item.prototype._updateStyle = function(element) {
     util.addCssText(element, this.data.style);
     this.style = this.data.style;
   }
+};
+
+/**
+ * Stringify the items contents
+ * @param {string | Element | undefined} content
+ * @returns {string | undefined}
+ * @private
+ */
+Item.prototype._contentToString = function (content) {
+  if (typeof content === 'string') return content;
+  if (content && 'outerHTML' in content) return content.outerHTML;
+  return content;
 };
 
 module.exports = Item;

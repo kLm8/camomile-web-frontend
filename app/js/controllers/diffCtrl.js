@@ -171,6 +171,27 @@ angular.module('myApp.controllers')
 			};
 
 
+		/*********************************************************************************************************/
+
+			// Videogular
+			$scope.API = null;
+
+			$scope.onPlayerReady = function(API) {
+				$scope.API = API;
+			};
+
+			$scope.updateTime = function(currentTime, duration) {
+				$scope.timeline.setCustomTime(currentTime*1000);
+				$scope.wavesurfer.seekAndCenter(currentTime*1000/$scope.API.totalTime);
+			};
+
+			$scope.updateState = function(state) {
+				// if state == 'pause' $scope.pause = true else $scope.pause = false;
+			};
+
+		/*********************************************************************************************************/
+
+			// Wavesurfer
 			var activeUrl = null;
 			$scope.paused = true;
 
@@ -195,6 +216,11 @@ angular.module('myApp.controllers')
 					$scope.$apply();
 				});
 
+				$scope.wavesurfer.on('seek', function () {
+					// $scope.API.seekTime($scope.wavesurfer.getCurrentTime());
+					$scope.timeline.setCustomTime($scope.wavesurfer.getCurrentTime()*1000);
+				});
+
 				$scope.wavesurfer.on('region-click', function(region, e) {
 					e.stopPropagation();
 					// Play on click, loop on shift click
@@ -203,17 +229,23 @@ angular.module('myApp.controllers')
 
 				$scope.wavesurfer.on('region-created', function(region) {
 					$scope.wavesurfer.clearRegions();
+					$scope.API.seekTime($scope.wavesurfer.getCurrentTime());
+					$scope.timeline.setCustomTime($scope.wavesurfer.getCurrentTime()*1000);
 				});
 
-				// $scope.wavesurfer.on('region-click', editAnnotation);
-				// $scope.wavesurfer.on('region-updated', saveRegions);
+				$scope.wavesurfer.on('region-updated', (function(region) {
+					// ...
+				}));
+
 				// $scope.wavesurfer.on('region-removed', saveRegions);
 				// $scope.wavesurfer.on('region-in', showNote);
 
 				$scope.wavesurfer.on('region-play', function (region) {
 					region.once('out', function () {
+						$scope.paused = false;
 						$scope.wavesurfer.play(region.start);
 						$scope.wavesurfer.pause();
+						$scope.paused = true;
 					});
 				});
 
@@ -252,6 +284,153 @@ angular.module('myApp.controllers')
 			$scope.isPlaying = function (url) {
 				return url == activeUrl;
 			};
+
+		/*********************************************************************************************************/
+
+			// Vis.js Timeline
+			$scope.options = {
+				editable: true,
+				onAdd: function (item, callback) {
+					item.content = prompt('Enter label for new item:', item.content);
+					if (item.content != null) {
+						callback(item); // send back adjusted new item
+					}
+					else {
+						callback(null); // cancel item creation
+					}
+				},
+				// onMove: function (item, callback) {
+				//   if (confirm('Do you really want to move the item to\n' +
+				//       'start: ' + item.start + '\n' +
+				//       'end: ' + item.end + '?')) {
+				//     callback(item); // send back item as confirmation (can be changed)
+				//   }
+				//   else {
+				//     callback(null); // cancel editing item
+				//   }
+				// },
+				// onMoving: function (item, callback) {
+				//   if (item.start < min) item.start = min;
+				//   if (item.start > max) item.start = max;
+				//   if (item.end   > max) item.end   = max;
+
+				//   callback(item); // send back the (possibly) changed item
+				// },
+				onUpdate: function (item, callback) {
+					content = prompt('Edit label:', item.content);
+					if (content != item.content && content != null) {
+						item.content = content;
+						callback(item); // send back adjusted item
+					}
+					else {
+						callback(null); // cancel updating the item
+					}
+				},
+
+				onRemove: function (item, callback) {
+					if (confirm('Remove label "' + item.content + '" ?')) {
+						callback(item); // confirm deletion
+					}
+					else {
+						callback(null); // cancel deletion
+					}
+				},
+				// showCustomTime: true, // now deprecated, use addCustomeTime() instead
+				start: 0,
+				min: 0,
+				max: 1000*60*10,
+				format: {minorLabels: {millisecond:'s[::]SS', second:'m[:]s', minute:'m'}},
+				type: 'range',
+				showMajorLabels: false,
+				// snap: null,
+				zoomMax: 1000*60*2, // 2 minutes
+				zoomMin: 1000,      // 1 second
+				maxHeight: '400px',
+				minHeight: '200px',
+				groupOrder: function (a, b) {
+					return a.value - b.value;
+				}
+			};
+
+			$scope.groups = new vis.DataSet([
+				{id: 0, content: 'First', value: 1},
+				{id: 1, content: 'Third', value: 3},
+				{id: 2, content: 'Second', value: 2}
+			]);
+
+			$scope.items = new vis.DataSet([
+				{id: 0, group: 0, content: 'item 0', start: 0, end: 4000},
+				{id: 2, group: 1, content: 'item 2', start: 0, end: 4000},
+				{id: 4, group: 1, content: 'item 4', start: 0, end: 4000},
+			]);
+			
+
+			$scope.items.on('update', function (event, properties) {
+				$scope.API.seekTime((properties.data[0].start).getTime()/1000);
+			});
+
+			$scope.items.on('*', function (event, properties) {
+				logEvent(event, properties);
+			});
+
+			function logEvent(event, properties) {
+				msg = 'event=' + JSON.stringify(event) + ', ' + 'properties=' + JSON.stringify(properties);
+				console.log(msg);
+			};
+
+			$scope.onSelect = function (event, props) {
+				var selection = $scope.timeline.getSelection();
+				$scope.timeline.focus(selection);
+			};
+
+			$scope.onClick = function (props) {
+				// ...
+			};
+
+			$scope.onDoubleClick = function (props) {
+				// ...
+			};
+
+			$scope.rightClick = function (props) {
+				// ...
+			};
+
+			$scope.onload = function (timeline) {
+				$scope.timeline = timeline;
+				console.log('Timeline loaded');
+			};
+
+			$scope.onRangeChange = function (props) {
+				// ...
+			};
+
+			$scope.onRangeChanged = function (props) {
+				// ...
+			};
+
+			$scope.onTimeChange = function (props) {
+				$scope.API.seekTime((props.time).getTime()/1000);
+				$scope.wavesurfer.seekAndCenter((props.time).getTime()/$scope.API.totalTime);
+			};
+
+			$scope.onTimeChanged = function (props) {
+				console.log('HEY HO');
+				$scope.API.seekTime((props.time).getTime()/1000);
+			};
+
+			$scope.events = {
+				select: $scope.onSelect,
+				click: $scope.onClick,
+				doubleClick: $scope.onDoubleClick,
+				contextmenu: $scope.rightClick,
+				onload: $scope.onload,
+				rangechange: $scope.onRangeChange,
+                rangechanged: $scope.onRangeChanged,
+                timechange: $scope.onTimeChange,
+                timechanged: $scope.onTimeChanged
+			};
+
+		/*********************************************************************************************************/
 
 
 			// the selected corpus has changed
@@ -303,93 +482,10 @@ angular.module('myApp.controllers')
 
 				/*********************************************************************************************************/
 
-					var options = {
-						align: 'center', // left | right (String)
-						autoResize: true, // false (Boolean)
-						editable: true,
-						selectable: true,
-						// start: null,
-						// end: null,
-						// height: null,
-						// width: '100%',
-						// margin: {
-						//   axis: 20,
-						//   item: 10
-						// },
-						// min: null,
-						// max: null,
-						// maxHeight: null,
-						orientation: 'bottom',
-						// padding: 5,
-						showCurrentTime: true,
-						showCustomTime: true,
-						showMajorLabels: true,
-						showMinorLabels: true
-						// type: 'box', // dot | point
-						// zoomMin: 1000,
-						// zoomMax: 1000 * 60 * 60 * 24 * 30 * 12 * 10,
-						// groupOrder: 'content'
-					};
 
-					var groups = new vis.DataSet([
-							{id: 0, content: 'First', value: 1},
-							{id: 1, content: 'Third', value: 3},
-							{id: 2, content: 'Second', value: 2}
-						]);
+					$scope.wavesurfer.load("audio0.wav");
 
-					var items = new vis.DataSet([
-							{id: 0, group: 0, content: 'item 0', start: new Date(2014, 3, 17), end: new Date(2014, 3, 21)},
-							{id: 1, group: 0, content: 'item 1', start: new Date(2014, 3, 19), end: new Date(2014, 3, 20)},
-							{id: 2, group: 1, content: 'item 2', start: new Date(2014, 3, 16), end: new Date(2014, 3, 24)},
-							{id: 3, group: 1, content: 'item 3', start: new Date(2014, 3, 23), end: new Date(2014, 3, 24)},
-							{id: 4, group: 1, content: 'item 4', start: new Date(2014, 3, 22), end: new Date(2014, 3, 26)},
-							{id: 5, group: 2, content: 'item 5', start: new Date(2014, 3, 24), end: new Date(2014, 3, 27)}
-						]);
-
-					$scope.model.data = {groups: groups, items: items};
-					var orderedContent = 'content';
-					var orderedSorting = function (a, b) {
-						// option groupOrder can be a property name or a sort function
-						// the sort function must compare two groups and return a value
-						//     > 0 when a > b
-						//     < 0 when a < b
-						//       0 when a == b
-						return a.value - b.value;
-					};
-
-					$scope.model.options = angular.extend(options, {
-						groupOrder: orderedContent,
-						editable: true
-					});
-
-					$scope.model.onSelect = function (items) {
-						console.log('Select');
-					};
-
-					$scope.model.onClick = function (props) {
-						console.log('Click');
-					};
-
-					$scope.model.onDoubleClick = function (props) {
-						console.log('DoubleClick');
-					};
-
-					$scope.model.rightClick = function (props) {
-						console.log('Right click!');
-					};
-
-					$scope.model.events = {
-						select: $scope.model.onSelect,
-						click: $scope.model.onClick,
-						doubleClick: $scope.model.onDoubleClick,
-						contextmenu: $scope.model.rightClick
-					};
-
-
-				/*********************************************************************************************************/
-
-
-					$scope.wavesurfer.load("audio.wav");
+					$scope.data = {groups: $scope.groups, items: $scope.items};
 
 
 				/*********************************************************************************************************/

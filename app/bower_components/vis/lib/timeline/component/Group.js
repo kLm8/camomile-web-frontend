@@ -47,30 +47,30 @@ function Group (groupId, data, itemSet) {
  */
 Group.prototype._create = function() {
   var label = document.createElement('div');
-  label.className = 'vlabel';
+  label.className = 'vis-label';
   this.dom.label = label;
 
   var inner = document.createElement('div');
-  inner.className = 'inner';
+  inner.className = 'vis-inner';
   label.appendChild(inner);
   this.dom.inner = inner;
 
   var foreground = document.createElement('div');
-  foreground.className = 'group';
+  foreground.className = 'vis-group';
   foreground['timeline-group'] = this;
   this.dom.foreground = foreground;
 
   this.dom.background = document.createElement('div');
-  this.dom.background.className = 'group';
+  this.dom.background.className = 'vis-group';
 
   this.dom.axis = document.createElement('div');
-  this.dom.axis.className = 'group';
+  this.dom.axis.className = 'vis-group';
 
   // create a hidden marker to detect when the Timelines container is attached
   // to the DOM, or the style of a parent of the Timeline is changed from
   // display:none is changed to visible.
   this.dom.marker = document.createElement('div');
-  this.dom.marker.style.visibility = 'hidden'; // TODO: ask jos why this is not none?
+  this.dom.marker.style.visibility = 'hidden';
   this.dom.marker.innerHTML = '?';
   this.dom.background.appendChild(this.dom.marker);
 };
@@ -96,10 +96,10 @@ Group.prototype.setData = function(data) {
   this.dom.label.title = data && data.title || '';
 
   if (!this.dom.inner.firstChild) {
-    util.addClassName(this.dom.inner, 'hidden');
+    util.addClassName(this.dom.inner, 'vis-hidden');
   }
   else {
-    util.removeClassName(this.dom.inner, 'hidden');
+    util.removeClassName(this.dom.inner, 'vis-hidden');
   }
 
   // update className
@@ -120,11 +120,11 @@ Group.prototype.setData = function(data) {
 
   // update style
   if (this.style) {
-    util.removeCssText(this.dom.label, this.style);
+    util.removeCssText(this.dom.label, 'vis-' + this.style);
     this.style = null;
   }
   if (data && data.style) {
-    util.addCssText(this.dom.label, data.style);
+    util.addCssText(this.dom.label, 'vis-' + data.style);
     this.style = data.style;
   }
 };
@@ -243,7 +243,7 @@ Group.prototype._calculateHeight = function (margin) {
   //this.visibleSubgroups = 0;
   this.resetSubgroups();
   var me = this;
-  if (visibleItems.length) {
+  if (visibleItems.length > 0) {
     var min = visibleItems[0].top;
     var max = visibleItems[0].top + visibleItems[0].height;
     util.forEach(visibleItems, function (item) {
@@ -252,10 +252,6 @@ Group.prototype._calculateHeight = function (margin) {
       if (item.data.subgroup !== undefined) {
         me.subgroups[item.data.subgroup].height = Math.max(me.subgroups[item.data.subgroup].height,item.height);
         me.subgroups[item.data.subgroup].visible = true;
-        //if (visibleSubgroups.indexOf(item.data.subgroup) == -1){
-        //  visibleSubgroups.push(item.data.subgroup);
-        //  me.visibleSubgroups += 1;
-        //}
       }
     });
     if (min > margin.axis) {

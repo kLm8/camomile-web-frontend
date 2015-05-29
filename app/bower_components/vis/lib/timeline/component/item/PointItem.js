@@ -63,7 +63,7 @@ PointItem.prototype.redraw = function() {
 
     // contents box, right from the dot
     dom.content = document.createElement('div');
-    dom.content.className = 'content';
+    dom.content.className = 'vis-item-content';
     dom.point.appendChild(dom.content);
 
     // dot at start
@@ -100,10 +100,10 @@ PointItem.prototype.redraw = function() {
     this._updateStyle(this.dom.point);
 
     // update class
-    var className = (this.data.className? ' ' + this.data.className : '') +
-        (this.selected ? ' selected' : '');
-    dom.point.className  = 'item point' + className;
-    dom.dot.className  = 'item dot' + className;
+    var className = (this.data.className ? ' ' + this.data.className : '') +
+        (this.selected ? ' vis-selected' : '');
+    dom.point.className  = 'vis-item vis-point' + className;
+    dom.dot.className  = 'vis-item vis-dot' + className;
 
     // recalculate size
     this.width = dom.point.offsetWidth;
@@ -166,8 +166,8 @@ PointItem.prototype.repositionX = function() {
  * @Override
  */
 PointItem.prototype.repositionY = function() {
-  var orientation = this.options.orientation,
-      point = this.dom.point;
+  var orientation = this.options.orientation.item;
+  var point = this.dom.point;
 
   if (orientation == 'top') {
     point.style.top = this.top + 'px';

@@ -10,11 +10,17 @@ var CurrentTime = require('./component/CurrentTime');
 var CustomTime = require('./component/CustomTime');
 var ItemSet = require('./component/ItemSet');
 
+var Configurator = require('../shared/Configurator');
+var Validator = require('../shared/Validator').default;
+var printStyle = require('../shared/Validator').printStyle;
+var allOptions = require('./optionsTimeline').allOptions;
+var configureOptions = require('./optionsTimeline').configureOptions;
+
 /**
  * Create a timeline visualization
  * @param {HTMLElement} container
- * @param {vis.DataSet | vis.DataView | Array | google.visualization.DataTable} [items]
- * @param {vis.DataSet | vis.DataView | Array | google.visualization.DataTable} [groups]
+ * @param {vis.DataSet | vis.DataView | Array} [items]
+ * @param {vis.DataSet | vis.DataView | Array} [groups]
  * @param {Object} [options]  See Timeline.setOptions for the available options.
  * @constructor
  * @extends Core
@@ -38,7 +44,11 @@ function Timeline (container, items, groups, options) {
 
     autoResize: true,
 
-    orientation: 'bottom',  // axis orientation: 'bottom', 'top', or 'both'
+    orientation: {
+      axis: 'bottom',   // axis orientation: 'bottom', 'top', or 'both'
+      item: 'bottom'    // not relevant
+    },
+
     width: null,
     height: null,
     maxHeight: null,
@@ -90,11 +100,6 @@ function Timeline (container, items, groups, options) {
   this.currentTime = new CurrentTime(this.body);
   this.components.push(this.currentTime);
 
-  // custom time bar
-  // Note: time bar will be attached in this.setOptions when selected
-  this.customTime = new CustomTime(this.body);
-  this.components.push(this.customTime);
-
   // item set
   this.itemSet = new ItemSet(this.body);
   this.components.push(this.itemSet);
@@ -111,6 +116,9 @@ function Timeline (container, items, groups, options) {
   this.dom.root.oncontextmenu = function (event) {
     me.emit('contextmenu', me.getEventProperties(event))
   };
+
+  // setup configuration system
+  this.configurator = new Configurator(this, container, configureOptions);
 
   // apply options
   if (options) {
@@ -144,9 +152,34 @@ Timeline.prototype.redraw = function() {
   this._redraw();
 };
 
+Timeline.prototype.setOptions = function (options) {
+  // validate options
+  let errorFound = Validator.validate(options, allOptions);
+  if (errorFound === true) {
+    console.log('%cErrors have been found in the supplied options object.', printStyle);
+  }
+
+  Core.prototype.setOptions.call(this, options);
+
+  if ('type' in options) {
+    if (options.type !== this.options.type) {
+      this.options.type = options.type;
+
+      // force recreation of all items
+      var itemsData = this.itemsData;
+      if (itemsData) {
+        var selection = this.getSelection();
+        this.setItems(null);          // remove all
+        this.setItems(itemsData);     // add all
+        this.setSelection(selection); // restore selection
+      }
+    }
+  }
+};
+
 /**
  * Set items
- * @param {vis.DataSet | Array | google.visualization.DataTable | null} items
+ * @param {vis.DataSet | Array | null} items
  */
 Timeline.prototype.setItems = function(items) {
   var initialLoad = (this.itemsData == null);
@@ -182,17 +215,17 @@ Timeline.prototype.setItems = function(items) {
       var start = this.options.start != undefined ? this.options.start : dataRange.start;
       var end   = this.options.end != undefined   ? this.options.end   : dataRange.end;
 
-      this.setWindow(start, end, {animate: false});
+      this.setWindow(start, end, {animation: false});
     }
     else {
-      this.fit({animate: false});
+      this.fit({animation: false});
     }
   }
 };
 
 /**
  * Set groups
- * @param {vis.DataSet | Array | google.visualization.DataTable} groups
+ * @param {vis.DataSet | Array} groups
  */
 Timeline.prototype.setGroups = function(groups) {
   // convert to type DataSet when needed
@@ -213,6 +246,20 @@ Timeline.prototype.setGroups = function(groups) {
 };
 
 /**
+ * Set both items and groups in one go
+ * @param {{items: Array | vis.DataSet, groups: Array | vis.DataSet}} data
+ */
+Timeline.prototype.setData = function (data) {
+  if (data && data.groups) {
+    this.setGroups(data.groups);
+  }
+
+  if (data && data.items) {
+    this.setItems(data.items);
+  }
+};
+
+/**
  * Set selected items by their id. Replaces the current selection
  * Unknown id's are silently ignored.
  * @param {string[] | string} [ids]  An array with zero or more id's of the items to be
@@ -221,11 +268,12 @@ Timeline.prototype.setGroups = function(groups) {
  * @param {Object} [options]      Available options:
  *                                `focus: boolean`
  *                                    If true, focus will be set to the selected item(s)
- *                                `animate: boolean | number`
+ *                                `animation: boolean | {duration: number, easingFunction: string}`
  *                                    If true (default), the range is animated
- *                                    smoothly to the new window.
- *                                    If a number, the number is taken as duration
- *                                    for the animation. Default duration is 500 ms.
+ *                                    smoothly to the new window. An object can be
+ *                                    provided to specify duration and easing function.
+ *                                    Default duration is 500 ms, and default easing
+ *                                    function is 'easeInOutQuad'.
  *                                    Only applicable when option focus is true.
  */
 Timeline.prototype.setSelection = function(ids, options) {
@@ -249,12 +297,12 @@ Timeline.prototype.getSelection = function() {
  * are centered on screen.
  * @param {String | String[]} id     An item id or array with item ids
  * @param {Object} [options]      Available options:
- *                                `animate: boolean | number`
+ *                                `animation: boolean | {duration: number, easingFunction: string}`
  *                                    If true (default), the range is animated
- *                                    smoothly to the new window.
- *                                    If a number, the number is taken as duration
- *                                    for the animation. Default duration is 500 ms.
- *                                    Only applicable when option focus is true
+ *                                    smoothly to the new window. An object can be
+ *                                    provided to specify duration and easing function.
+ *                                    Default duration is 500 ms, and default easing
+ *                                    function is 'easeInOutQuad'.
  */
 Timeline.prototype.focus = function(id, options) {
   if (!this.itemsData || id == undefined) return;
@@ -290,8 +338,8 @@ Timeline.prototype.focus = function(id, options) {
     var middle = (start + end) / 2;
     var interval = Math.max((this.range.end - this.range.start), (end - start) * 1.1);
 
-    var animate = (options && options.animate !== undefined) ? options.animate : true;
-    this.range.setRange(middle - interval / 2, middle + interval / 2, animate);
+    var animation = (options && options.animation !== undefined) ? options.animation : true;
+    this.range.setRange(middle - interval / 2, middle + interval / 2, animation);
   }
 };
 
@@ -303,9 +351,9 @@ Timeline.prototype.focus = function(id, options) {
  */
 Timeline.prototype.getItemRange = function() {
   // calculate min from start filed
-  var dataset = this.itemsData.getDataSet(),
-    min = null,
-    max = null;
+  var dataset = this.itemsData && this.itemsData.getDataSet();
+  var min = null;
+  var max = null;
 
   if (dataset) {
     // calculate the minimum value of the field 'start'
@@ -343,12 +391,14 @@ Timeline.prototype.getItemRange = function() {
  *                  The event happened, whether clicked on an item, etc.
  */
 Timeline.prototype.getEventProperties = function (event) {
+  var clientX = event.center ? event.center.x : event.clientX;
+  var clientY = event.center ? event.center.y : event.clientY;
+  var x = clientX - util.getAbsoluteLeft(this.dom.centerContainer);
+  var y = clientY - util.getAbsoluteTop(this.dom.centerContainer);
+
   var item  = this.itemSet.itemFromTarget(event);
   var group = this.itemSet.groupFromTarget(event);
-  var pageX = event.gesture ? event.gesture.center.pageX : event.pageX;
-  var pageY = event.gesture ? event.gesture.center.pageY : event.pageY;
-  var x = pageX - util.getAbsoluteLeft(this.dom.centerContainer);
-  var y = pageY - util.getAbsoluteTop(this.dom.centerContainer);
+  var customTime = CustomTime.customTimeFromTarget(event);
 
   var snap = this.itemSet.options.snap || null;
   var scale = this.body.util.getScale();
@@ -359,10 +409,10 @@ Timeline.prototype.getEventProperties = function (event) {
   var element = util.getTarget(event);
   var what = null;
   if (item != null)                                                    {what = 'item';}
+  else if (customTime != null)                                         {what = 'custom-time';}
   else if (util.hasParent(element, this.timeAxis.dom.foreground))      {what = 'axis';}
   else if (this.timeAxis2 && util.hasParent(element, this.timeAxis2.dom.foreground)) {what = 'axis';}
   else if (util.hasParent(element, this.itemSet.dom.labelSet))         {what = 'group-label';}
-  else if (util.hasParent(element, this.customTime.bar))               {what = 'custom-time';} // TODO: fix for multiple custom time bars
   else if (util.hasParent(element, this.currentTime.bar))              {what = 'current-time';}
   else if (util.hasParent(element, this.dom.center))                   {what = 'background';}
 
@@ -371,8 +421,8 @@ Timeline.prototype.getEventProperties = function (event) {
     item: item ? item.id : null,
     group: group ? group.groupId : null,
     what: what,
-    pageX: pageX,
-    pageY: pageY,
+    pageX: event.srcEvent ? event.srcEvent.pageX : event.pageX,
+    pageY: event.srcEvent ? event.srcEvent.pageY : event.pageY,
     x: x,
     y: y,
     time: time,

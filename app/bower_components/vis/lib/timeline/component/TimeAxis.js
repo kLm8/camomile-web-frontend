@@ -34,10 +34,12 @@ function TimeAxis (body, options) {
   };
 
   this.defaultOptions = {
-    orientation: 'bottom',  // axis orientation: 'top' or 'bottom'
+    orientation: {
+      axis: 'bottom'
+    },  // axis orientation: 'top' or 'bottom'
     showMinorLabels: true,
     showMajorLabels: true,
-    format: null,
+    format: TimeStep.FORMAT,
     timeAxis: null
   };
   this.options = util.extend({}, this.defaultOptions);
@@ -56,7 +58,7 @@ TimeAxis.prototype = new Component();
  * Set options for the TimeAxis.
  * Parameters will be merged in current options.
  * @param {Object} options  Available options:
- *                          {string} [orientation]
+ *                          {string} [orientation.axis]
  *                          {boolean} [showMinorLabels]
  *                          {boolean} [showMajorLabels]
  */
@@ -67,16 +69,18 @@ TimeAxis.prototype.setOptions = function(options) {
       'showMinorLabels',
       'showMajorLabels',
       'hiddenDates',
-      'format',
       'timeAxis'
     ], this.options, options);
 
+    // deep copy the format options
+    util.selectiveDeepExtend(['format'], this.options, options);
+
     if ('orientation' in options) {
       if (typeof options.orientation === 'string') {
-        this.options.orientation = options.orientation;
+        this.options.orientation.axis = options.orientation;
       }
       else if (typeof options.orientation === 'object' && 'axis' in options.orientation) {
-        this.options.orientation = options.orientation.axis;
+        this.options.orientation.axis = options.orientation.axis;
       }
     }
 
@@ -101,8 +105,8 @@ TimeAxis.prototype._create = function() {
   this.dom.foreground = document.createElement('div');
   this.dom.background = document.createElement('div');
 
-  this.dom.foreground.className = 'timeaxis foreground';
-  this.dom.background.className = 'timeaxis background';
+  this.dom.foreground.className = 'vis-time-axis vis-foreground';
+  this.dom.background.className = 'vis-time-axis vis-background';
 };
 
 /**
@@ -131,7 +135,7 @@ TimeAxis.prototype.redraw = function () {
   var background = this.dom.background;
 
   // determine the correct parent DOM element (depending on option orientation)
-  var parent = (options.orientation == 'top') ? this.body.dom.top : this.body.dom.bottom;
+  var parent = (options.orientation.axis == 'top') ? this.body.dom.top : this.body.dom.bottom;
   var parentChanged = (foreground.parentNode !== parent);
 
   // calculate character width and height
@@ -148,7 +152,7 @@ TimeAxis.prototype.redraw = function () {
   props.width = foreground.offsetWidth;
 
   props.minorLineHeight = this.body.domProps.root.height - props.majorLabelHeight -
-      (options.orientation == 'top' ? this.body.domProps.bottom.height : this.body.domProps.top.height);
+      (options.orientation.axis == 'top' ? this.body.domProps.bottom.height : this.body.domProps.top.height);
   props.minorLineWidth = 1; // TODO: really calculate width
   props.majorLineHeight = props.minorLineHeight + props.majorLabelHeight;
   props.majorLineWidth = 1; // TODO: really calculate width
@@ -185,7 +189,7 @@ TimeAxis.prototype.redraw = function () {
  * @private
  */
 TimeAxis.prototype._repaintLabels = function () {
-  var orientation = this.options.orientation;
+  var orientation = this.options.orientation.axis;
 
   // calculate range and step (step such that we have space for 7 characters per label)
   var start = util.convert(this.body.range.start, 'Number');
@@ -306,7 +310,7 @@ TimeAxis.prototype._repaintMinorText = function (x, text, orientation, className
 
   label.style.top = (orientation == 'top') ? (this.props.majorLabelHeight + 'px') : '0';
   label.style.left = x + 'px';
-  label.className = 'text minor ' + className;
+  label.className = 'vis-text vis-minor ' + className;
   //label.title = title;  // TODO: this is a heavy operation
 };
 
@@ -332,7 +336,7 @@ TimeAxis.prototype._repaintMajorText = function (x, text, orientation, className
   this.dom.majorTexts.push(label);
 
   label.childNodes[0].nodeValue = text;
-  label.className = 'text major ' + className;
+  label.className = 'vis-text vis-major ' + className;
   //label.title = title; // TODO: this is a heavy operation
 
   label.style.top = (orientation == 'top') ? '0' : (this.props.minorLabelHeight  + 'px');
@@ -367,7 +371,7 @@ TimeAxis.prototype._repaintMinorLine = function (x, orientation, className) {
   line.style.height = props.minorLineHeight + 'px';
   line.style.left = (x - props.minorLineWidth / 2) + 'px';
 
-  line.className = 'grid vertical minor ' + className;
+  line.className = 'vis-grid vis-vertical vis-minor ' + className;
 
   return line;
 };
@@ -400,7 +404,7 @@ TimeAxis.prototype._repaintMajorLine = function (x, orientation, className) {
   line.style.left = (x - props.majorLineWidth / 2) + 'px';
   line.style.height = props.majorLineHeight + 'px';
 
-  line.className = 'grid vertical major ' + className;
+  line.className = 'vis-grid vis-vertical vis-major ' + className;
 
   return line;
 };
@@ -417,7 +421,7 @@ TimeAxis.prototype._calculateCharSize = function () {
   // determine the char width and height on the minor axis
   if (!this.dom.measureCharMinor) {
     this.dom.measureCharMinor = document.createElement('DIV');
-    this.dom.measureCharMinor.className = 'text minor measure';
+    this.dom.measureCharMinor.className = 'vis-text vis-minor vis-measure';
     this.dom.measureCharMinor.style.position = 'absolute';
 
     this.dom.measureCharMinor.appendChild(document.createTextNode('0'));
@@ -429,7 +433,7 @@ TimeAxis.prototype._calculateCharSize = function () {
   // determine the char width and height on the major axis
   if (!this.dom.measureCharMajor) {
     this.dom.measureCharMajor = document.createElement('DIV');
-    this.dom.measureCharMajor.className = 'text major measure';
+    this.dom.measureCharMajor.className = 'vis-text vis-major vis-measure';
     this.dom.measureCharMajor.style.position = 'absolute';
 
     this.dom.measureCharMajor.appendChild(document.createTextNode('0'));

@@ -2,7 +2,10 @@
 
 // first check if moment.js is already loaded in the browser window, if so,
 // use this instance. Else, load via commonjs.
+
+
 var moment = require('./module/moment');
+var uuid = require('./module/uuid');
 
 /**
  * Test whether given object is a number
@@ -13,6 +16,19 @@ exports.isNumber = function(object) {
   return (object instanceof Number || typeof object == 'number');
 };
 
+
+/**
+ * Remove everything in the DOM object
+ * @param DOMobject
+ */
+exports.recursiveDOMDelete = function(DOMobject) {
+  if (DOMobject) {
+    while (DOMobject.hasChildNodes() === true) {
+      exports.recursiveDOMDelete(DOMobject.firstChild);
+      DOMobject.removeChild(DOMobject.firstChild);
+    }
+  }
+};
 
 /**
  * this function gives you a range between 0 and 1 based on the min and max values in the set, the total sum of all values and the current value.
@@ -66,36 +82,73 @@ exports.isDate = function(object) {
 };
 
 /**
- * Test whether given object is an instance of google.visualization.DataTable
- * @param {*} object
- * @return {Boolean} isDataTable
- */
-exports.isDataTable = function(object) {
-  return (typeof (google) !== 'undefined') &&
-      (google.visualization) &&
-      (google.visualization.DataTable) &&
-      (object instanceof google.visualization.DataTable);
-};
-
-/**
  * Create a semi UUID
  * source: http://stackoverflow.com/a/105074/1262753
  * @return {String} uuid
  */
 exports.randomUUID = function() {
-  var S4 = function () {
-    return Math.floor(
-        Math.random() * 0x10000 /* 65536 */
-    ).toString(16);
-  };
+  return uuid.v4();
+};
 
-  return (
-      S4() + S4() + '-' +
-          S4() + '-' +
-          S4() + '-' +
-          S4() + '-' +
-          S4() + S4() + S4()
-      );
+/**
+ * assign all keys of an object that are not nested objects to a certain value (used for color objects).
+ * @param obj
+ * @param value
+ */
+exports.assignAllKeys = function (obj, value) {
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      if (typeof obj[prop] !== 'object') {
+        obj[prop] = value;
+      }
+    }
+  }
+}
+
+
+/**
+ * Fill an object with a possibly partially defined other object. Only copies values if the a object has an object requiring values.
+ * That means an object is not created on a property if only the b object has it.
+ * @param obj
+ * @param value
+ */
+exports.fillIfDefined = function (a, b, allowDeletion = false) {
+  for (var prop in a) {
+    if (b[prop] !== undefined) {
+      if (typeof b[prop] !== 'object') {
+        if ((b[prop] === undefined || b[prop] === null) && a[prop] !== undefined && allowDeletion === true) {
+          delete a[prop];
+        }
+        else {
+          a[prop] = b[prop];
+        }
+      }
+      else {
+        if (typeof a[prop] === 'object') {
+          exports.fillIfDefined(a[prop],b[prop],allowDeletion);
+        }
+      }
+    }
+  }
+}
+
+
+
+/**
+ * Extend object a with the properties of object b or a series of objects
+ * Only properties with defined values are copied
+ * @param {Object} a
+ * @param {... Object} b
+ * @return {Object} a
+ */
+exports.protoExtend = function (a, b) {
+  for (var i = 1; i < arguments.length; i++) {
+    var other = arguments[i];
+    for (var prop in other) {
+      a[prop] = other[prop];
+    }
+  }
+  return a;
 };
 
 /**
@@ -106,7 +159,7 @@ exports.randomUUID = function() {
  * @return {Object} a
  */
 exports.extend = function (a, b) {
-  for (var i = 1, len = arguments.length; i < len; i++) {
+  for (var i = 1; i < arguments.length; i++) {
     var other = arguments[i];
     for (var prop in other) {
       if (other.hasOwnProperty(prop)) {
@@ -114,7 +167,6 @@ exports.extend = function (a, b) {
       }
     }
   }
-
   return a;
 };
 
@@ -123,7 +175,7 @@ exports.extend = function (a, b) {
  * Only properties with defined values are copied
  * @param {Array.<String>} props
  * @param {Object} a
- * @param {... Object} b
+ * @param {Object} b
  * @return {Object} a
  */
 exports.selectiveExtend = function (props, a, b) {
@@ -149,10 +201,10 @@ exports.selectiveExtend = function (props, a, b) {
  * Only properties with defined values are copied
  * @param {Array.<String>} props
  * @param {Object} a
- * @param {... Object} b
+ * @param {Object} b
  * @return {Object} a
  */
-exports.selectiveDeepExtend = function (props, a, b) {
+exports.selectiveDeepExtend = function (props, a, b, allowDeletion = false) {
   // TODO: add support for Arrays to deepExtend
   if (Array.isArray(b)) {
     throw new TypeError('Arrays are not supported by deepExtend');
@@ -167,10 +219,15 @@ exports.selectiveDeepExtend = function (props, a, b) {
             a[prop] = {};
           }
           if (a[prop].constructor === Object) {
-            exports.deepExtend(a[prop], b[prop]);
+            exports.deepExtend(a[prop], b[prop], false, allowDeletion);
           }
           else {
-            a[prop] = b[prop];
+            if ((b[prop] === null) && a[prop] !== undefined && allowDeletion === true) {
+              delete a[prop];
+            }
+            else {
+              a[prop] = b[prop];
+            }
           }
         } else if (Array.isArray(b[prop])) {
           throw new TypeError('Arrays are not supported by deepExtend');
@@ -189,10 +246,10 @@ exports.selectiveDeepExtend = function (props, a, b) {
  * Only properties with defined values are copied
  * @param {Array.<String>} props
  * @param {Object} a
- * @param {... Object} b
+ * @param {Object} b
  * @return {Object} a
  */
-exports.selectiveNotDeepExtend = function (props, a, b) {
+exports.selectiveNotDeepExtend = function (props, a, b, allowDeletion = false) {
   // TODO: add support for Arrays to deepExtend
   if (Array.isArray(b)) {
     throw new TypeError('Arrays are not supported by deepExtend');
@@ -208,7 +265,12 @@ exports.selectiveNotDeepExtend = function (props, a, b) {
             exports.deepExtend(a[prop], b[prop]);
           }
           else {
-            a[prop] = b[prop];
+            if ((b[prop] === null) && a[prop] !== undefined && allowDeletion === true) {
+              delete a[prop];
+            }
+            else {
+              a[prop] = b[prop];
+            }
           }
         } else if (Array.isArray(b[prop])) {
           throw new TypeError('Arrays are not supported by deepExtend');
@@ -225,28 +287,34 @@ exports.selectiveNotDeepExtend = function (props, a, b) {
  * Deep extend an object a with the properties of object b
  * @param {Object} a
  * @param {Object} b
+ * @param [Boolean] protoExtend --> optional parameter. If true, the prototype values will also be extended.
+ *                                  (ie. the options objects that inherit from others will also get the inherited options)
+ * @param [Boolean] global      --> optional parameter. If true, the values of fields that are null will not deleted
  * @returns {Object}
  */
-exports.deepExtend = function(a, b) {
-  // TODO: add support for Arrays to deepExtend
-  if (Array.isArray(b)) {
-    throw new TypeError('Arrays are not supported by deepExtend');
-  }
-
+exports.deepExtend = function(a, b, protoExtend, allowDeletion) {
   for (var prop in b) {
-    if (b.hasOwnProperty(prop)) {
+    if (b.hasOwnProperty(prop) || protoExtend === true) {
       if (b[prop] && b[prop].constructor === Object) {
         if (a[prop] === undefined) {
           a[prop] = {};
         }
         if (a[prop].constructor === Object) {
-          exports.deepExtend(a[prop], b[prop]);
+          exports.deepExtend(a[prop], b[prop], protoExtend);
         }
         else {
-          a[prop] = b[prop];
+          if ((b[prop] === null) && a[prop] !== undefined && allowDeletion === true) {
+            delete a[prop];
+          }
+          else {
+            a[prop] = b[prop];
+          }
         }
       } else if (Array.isArray(b[prop])) {
-        throw new TypeError('Arrays are not supported by deepExtend');
+        a[prop] = [];
+        for (let i = 0; i < b[prop].length; i++) {
+          a[prop].push(b[prop][i]);
+        }
       } else {
         a[prop] = b[prop];
       }
@@ -434,7 +502,7 @@ exports.getType = function(object) {
   var type = typeof object;
 
   if (type == 'object') {
-    if (object == null) {
+    if (object === null) {
       return 'null';
     }
     if (object instanceof Boolean) {
@@ -463,9 +531,45 @@ exports.getType = function(object) {
   else if (type == 'string') {
     return 'String';
   }
+  else if (type === undefined) {
+    return 'undefined';
+  }
+
 
   return type;
 };
+
+
+/**
+ * Used to extend an array and copy it. This is used to propagate paths recursively.
+ *
+ * @param arr
+ * @param newValue
+ * @returns {Array}
+ */
+exports.copyAndExtendArray = function(arr,newValue) {
+  let newArr = [];
+  for (let i = 0; i < arr.length; i++) {
+    newArr.push(arr[i]);
+  }
+  newArr.push(newValue);
+  return newArr;
+}
+
+/**
+ * Used to extend an array and copy it. This is used to propagate paths recursively.
+ *
+ * @param arr
+ * @param newValue
+ * @returns {Array}
+ */
+exports.copyArray = function(arr) {
+  let newArr = [];
+  for (let i = 0; i < arr.length; i++) {
+    newArr.push(arr[i]);
+  }
+  return newArr;
+}
 
 /**
  * Retrieve the absolute left value of a DOM element
@@ -474,7 +578,7 @@ exports.getType = function(object) {
  *                              in the browser page.
  */
 exports.getAbsoluteLeft = function(elem) {
-  return elem.getBoundingClientRect().left + window.pageXOffset;
+  return elem.getBoundingClientRect().left;
 };
 
 /**
@@ -484,7 +588,7 @@ exports.getAbsoluteLeft = function(elem) {
  *                              in the browser page.
  */
 exports.getAbsoluteTop = function(elem) {
-  return elem.getBoundingClientRect().top + window.pageYOffset;
+  return elem.getBoundingClientRect().top;
 };
 
 /**
@@ -802,7 +906,10 @@ exports.hexToRGB = function(hex) {
  * @returns {*}
  */
 exports.overrideOpacity = function(color,opacity) {
-  if (color.indexOf("rgb") != -1) {
+  if (color.indexOf("rgba") != -1) {
+    return color;
+  }
+  else if (color.indexOf("rgb") != -1) {
     var rgb = color.substr(color.indexOf("(")+1).replace(")","").split(",");
     return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + opacity + ")"
   }
@@ -837,18 +944,17 @@ exports.RGBToHex = function(red,green,blue) {
  */
 exports.parseColor = function(color) {
   var c;
-  if (exports.isString(color)) {
-    if (exports.isValidRGB(color)) {
-      var rgb = color.substr(4).substr(0,color.length-5).split(',');
+  if (exports.isString(color) === true) {
+    if (exports.isValidRGB(color) === true) {
+      var rgb = color.substr(4).substr(0,color.length-5).split(',').map(function (value) {return parseInt(value)});
       color = exports.RGBToHex(rgb[0],rgb[1],rgb[2]);
     }
-    if (exports.isValidHex(color)) {
+    if (exports.isValidHex(color) === true) {
       var hsv = exports.hexToHSV(color);
-      var lighterColorHSV = {h:hsv.h,s:hsv.s * 0.45,v:Math.min(1,hsv.v * 1.05)};
-      var darkerColorHSV  = {h:hsv.h,s:Math.min(1,hsv.v * 1.25),v:hsv.v*0.6};
-      var darkerColorHex  = exports.HSVToHex(darkerColorHSV.h ,darkerColorHSV.h ,darkerColorHSV.v);
+      var lighterColorHSV = {h:hsv.h,s:hsv.s * 0.8,v:Math.min(1,hsv.v * 1.02)};
+      var darkerColorHSV  = {h:hsv.h,s:Math.min(1,hsv.s * 1.25),v:hsv.v*0.8};
+      var darkerColorHex  = exports.HSVToHex(darkerColorHSV.h ,darkerColorHSV.s ,darkerColorHSV.v);
       var lighterColorHex = exports.HSVToHex(lighterColorHSV.h,lighterColorHSV.s,lighterColorHSV.v);
-
       c = {
         background: color,
         border:darkerColorHex,
@@ -879,8 +985,8 @@ exports.parseColor = function(color) {
   }
   else {
     c = {};
-    c.background = color.background || 'white';
-    c.border = color.border || c.background;
+    c.background = color.background || undefined;
+    c.border = color.border || undefined;
 
     if (exports.isString(color.highlight)) {
       c.highlight = {
@@ -890,8 +996,8 @@ exports.parseColor = function(color) {
     }
     else {
       c.highlight = {};
-      c.highlight.background = color.highlight && color.highlight.background || c.background;
-      c.highlight.border = color.highlight && color.highlight.border || c.border;
+      c.highlight.background = color.highlight && color.highlight.background || undefined;
+      c.highlight.border = color.highlight && color.highlight.border || undefined;
     }
 
     if (exports.isString(color.hover)) {
@@ -902,13 +1008,15 @@ exports.parseColor = function(color) {
     }
     else {
       c.hover = {};
-      c.hover.background = color.hover && color.hover.background || c.background;
-      c.hover.border = color.hover && color.hover.border || c.border;
+      c.hover.background = color.hover && color.hover.background || undefined;
+      c.hover.border = color.hover && color.hover.border || undefined;
     }
   }
 
   return c;
 };
+
+
 
 /**
  * http://www.javascripter.net/faq/rgb2hsv.htm
@@ -1045,6 +1153,11 @@ exports.isValidRGB = function(rgb) {
   var isOk = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/i.test(rgb);
   return isOk;
 }
+exports.isValidRGBA = function(rgba) {
+  rgba = rgba.replace(" ","");
+  var isOk = /rgba\((\d{1,3}),(\d{1,3}),(\d{1,3}),(.{1,3})\)/i.test(rgba);
+  return isOk;
+}
 
 /**
  * This recursively redirects the prototype of JSON objects to the referenceObject
@@ -1104,16 +1217,24 @@ exports.bridgeObject = function(referenceObject) {
  * @param [String] option      | this is the option key in the options argument
  * @private
  */
-exports.mergeOptions = function (mergeTarget, options, option) {
-  if (options[option] !== undefined) {
-    if (typeof options[option] == 'boolean') {
-      mergeTarget[option].enabled = options[option];
-    }
-    else {
-      mergeTarget[option].enabled = true;
-      for (var prop in options[option]) {
-        if (options[option].hasOwnProperty(prop)) {
-          mergeTarget[option][prop] = options[option][prop];
+exports.mergeOptions = function (mergeTarget, options, option, allowDeletion = false) {
+  if (options[option] === null) {
+    mergeTarget[option] = undefined;
+    delete mergeTarget[option];
+  }
+  else {
+    if (options[option] !== undefined) {
+      if (typeof options[option] === 'boolean') {
+        mergeTarget[option].enabled = options[option];
+      }
+      else {
+        if (options[option].enabled === undefined) {
+          mergeTarget[option].enabled = true;
+        }
+        for (var prop in options[option]) {
+          if (options[option].hasOwnProperty(prop)) {
+            mergeTarget[option][prop] = options[option][prop];
+          }
         }
       }
     }
@@ -1210,25 +1331,6 @@ exports.binarySearchValue = function(orderedItems, target, field, sidePreference
   // didnt find anything. Return -1.
   return -1;
 };
-
-/**
- * Quadratic ease-in-out
- * http://gizma.com/easing/
- * @param {number} t        Current time
- * @param {number} start    Start value
- * @param {number} end      End value
- * @param {number} duration Duration
- * @returns {number} Value corresponding with current time
- */
-exports.easeInOutQuad = function (t, start, end, duration) {
-  var change = end - start;
-  t /= duration/2;
-  if (t < 1) return change/2*t*t + start;
-  t--;
-  return -change/2 * (t*(t-2) - 1) + start;
-};
-
-
 
 /*
  * Easing Functions - inspired from http://gizma.com/easing/

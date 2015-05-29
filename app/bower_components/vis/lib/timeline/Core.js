@@ -1,5 +1,6 @@
 var Emitter = require('emitter-component');
 var Hammer = require('../module/hammer');
+var hammerUtil = require('../hammerUtil');
 var util = require('../util');
 var DataSet = require('../DataSet');
 var DataView = require('../DataView');
@@ -12,9 +13,6 @@ var CustomTime = require('./component/CustomTime');
 
 /**
  * Create a timeline visualization
- * @param {HTMLElement} container
- * @param {vis.DataSet | Array | google.visualization.DataTable} [items]
- * @param {Object} [options]  See Core.setOptions for the available options.
  * @constructor
  */
 function Core () {}
@@ -51,24 +49,24 @@ Core.prototype._create = function (container) {
   this.dom.shadowTopRight       = document.createElement('div');
   this.dom.shadowBottomRight    = document.createElement('div');
 
-  this.dom.root.className                 = 'vis timeline root';
-  this.dom.background.className           = 'vispanel background';
-  this.dom.backgroundVertical.className   = 'vispanel background vertical';
-  this.dom.backgroundHorizontal.className = 'vispanel background horizontal';
-  this.dom.centerContainer.className      = 'vispanel center';
-  this.dom.leftContainer.className        = 'vispanel left';
-  this.dom.rightContainer.className       = 'vispanel right';
-  this.dom.top.className                  = 'vispanel top';
-  this.dom.bottom.className               = 'vispanel bottom';
-  this.dom.left.className                 = 'content';
-  this.dom.center.className               = 'content';
-  this.dom.right.className                = 'content';
-  this.dom.shadowTop.className            = 'shadow top';
-  this.dom.shadowBottom.className         = 'shadow bottom';
-  this.dom.shadowTopLeft.className        = 'shadow top';
-  this.dom.shadowBottomLeft.className     = 'shadow bottom';
-  this.dom.shadowTopRight.className       = 'shadow top';
-  this.dom.shadowBottomRight.className    = 'shadow bottom';
+  this.dom.root.className                 = 'vis-timeline';
+  this.dom.background.className           = 'vis-panel vis-background';
+  this.dom.backgroundVertical.className   = 'vis-panel vis-background vis-vertical';
+  this.dom.backgroundHorizontal.className = 'vis-panel vis-background vis-horizontal';
+  this.dom.centerContainer.className      = 'vis-panel vis-center';
+  this.dom.leftContainer.className        = 'vis-panel vis-left';
+  this.dom.rightContainer.className       = 'vis-panel vis-right';
+  this.dom.top.className                  = 'vis-panel vis-top';
+  this.dom.bottom.className               = 'vis-panel vis-bottom';
+  this.dom.left.className                 = 'vis-content';
+  this.dom.center.className               = 'vis-content';
+  this.dom.right.className                = 'vis-content';
+  this.dom.shadowTop.className            = 'vis-shadow vis-top';
+  this.dom.shadowBottom.className         = 'vis-shadow vis-bottom';
+  this.dom.shadowTopLeft.className        = 'vis-shadow vis-top';
+  this.dom.shadowBottomLeft.className     = 'vis-shadow vis-bottom';
+  this.dom.shadowTopRight.className       = 'vis-shadow vis-top';
+  this.dom.shadowBottomRight.className    = 'vis-shadow vis-bottom';
 
   this.dom.root.appendChild(this.dom.background);
   this.dom.root.appendChild(this.dom.backgroundVertical);
@@ -90,11 +88,9 @@ Core.prototype._create = function (container) {
   this.dom.rightContainer.appendChild(this.dom.shadowTopRight);
   this.dom.rightContainer.appendChild(this.dom.shadowBottomRight);
 
-  this.on('rangechange', this._redraw.bind(this));
-  this.on('touch', this._onTouch.bind(this));
-  this.on('pinch', this._onPinch.bind(this));
-  this.on('dragstart', this._onDragStart.bind(this));
-  this.on('drag', this._onDrag.bind(this));
+  this.on('rangechange', this.redraw.bind(this));
+  this.on('touch',       this._onTouch.bind(this));
+  this.on('pan',         this._onDrag.bind(this));
 
   var me = this;
   this.on('change', function (properties) {
@@ -115,27 +111,47 @@ Core.prototype._create = function (container) {
 
   // create event listeners for all interesting events, these events will be
   // emitted via emitter
-  this.hammer = Hammer(this.dom.root, {
-    preventDefault: true
-  });
+  this.hammer = new Hammer(this.dom.root);
+  this.hammer.get('pinch').set({enable: true});
   this.listeners = {};
 
   var events = [
-    'touch', 'pinch',
-    'tap', 'doubletap', 'hold',
-    'dragstart', 'drag', 'dragend',
-    'mousewheel', 'DOMMouseScroll' // DOMMouseScroll is needed for Firefox
+    'tap', 'doubletap', 'press',
+    'pinch',
+    'pan', 'panstart', 'panmove', 'panend'
+      // TODO: cleanup
+    //'touch', 'pinch',
+    //'tap', 'doubletap', 'hold',
+    //'dragstart', 'drag', 'dragend',
+    //'mousewheel', 'DOMMouseScroll' // DOMMouseScroll is needed for Firefox
   ];
-  events.forEach(function (event) {
-    var listener = function () {
-      var args = [event].concat(Array.prototype.slice.call(arguments, 0));
+  events.forEach(function (type) {
+    var listener = function (event) {
       if (me.isActive()) {
-        me.emit.apply(me, args);
+        me.emit(type, event);
       }
     };
-    me.hammer.on(event, listener);
-    me.listeners[event] = listener;
+    me.hammer.on(type, listener);
+    me.listeners[type] = listener;
   });
+
+  // emulate a touch event (emitted before the start of a pan, pinch, tap, or press)
+  hammerUtil.onTouch(this.hammer, function (event) {
+    me.emit('touch', event);
+  }.bind(this));
+
+  // emulate a release event (emitted after a pan, pinch, tap, or press)
+  hammerUtil.onRelease(this.hammer, function (event) {
+    me.emit('release', event);
+  }.bind(this));
+
+  function onMouseWheel(event) {
+    if (me.isActive()) {
+      me.emit('mousewheel', event);
+    }
+  }
+  this.dom.root.addEventListener('mousewheel', onMouseWheel);
+  this.dom.root.addEventListener('DOMMouseScroll', onMouseWheel);
 
   // size properties of each of the panels
   this.props = {
@@ -153,7 +169,11 @@ Core.prototype._create = function (container) {
     scrollTop: 0,
     scrollTopMin: 0
   };
-  this.touch = {}; // store state information needed for touch events
+
+  this.customTimes = [];
+
+  // store state information needed for touch events
+  this.touch = {};
 
   this.redrawCount = 0;
 
@@ -195,14 +215,22 @@ Core.prototype.setOptions = function (options) {
 
     if ('orientation' in options) {
       if (typeof options.orientation === 'string') {
-        this.options.orientation = options.orientation;
+        this.options.orientation = {
+          item: options.orientation,
+          axis: options.orientation
+        };
       }
-      else if (typeof options.orientation === 'object' && 'axis' in options.orientation) {
-        this.options.orientation = options.orientation.axis;
+      else if (typeof options.orientation === 'object') {
+        if ('item' in options.orientation) {
+          this.options.orientation.item = options.orientation.item;
+        }
+        if ('axis' in options.orientation) {
+          this.options.orientation.axis = options.orientation.axis;
+        }
       }
     }
 
-    if (this.options.orientation === 'both') {
+    if (this.options.orientation.axis === 'both') {
       if (!this.timeAxis2) {
         var timeAxis2 = this.timeAxis2 = new TimeAxis(this.body);
         timeAxis2.setOptions = function (options) {
@@ -242,14 +270,28 @@ Core.prototype.setOptions = function (options) {
       }
     }
 
+    if ('showCustomTime' in options) {
+      throw new Error('Option `showCustomTime` is deprecated. Create a custom time bar via timeline.addCustomTime(time [, id])');
+    }
+
     // enable/disable autoResize
     this._initAutoResize();
   }
 
   // propagate options to all components
-  this.components.forEach(function (component) {
-    component.setOptions(options);
-  });
+  this.components.forEach(component => component.setOptions(options));
+
+  // enable/disable configure
+  if (this.configurator) {
+    this.configurator.setOptions(options.configure);
+
+    // collect the settings of all components, and pass them to the configuration system
+    var appliedOptions = util.deepExtend({}, this.options);
+    this.components.forEach(function (component) {
+      util.deepExtend(appliedOptions, component.options);
+    });
+    this.configurator.setModuleOptions({global: appliedOptions});
+  }
 
   // redraw everything
   this._redraw();
@@ -268,7 +310,8 @@ Core.prototype.isActive = function () {
  */
 Core.prototype.destroy = function () {
   // unbind datasets
-  this.clear();
+  this.setItems(null);
+  this.setGroups(null);
 
   // remove all event listeners
   this.off();
@@ -298,9 +341,7 @@ Core.prototype.destroy = function () {
   this.hammer = null;
 
   // give all components the opportunity to cleanup
-  this.components.forEach(function (component) {
-    component.destroy();
-  });
+  this.components.forEach(component => component.destroy());
 
   this.body = null;
 };
@@ -309,102 +350,70 @@ Core.prototype.destroy = function () {
 /**
  * Set a custom time bar
  * @param {Date} time
- * @param {int} id
+ * @param {number} [id=undefined] Optional id of the custom time bar to be adjusted.
  */
 Core.prototype.setCustomTime = function (time, id) {
-  if (!this.customTime) {
-    throw new Error('Cannot get custom time: Custom time bar is not enabled');
+  var customTimes = this.customTimes.filter(function (component) {
+    return id === component.options.id;
+  });
+
+  if (customTimes.length === 0) {
+    throw new Error('No custom time bar found with id ' + JSON.stringify(id))
   }
 
-  var barId = id || 0;
-
-  this.components.forEach(function (element, index, components) {
-    if (element instanceof CustomTime && element.options.id === barId) {
-      element.setCustomTime(time);
-    }
-  });
+  if (customTimes.length > 0) {
+    customTimes[0].setCustomTime(time);
+  }
 };
 
 /**
  * Retrieve the current custom time.
- * @return {Date} customTime
- * @param {int} id
+ * @param {number} [id=undefined]    Id of the custom time bar.
+ * @return {Date | undefined} customTime
  */
 Core.prototype.getCustomTime = function(id) {
-  if (!this.customTime) {
-    throw new Error('Cannot get custom time: Custom time bar is not enabled');
-  }
-
-  var barId = id || 0,
-      customTime = this.customTime.getCustomTime();
-
-  this.components.forEach(function (element, index, components) {
-    if (element instanceof CustomTime && element.options.id === barId) {
-      customTime = element.getCustomTime();
-    }
+  var customTimes = this.customTimes.filter(function (component) {
+    return component.options.id === id;
   });
 
-  return customTime;
+  if (customTimes.length === 0) {
+    throw new Error('No custom time bar found with id ' + JSON.stringify(id))
+  }
+  return customTimes[0].getCustomTime();
 };
 
 /**
  * Add custom vertical bar
- * @param {Date | String | Number} time  A Date, unix timestamp, or
- *                                      ISO date string. Time point where the new bar should be placed
- * @param {Number | String} ID of the new bar
- * @return {Number | String} ID of the new bar
+ * @param {Date | String | Number} [time]  A Date, unix timestamp, or
+ *                                         ISO date string. Time point where
+ *                                         the new bar should be placed.
+ *                                         If not provided, `new Date()` will
+ *                                         be used.
+ * @param {Number | String} [id=undefined] Id of the new bar. Optional
+ * @return {Number | String}               Returns the id of the new bar
  */
 Core.prototype.addCustomTime = function (time, id) {
-  if (!this.currentTime) {
-    throw new Error('Option showCurrentTime must be true');
+  var timestamp = time !== undefined
+      ? util.convert(time, 'Date').valueOf()
+      : new Date();
+
+  var exists = this.customTimes.some(function (customTime) {
+    return customTime.options.id === id;
+  });
+  if (exists) {
+    throw new Error('A custom time with id ' + JSON.stringify(id) + ' already exists');
   }
 
-  if (time === undefined) {
-    throw new Error('Time parameter for the custom bar must be provided');
-  }
-
-  var ts = util.convert(time, 'Date').valueOf(),
-      numIds, customTime, customBarId;
-
-  // All bar IDs are kept in 1 array, mixed types
-  // Bar with ID 0 is the default bar.
-  if (!this.customBarIds || this.customBarIds.constructor !== Array) {
-    this.customBarIds = [0];
-  }
-
-  // If the ID is not provided, generate one, otherwise just use it
-  if (id === undefined) {
-
-    numIds = this.customBarIds.filter(function (element) {
-      return util.isNumber(element);
-    });
-
-    customBarId = numIds.length > 0 ? Math.max.apply(null, numIds) + 1 : 1;
-
-  } else {
-    
-    // Check for duplicates
-    this.customBarIds.forEach(function (element) {
-      if (element === id) {
-        throw new Error('Custom time ID already exists');
-      }
-    });
-
-    customBarId = id;
-  }
-
-  this.customBarIds.push(customBarId);
-
-  customTime = new CustomTime(this.body, {
-    showCustomTime : true,
-    time : ts,
-    id : customBarId
+  var customTime = new CustomTime(this.body, {
+    time : timestamp,
+    id : id
   });
 
+  this.customTimes.push(customTime);
   this.components.push(customTime);
   this.redraw();
 
-  return customBarId;
+  return id;
 };
 
 /**
@@ -413,19 +422,19 @@ Core.prototype.addCustomTime = function (time, id) {
  * @return {boolean} True if the bar exists and is removed, false otherwise
  */
 Core.prototype.removeCustomTime = function (id) {
-
-  var me = this;
-
-  this.components.forEach(function (bar, index, components) {
-    if (bar instanceof CustomTime && bar.options.id === id) {
-      // Only the lines added by the user will be removed
-      if (bar.options.id !== 0) {
-        me.customBarIds.splice(me.customBarIds.indexOf(id), 1);
-        components.splice(index, 1);
-        bar.destroy();
-      }
-    }
+  var customTimes = this.customTimes.filter(function (bar) {
+    return (bar.options.id === id);
   });
+
+  if (customTimes.length === 0) {
+    throw new Error('No custom time bar found with id ' + JSON.stringify(id))
+  }
+
+  customTimes.forEach(function (customTime) {
+    this.customTimes.splice(this.customTimes.indexOf(customTime), 1);
+    this.components.splice(this.components.indexOf(customTime), 1);
+    customTime.destroy();
+  }.bind(this))
 };
 
 
@@ -437,47 +446,15 @@ Core.prototype.getVisibleItems = function() {
   return this.itemSet && this.itemSet.getVisibleItems() || [];
 };
 
-
-
-/**
- * Clear the Core. By Default, items, groups and options are cleared.
- * Example usage:
- *
- *     timeline.clear();                // clear items, groups, and options
- *     timeline.clear({options: true}); // clear options only
- *
- * @param {Object} [what]      Optionally specify what to clear. By default:
- *                             {items: true, groups: true, options: true}
- */
-Core.prototype.clear = function(what) {
-  // clear items
-  if (!what || what.items) {
-    this.setItems(null);
-  }
-
-  // clear groups
-  if (!what || what.groups) {
-    this.setGroups(null);
-  }
-
-  // clear options of timeline and of each of the components
-  if (!what || what.options) {
-    this.components.forEach(function (component) {
-      component.setOptions(component.defaultOptions);
-    });
-
-    this.setOptions(this.defaultOptions); // this will also do a redraw
-  }
-};
-
 /**
  * Set Core window such that it fits all items
  * @param {Object} [options]  Available options:
- *                            `animate: boolean | number`
- *                                 If true (default), the range is animated
- *                                 smoothly to the new window.
- *                                 If a number, the number is taken as duration
- *                                 for the animation. Default duration is 500 ms.
+ *                                `animation: boolean | {duration: number, easingFunction: string}`
+ *                                    If true (default), the range is animated
+ *                                    smoothly to the new window. An object can be
+ *                                    provided to specify duration and easing function.
+ *                                    Default duration is 500 ms, and default easing
+ *                                    function is 'easeInOutQuad'.
  */
 Core.prototype.fit = function(options) {
   var range = this._getDataRange();
@@ -487,8 +464,8 @@ Core.prototype.fit = function(options) {
     return;
   }
 
-  var animate = (options && options.animate !== undefined) ? options.animate : true;
-  this.range.setRange(range.start, range.end, animate);
+  var animation = (options && options.animation !== undefined) ? options.animation : true;
+  this.range.setRange(range.start, range.end, animation);
 };
 
 /**
@@ -533,22 +510,23 @@ Core.prototype._getDataRange = function() {
  * @param {Date | Number | String | Object} [start] Start date of visible window
  * @param {Date | Number | String} [end]            End date of visible window
  * @param {Object} [options]  Available options:
- *                            `animate: boolean | number`
- *                                 If true (default), the range is animated
- *                                 smoothly to the new window.
- *                                 If a number, the number is taken as duration
- *                                 for the animation. Default duration is 500 ms.
+ *                                `animation: boolean | {duration: number, easingFunction: string}`
+ *                                    If true (default), the range is animated
+ *                                    smoothly to the new window. An object can be
+ *                                    provided to specify duration and easing function.
+ *                                    Default duration is 500 ms, and default easing
+ *                                    function is 'easeInOutQuad'.
  */
 Core.prototype.setWindow = function(start, end, options) {
-  var animate;
+  var animation;
   if (arguments.length == 1) {
     var range = arguments[0];
-    animate = (range.animate !== undefined) ? range.animate : true;
-    this.range.setRange(range.start, range.end, animate);
+    animation = (range.animation !== undefined) ? range.animation : true;
+    this.range.setRange(range.start, range.end, animation);
   }
   else {
-    animate = (options && options.animate !== undefined) ? options.animate : true;
-    this.range.setRange(start, end, animate);
+    animation = (options && options.animation !== undefined) ? options.animation : true;
+    this.range.setRange(start, end, animation);
   }
 };
 
@@ -556,11 +534,12 @@ Core.prototype.setWindow = function(start, end, options) {
  * Move the window such that given time is centered on screen.
  * @param {Date | Number | String} time
  * @param {Object} [options]  Available options:
- *                            `animate: boolean | number`
- *                                 If true (default), the range is animated
- *                                 smoothly to the new window.
- *                                 If a number, the number is taken as duration
- *                                 for the animation. Default duration is 500 ms.
+ *                                `animation: boolean | {duration: number, easingFunction: string}`
+ *                                    If true (default), the range is animated
+ *                                    smoothly to the new window. An object can be
+ *                                    provided to specify duration and easing function.
+ *                                    Default duration is 500 ms, and default easing
+ *                                    function is 'easeInOutQuad'.
  */
 Core.prototype.moveTo = function(time, options) {
   var interval = this.range.end - this.range.start;
@@ -568,9 +547,9 @@ Core.prototype.moveTo = function(time, options) {
 
   var start = t - interval / 2;
   var end = t + interval / 2;
-  var animate = (options && options.animate !== undefined) ? options.animate : true;
+  var animation = (options && options.animation !== undefined) ? options.animation : true;
 
-  this.range.setRange(start, end, animate);
+  this.range.setRange(start, end, animation);
 };
 
 /**
@@ -609,12 +588,12 @@ Core.prototype._redraw = function() {
 
   // update class names
   if (options.orientation == 'top') {
-    util.addClassName(dom.root, 'top');
-    util.removeClassName(dom.root, 'bottom');
+    util.addClassName(dom.root, 'vis-top');
+    util.removeClassName(dom.root, 'vis-bottom');
   }
   else {
-    util.removeClassName(dom.root, 'top');
-    util.addClassName(dom.root, 'bottom');
+    util.removeClassName(dom.root, 'vis-top');
+    util.addClassName(dom.root, 'vis-bottom');
   }
 
   // update root width and height options
@@ -718,7 +697,7 @@ Core.prototype._redraw = function() {
 
   // reposition the scrollable contents
   var offset = this.props.scrollTop;
-  if (options.orientation == 'bottom') {
+  if (options.orientation.item != 'top') {
     offset += Math.max(this.props.centerContainer.height - this.props.center.height -
       this.props.border.top - this.props.border.bottom, 0);
   }
@@ -755,8 +734,6 @@ Core.prototype._redraw = function() {
     }
     this.redrawCount = 0;
   }
-
-  this.emit("finishedRedraw");
 };
 
 // TODO: deprecated since version 1.1.0, remove some day
@@ -919,6 +896,7 @@ Core.prototype._stopAutoResize = function () {
  */
 Core.prototype._onTouch = function (event) {
   this.touch.allowDragging = true;
+  this.touch.initialScrollTop = this.props.scrollTop;
 };
 
 /**
@@ -931,15 +909,6 @@ Core.prototype._onPinch = function (event) {
 };
 
 /**
- * Start moving the timeline vertically
- * @param {Event} event
- * @private
- */
-Core.prototype._onDragStart = function (event) {
-  this.touch.initialScrollTop = this.props.scrollTop;
-};
-
-/**
  * Move the timeline vertically
  * @param {Event} event
  * @private
@@ -949,7 +918,7 @@ Core.prototype._onDrag = function (event) {
   // when releasing the fingers in opposite order from the touch screen
   if (!this.touch.allowDragging) return;
 
-  var delta = event.gesture.deltaY;
+  var delta = event.deltaY;
 
   var oldScrollTop = this._getScrollTop();
   var newScrollTop = this._setScrollTop(this.touch.initialScrollTop + delta);
@@ -984,7 +953,7 @@ Core.prototype._updateScrollTop = function () {
   if (scrollTopMin != this.props.scrollTopMin) {
     // in case of bottom orientation, change the scrollTop such that the contents
     // do not move relative to the time axis at the bottom
-    if (this.options.orientation == 'bottom') {
+    if (this.options.orientation.item != 'top') {
       this.props.scrollTop += (scrollTopMin - this.props.scrollTopMin);
     }
     this.props.scrollTopMin = scrollTopMin;
