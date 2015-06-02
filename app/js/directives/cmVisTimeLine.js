@@ -66,7 +66,6 @@ angular.module('myApp.directives')
                     // Set the options first
                     timeline.setOptions(scope.options);
                     timeline.addCustomTime(0);
-                    timeline.moveTo(0);
 
                     // Add groups and items
                     if (scope.data.groups != null) {
@@ -75,6 +74,8 @@ angular.module('myApp.directives')
                     if (scope.data.items != null) {
                         timeline.setItems(scope.data.items);
                     }
+
+                    timeline.setWindow(0, 12000);
 
                     // onLoad callback
                     if (scope.events != null && scope.events.onload != null && angular.isFunction(scope.events.onload)) {

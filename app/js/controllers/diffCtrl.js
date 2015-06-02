@@ -202,12 +202,19 @@ angular.module('myApp.controllers')
 					// color: randomColor(0.2)
 				});
 				
+				$scope.wavesurfer.on('ready', function () {
+					$scope.wavesurfer.zoom(100);
+					console.log('Wavesurfer loaded');
+				});
+
 				$scope.wavesurfer.on('play', function () {
 					$scope.paused = false;
+					$scope.$apply();
 				});
 
 				$scope.wavesurfer.on('pause', function () {
 					$scope.paused = true;
+					$scope.$apply();
 				});
 
 				$scope.wavesurfer.on('finish', function () {
@@ -234,7 +241,13 @@ angular.module('myApp.controllers')
 				});
 
 				$scope.wavesurfer.on('region-updated', (function(region) {
-					// ...
+					$scope.items.update({
+						id: 999999999,
+						group: 0,
+						content: "new item",
+						start: region.start*1000,
+						end: region.end*1000
+					});
 				}));
 
 				// $scope.wavesurfer.on('region-removed', saveRegions);
@@ -330,6 +343,7 @@ angular.module('myApp.controllers')
 				onRemove: function (item, callback) {
 					if (confirm('Remove label "' + item.content + '" ?')) {
 						callback(item); // confirm deletion
+						$scope.wavesurfer.clearRegions();
 					}
 					else {
 						callback(null); // cancel deletion
@@ -359,18 +373,19 @@ angular.module('myApp.controllers')
 			]);
 
 			$scope.items = new vis.DataSet([
-				{id: 0, group: 0, content: 'item 0', start: 0, end: 4000},
-				{id: 2, group: 1, content: 'item 2', start: 0, end: 4000},
-				{id: 4, group: 1, content: 'item 4', start: 0, end: 4000},
+				{id: 0, group: 0, content: 'item 0', start: 0, end: 1000},
+				{id: 2, group: 1, content: 'item 2', start: 1500, end: 2000},
+				{id: 4, group: 1, content: 'item 4', start: 2500, end: 4000},
 			]);
 			
 
 			$scope.items.on('update', function (event, properties) {
-				$scope.API.seekTime((properties.data[0].start).getTime()/1000);
+				// if (event && properties) $scope.API.seekTime((properties.data[0].start).getTime()/1000);
+				// console.log(properties);
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				logEvent(event, properties);
+				// logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -378,9 +393,21 @@ angular.module('myApp.controllers')
 				console.log(msg);
 			};
 
-			$scope.onSelect = function (event, props) {
+			$scope.onSelect = function (props) {
+				console.log('tototototo');
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
+				$scope.API.seekTime((($scope.items.get(selection[0])).start)/1000);
+				$scope.timeline.setCustomTime(($scope.items.get(selection[0])).start);
+
+				// Add region to wavesurfer
+				if ($scope.wavesurfer) {
+					$scope.wavesurfer.clearRegions();
+					$scope.wavesurfer.addRegion({
+						start: (($scope.items.get(selection[0])).start)/1000,
+						end: (($scope.items.get(selection[0])).end)/1000
+					});
+				}
 			};
 
 			$scope.onClick = function (props) {
@@ -405,7 +432,7 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onRangeChanged = function (props) {
-				// ...
+				// $scope.API.seekTime((props.time).getTime()/1000);
 			};
 
 			$scope.onTimeChange = function (props) {
@@ -414,7 +441,6 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onTimeChanged = function (props) {
-				console.log('HEY HO');
 				$scope.API.seekTime((props.time).getTime()/1000);
 			};
 
@@ -425,9 +451,9 @@ angular.module('myApp.controllers')
 				contextmenu: $scope.rightClick,
 				onload: $scope.onload,
 				rangechange: $scope.onRangeChange,
-                rangechanged: $scope.onRangeChanged,
-                timechange: $scope.onTimeChange,
-                timechanged: $scope.onTimeChanged
+				rangechanged: $scope.onRangeChanged,
+				timechange: $scope.onTimeChange,
+				timechanged: $scope.onTimeChanged
 			};
 
 		/*********************************************************************************************************/
@@ -504,7 +530,6 @@ angular.module('myApp.controllers')
 
 					$scope.resetSummaryView(true);
 
-
 				}
 			});
 
@@ -519,6 +544,26 @@ angular.module('myApp.controllers')
 						scope.model.selected_medium,
 						scope.model.selected_reference);
 					$scope.resetSummaryView(true);
+				}
+			});
+
+			$scope.$watch('model.layers[0].layer', function () {
+				if ($scope.model.layers[0].layer) {
+					$scope.items.clear();
+					// console.log($scope.model.layers[0].layer);
+					for (var i = 0; i < $scope.model.layers[0].layer.length; i++) {
+						// console.log(parseInt($scope.browse.annotations[i]['_id'], 16));
+
+						$scope.items.add({
+							title: parseInt($scope.model.layers[0].layer[i]['_id'], 16),
+							id: i,
+							group: 1,
+							content: $scope.model.layers[0].layer[i]['data'],
+							start: $scope.model.layers[0].layer[i]['fragment']['start']*1000,
+							end: $scope.model.layers[0].layer[i]['fragment']['end']*1000
+						});
+					};
+					if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
 				}
 			});
 
