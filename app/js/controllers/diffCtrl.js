@@ -224,30 +224,37 @@ angular.module('myApp.controllers')
 				});
 
 				$scope.wavesurfer.on('seek', function () {
+					// $scope.timeline.off();
+					// console.log($scope.wavesurfer.getCurrentTime());
 					// $scope.API.seekTime($scope.wavesurfer.getCurrentTime());
 					$scope.timeline.setCustomTime($scope.wavesurfer.getCurrentTime()*1000);
 				});
 
+				$scope.wavesurfer.on('mouseup', function (e) {
+					console.log('mouseup');
+				});
+
 				$scope.wavesurfer.on('region-click', function(region, e) {
 					e.stopPropagation();
-					// Play on click, loop on shift click
-					e.shiftKey ? region.playLoop() : region.play();
+					// Play on shift click
+					if (e.shiftKey) region.play();
 				});
 
 				$scope.wavesurfer.on('region-created', function(region) {
 					$scope.wavesurfer.clearRegions();
-					$scope.API.seekTime($scope.wavesurfer.getCurrentTime());
-					$scope.timeline.setCustomTime($scope.wavesurfer.getCurrentTime()*1000);
 				});
 
 				$scope.wavesurfer.on('region-updated', (function(region) {
 					$scope.items.update({
-						id: 999999999,
+						id: -1,
 						group: 0,
-						content: "new item",
+						content: "rename me",
 						start: region.start*1000,
 						end: region.end*1000
 					});
+					// console.log($scope.wavesurfer.getCurrentTime());
+					$scope.API.seekTime($scope.wavesurfer.getCurrentTime());
+					$scope.timeline.setCustomTime($scope.wavesurfer.getCurrentTime()*1000);
 				}));
 
 				// $scope.wavesurfer.on('region-removed', saveRegions);
@@ -286,6 +293,8 @@ angular.module('myApp.controllers')
 
 				activeUrl = url;
 
+				console.log('tototototototo');
+
 				$scope.wavesurfer.once('ready', function () {
 					$scope.wavesurfer.play();
 					$scope.$apply();
@@ -301,8 +310,10 @@ angular.module('myApp.controllers')
 		/*********************************************************************************************************/
 
 			// Vis.js Timeline
+			$scope.id = 0;
+
 			$scope.options = {
-				editable: true,
+				editable: {add: true, remove: true, updateGroup: true, updateTime: false},
 				onAdd: function (item, callback) {
 					item.content = prompt('Enter label for new item:', item.content);
 					if (item.content != null) {
@@ -333,6 +344,9 @@ angular.module('myApp.controllers')
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
 						item.content = content;
+						item.id = $scope.id;
+						$scope.id += 1;
+						$scope.items.remove(-1);
 						callback(item); // send back adjusted item
 					}
 					else {
@@ -343,7 +357,6 @@ angular.module('myApp.controllers')
 				onRemove: function (item, callback) {
 					if (confirm('Remove label "' + item.content + '" ?')) {
 						callback(item); // confirm deletion
-						$scope.wavesurfer.clearRegions();
 					}
 					else {
 						callback(null); // cancel deletion
@@ -373,15 +386,30 @@ angular.module('myApp.controllers')
 			]);
 
 			$scope.items = new vis.DataSet([
-				{id: 0, group: 0, content: 'item 0', start: 0, end: 1000},
-				{id: 2, group: 1, content: 'item 2', start: 1500, end: 2000},
-				{id: 4, group: 1, content: 'item 4', start: 2500, end: 4000},
+				// {id: 0, group: 0, content: 'item 0', start: 0, end: 1000},
+				// {id: 2, group: 1, content: 'item 2', start: 1500, end: 2000},
+				// {id: 4, group: 1, content: 'item 4', start: 2500, end: 4000},
 			]);
 			
 
 			$scope.items.on('update', function (event, properties) {
-				// if (event && properties) $scope.API.seekTime((properties.data[0].start).getTime()/1000);
-				// console.log(properties);
+				$scope.API.seekTime(properties.data[0].start/1000);
+				$scope.wavesurfer.seekAndCenter(properties.data[0].start/$scope.API.totalTime);
+				
+				// console.log(properties.data[0]);
+
+				// Update wavesurfer region
+				// if ($scope.wavesurfer) {
+				// 	$scope.wavesurfer.clearRegions();
+				// 	$scope.wavesurfer.addRegion({
+				// 		start: properties.data[0].start/1000,
+				// 		end: properties.data[0].end/1000
+				// 	});
+				// }
+			});
+
+			$scope.items.on('remove', function (event, properties) {
+				$scope.wavesurfer.clearRegions();
 			});
 
 			$scope.items.on('*', function (event, properties) {
@@ -394,11 +422,17 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onSelect = function (props) {
-				console.log('tototototo');
+				console.log('onSelect');
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
-				$scope.API.seekTime((($scope.items.get(selection[0])).start)/1000);
-				$scope.timeline.setCustomTime(($scope.items.get(selection[0])).start);
+
+				var x = ((($scope.items.get(selection[0])).start));
+				x = Math.round(x * 1000) / 1000;
+				console.log(x);
+
+				// $scope.API.seekTime(x/1000);
+				$scope.timeline.setCustomTime(x);
+				$scope.wavesurfer.seekAndCenter(x/$scope.API.totalTime);				
 
 				// Add region to wavesurfer
 				if ($scope.wavesurfer) {
@@ -411,15 +445,15 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onClick = function (props) {
-				// ...
+				console.log('onClick');
 			};
 
 			$scope.onDoubleClick = function (props) {
-				// ...
+				console.log('onDoubleClick');
 			};
 
-			$scope.rightClick = function (props) {
-				// ...
+			$scope.onRightClick = function (props) {
+				console.log('onRightClick');
 			};
 
 			$scope.onload = function (timeline) {
@@ -428,19 +462,22 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onRangeChange = function (props) {
-				// ...
+				console.log('onRangeChange');
 			};
 
 			$scope.onRangeChanged = function (props) {
+				console.log('onRangeChanged');
 				// $scope.API.seekTime((props.time).getTime()/1000);
 			};
 
 			$scope.onTimeChange = function (props) {
+				console.log('onTimeChange');
 				$scope.API.seekTime((props.time).getTime()/1000);
 				$scope.wavesurfer.seekAndCenter((props.time).getTime()/$scope.API.totalTime);
 			};
 
 			$scope.onTimeChanged = function (props) {
+				console.log('onTimeChanged');
 				$scope.API.seekTime((props.time).getTime()/1000);
 			};
 
@@ -448,7 +485,7 @@ angular.module('myApp.controllers')
 				select: $scope.onSelect,
 				click: $scope.onClick,
 				doubleClick: $scope.onDoubleClick,
-				contextmenu: $scope.rightClick,
+				contextmenu: $scope.onRightClick,
 				onload: $scope.onload,
 				rangechange: $scope.onRangeChange,
 				rangechanged: $scope.onRangeChanged,
@@ -564,6 +601,7 @@ angular.module('myApp.controllers')
 						});
 					};
 					if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
+					$scope.id = $scope.model.layers[0].layer.length;
 				}
 			});
 
