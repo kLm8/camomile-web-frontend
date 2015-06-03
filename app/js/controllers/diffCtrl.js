@@ -380,10 +380,33 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.groups = new vis.DataSet([
-				{id: 0, content: 'First', value: 1},
-				{id: 1, content: 'Third', value: 3},
-				{id: 2, content: 'Second', value: 2}
+				// {id: 0, content: 'First', value: 1},
+				// {id: 1, content: 'Third', value: 3},
+				// {id: 2, content: 'Second', value: 2}
 			]);
+
+			/**********************************************************************************************/
+
+			$http.get('config.json').
+				success(function(data, status, headers, config) {
+					// called asynchronously when response is available
+					console.log('Layers loaded');
+
+					for (var i = 0; i < data.layers.length; i++) {
+						$scope.groups.add({
+							id: i,
+							content: data.layers[i]
+						});
+					};
+			}).
+				error(function(data, status, headers, config) {
+					// called asynchronously if error
+					console.log('error');
+			});
+
+			// timeline.redraw();
+
+			/**********************************************************************************************/
 
 			$scope.items = new vis.DataSet([
 				// {id: 0, group: 0, content: 'item 0', start: 0, end: 1000},

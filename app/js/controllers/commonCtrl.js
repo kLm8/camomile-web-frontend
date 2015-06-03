@@ -2,7 +2,7 @@
  * Created by stefas on 09/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService', '$resource', '$cookieStore',
+    .controller('CommonCtrl', ['$scope', '$http', 'defaults', 'Session', '$rootScope', 'camomileService', '$resource', '$cookieStore',
         function ($scope, $http, defaults, Session, $rootScope, camomileService, $resource, $cookieStore) {
 
             'use strict';
