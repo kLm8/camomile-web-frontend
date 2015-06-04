@@ -2,7 +2,7 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-	.controller('DiffCtrl', ['$sce', '$scope', '$http',
+	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
 		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
@@ -186,14 +186,13 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.updateState = function(state) {
-				// if state == 'pause' $scope.pause = true else $scope.pause = false;
+				// ...
 			};
 
 		/*********************************************************************************************************/
 
 			// Wavesurfer
 			var activeUrl = null;
-			$scope.paused = true;
 
 			$scope.$on('wavesurferInit', function (e, wavesurfer) {
 				$scope.wavesurfer = wavesurfer;
@@ -208,17 +207,14 @@ angular.module('myApp.controllers')
 				});
 
 				$scope.wavesurfer.on('play', function () {
-					$scope.paused = false;
-					$scope.$apply();
+					// ...
 				});
 
 				$scope.wavesurfer.on('pause', function () {
-					$scope.paused = true;
-					$scope.$apply();
+					// ...
 				});
 
 				$scope.wavesurfer.on('finish', function () {
-					$scope.paused = true;
 					$scope.wavesurfer.seekTo(0);
 					$scope.$apply();
 				});
@@ -231,7 +227,7 @@ angular.module('myApp.controllers')
 				});
 
 				$scope.wavesurfer.on('mouseup', function (e) {
-					console.log('mouseup');
+					// console.log('mouseup');
 				});
 
 				$scope.wavesurfer.on('region-click', function(region, e) {
@@ -262,10 +258,8 @@ angular.module('myApp.controllers')
 
 				$scope.wavesurfer.on('region-play', function (region) {
 					region.once('out', function () {
-						$scope.paused = false;
 						$scope.wavesurfer.play(region.start);
 						$scope.wavesurfer.pause();
-						$scope.paused = true;
 					});
 				});
 
@@ -286,26 +280,6 @@ angular.module('myApp.controllers')
 				});
 			});
 
-			$scope.play = function (url) {
-				if (!$scope.wavesurfer) {
-					return;
-				}
-
-				activeUrl = url;
-
-				console.log('tototototototo');
-
-				$scope.wavesurfer.once('ready', function () {
-					$scope.wavesurfer.play();
-					$scope.$apply();
-				});
-
-				$scope.wavesurfer.load(activeUrl);
-			};
-
-			$scope.isPlaying = function (url) {
-				return url == activeUrl;
-			};
 
 		/*********************************************************************************************************/
 
@@ -323,29 +297,13 @@ angular.module('myApp.controllers')
 						callback(null); // cancel item creation
 					}
 				},
-				// onMove: function (item, callback) {
-				//   if (confirm('Do you really want to move the item to\n' +
-				//       'start: ' + item.start + '\n' +
-				//       'end: ' + item.end + '?')) {
-				//     callback(item); // send back item as confirmation (can be changed)
-				//   }
-				//   else {
-				//     callback(null); // cancel editing item
-				//   }
-				// },
-				// onMoving: function (item, callback) {
-				//   if (item.start < min) item.start = min;
-				//   if (item.start > max) item.start = max;
-				//   if (item.end   > max) item.end   = max;
-
-				//   callback(item); // send back the (possibly) changed item
-				// },
 				onUpdate: function (item, callback) {
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
 						item.content = content;
 						item.id = $scope.id;
 						$scope.id += 1;
+						$scope.$apply();
 						$scope.items.remove(-1);
 						callback(item); // send back adjusted item
 					}
@@ -401,10 +359,10 @@ angular.module('myApp.controllers')
 			}).
 				error(function(data, status, headers, config) {
 					// called asynchronously if error
-					console.log('error');
+					alert("Error loading layers");
 			});
 
-			// timeline.redraw();
+			// $scope.timeline.redraw();
 
 			/**********************************************************************************************/
 
@@ -418,17 +376,6 @@ angular.module('myApp.controllers')
 			$scope.items.on('update', function (event, properties) {
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekAndCenter(properties.data[0].start/$scope.API.totalTime);
-				
-				// console.log(properties.data[0]);
-
-				// Update wavesurfer region
-				// if ($scope.wavesurfer) {
-				// 	$scope.wavesurfer.clearRegions();
-				// 	$scope.wavesurfer.addRegion({
-				// 		start: properties.data[0].start/1000,
-				// 		end: properties.data[0].end/1000
-				// 	});
-				// }
 			});
 
 			$scope.items.on('remove', function (event, properties) {
@@ -445,13 +392,13 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onSelect = function (props) {
-				console.log('onSelect');
+				// console.log('onSelect');
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
 
 				var x = ((($scope.items.get(selection[0])).start));
 				x = Math.round(x * 1000) / 1000;
-				console.log(x);
+				// console.log(x);
 
 				// $scope.API.seekTime(x/1000);
 				$scope.timeline.setCustomTime(x);
@@ -468,15 +415,15 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onClick = function (props) {
-				console.log('onClick');
+				// console.log('onClick');
 			};
 
 			$scope.onDoubleClick = function (props) {
-				console.log('onDoubleClick');
+				// console.log('onDoubleClick');
 			};
 
 			$scope.onRightClick = function (props) {
-				console.log('onRightClick');
+				// console.log('onRightClick');
 			};
 
 			$scope.onload = function (timeline) {
@@ -485,22 +432,22 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onRangeChange = function (props) {
-				console.log('onRangeChange');
+				// console.log('onRangeChange');
 			};
 
 			$scope.onRangeChanged = function (props) {
-				console.log('onRangeChanged');
+				// console.log('onRangeChanged');
 				// $scope.API.seekTime((props.time).getTime()/1000);
 			};
 
 			$scope.onTimeChange = function (props) {
-				console.log('onTimeChange');
+				// console.log('onTimeChange');
 				$scope.API.seekTime((props.time).getTime()/1000);
 				$scope.wavesurfer.seekAndCenter((props.time).getTime()/$scope.API.totalTime);
 			};
 
 			$scope.onTimeChanged = function (props) {
-				console.log('onTimeChanged');
+				// console.log('onTimeChanged');
 				$scope.API.seekTime((props.time).getTime()/1000);
 			};
 
@@ -518,6 +465,77 @@ angular.module('myApp.controllers')
 
 		/*********************************************************************************************************/
 
+			var visjs2camomile = function(visjs) {
+				var camomile = [];
+
+				for (var i = 0; i < visjs.length; i++) {
+
+					var start = Math.round(visjs[i].start * 1000) / 1000000;
+					var end = Math.round(visjs[i].end * 1000) / 1000000;
+					var label = visjs[i].content;
+
+					camomile.push({
+						'fragment': {'start': start, 'end': end},
+						'data': label,
+						'id_medium': $scope.model.selected_medium
+					});
+
+				};
+
+				return camomile
+			};
+
+			$scope.saveAnnotations = function() {
+				var ids = $scope.groups.getIds();
+
+				for (i in ids) {
+					var content = $scope.groups.get(i).content;
+					// get annotations on this layer
+					var data = $scope.items.get({
+						filter: function(item) {
+							return item.group == i;
+						}
+					});
+
+					// convert this data to Camomile format
+					var annotations = visjs2camomile(data);
+
+					var found = false;
+					console.log("Looking for : " + content);
+
+					for (var j = 0; j < $scope.model.available_layers.length; j++) {
+						if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
+							found = true;
+							break;
+						};
+					};
+
+					if (found) {
+						console.log('Found !');
+					}
+					else {
+						console.log('Not found : creating layer \'' + content + '\'');
+						camomileService.createLayer($scope.model.selected_corpus, 
+													content, "", 'segment', 'label',
+													annotations, 
+													function(err, data) {
+														if(!err) {
+															// ...
+														}
+														else {
+															alert(data.message);
+														}
+													});
+					}
+				};
+
+				// alert("Annotations saved successfully");
+				$scope.get_layers($scope.model.selected_corpus);
+			};
+
+
+		/*********************************************************************************************************/
+
 
 			// the selected corpus has changed
 			$scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
@@ -532,10 +550,6 @@ angular.module('myApp.controllers')
 
 			$scope.$watch('model.selected_medium', function (newValue, oldValue, scope) {
 				// when the medium changes, the viz is reinit, and the select box gets the new layers
-				// TODO: no more necessary since all videos have the same layers
-//				scope.model.selected_reference = undefined;
-//				scope.model.selected_hypothesis = undefined;
-
 				if (newValue) {
 					// scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
 
@@ -578,12 +592,12 @@ angular.module('myApp.controllers')
 
 					scope.get_layers(scope.model.selected_corpus);
 
-					// re-initialize the reference is needed
+					// re-initialize the reference if needed
 					if (scope.model.selected_reference != undefined) {
 						$scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
 					}
 
-					// re-initialize the hypothesis is needed
+					// re-initialize the hypothesis if needed
 					if (scope.model.selected_hypothesis != undefined) {
 						$scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis, false);
 					}
@@ -608,24 +622,50 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.$watch('model.layers[0].layer', function () {
-				if ($scope.model.layers[0].layer) {
-					$scope.items.clear();
-					// console.log($scope.model.layers[0].layer);
-					for (var i = 0; i < $scope.model.layers[0].layer.length; i++) {
-						// console.log(parseInt($scope.browse.annotations[i]['_id'], 16));
+				if ($scope.model.layers[0].layer && $scope.model.layers[0].layer.length > 0) {
+					camomileService.getLayer($scope.model.layers[0].layer[0]['id_layer'],
+						function(err, data) {
+							if(!err) {
+								var ids = $scope.groups.getIds();
+								var g = -1;
 
-						$scope.items.add({
-							title: parseInt($scope.model.layers[0].layer[i]['_id'], 16),
-							id: i,
-							group: 1,
-							content: $scope.model.layers[0].layer[i]['data'],
-							start: $scope.model.layers[0].layer[i]['fragment']['start']*1000,
-							end: $scope.model.layers[0].layer[i]['fragment']['end']*1000
+								for (i in ids) {
+									if ($scope.groups.get(i).content.toLowerCase() == data.name.toLowerCase()) {
+										g = i;
+										break;
+									};
+								};
+
+								var itemsToRemove = $scope.items.get({
+									filter: function(item) {
+										return item.group == g;
+									}
+								});
+								for (var i = 0; i < itemsToRemove.length; i++) $scope.items.remove(itemsToRemove[i].id);
+
+								for (var i = 0; i < $scope.model.layers[0].layer.length; i++) {
+									$scope.items.add({
+										title: parseInt($scope.model.layers[0].layer[i]['_id'], 16),
+										id: $scope.id,
+										group: g,
+										content: $scope.model.layers[0].layer[i]['data'],
+										start: $scope.model.layers[0].layer[i]['fragment']['start']*1000,
+										end: $scope.model.layers[0].layer[i]['fragment']['end']*1000
+									});
+									$scope.id += 1;
+									$scope.$apply();
+								};
+								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
+							}
+							else {
+								alert(data.error);
+							}
 						});
-					};
-					if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
-					$scope.id = $scope.model.layers[0].layer.length;
 				}
+			});
+
+			$scope.$watch('id', function (newValue, oldValue, scope) {
+				console.log('ID of last annotation changed to : ' + newValue);
 			});
 
 			$scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
@@ -636,7 +676,8 @@ angular.module('myApp.controllers')
 					} else if (!oldValue) {
 						$scope.model.restrict_toggle = 0;
 					}
-				});
+				}
+			);
 
 
 			$scope.$watch('model.selected_hypothesis', function (newValue, oldValue, scope) {

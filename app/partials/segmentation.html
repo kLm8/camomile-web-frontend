@@ -1,4 +1,4 @@
-<div ng-controller="DiffCtrl">
+<div ng-controller="SegmentationCtrl">
 
 <div class="form-group container">
 
@@ -77,16 +77,7 @@
 			<div id="wavesurfer-timeline"></div>
 			<cm-wavesurfer></cm-wavesurfer>
 
-			<button class="btn btn-success btn-block" ng-click="wavesurfer.playPause()">
-				<span id="play" ng-show="paused">
-					<i class="glyphicon glyphicon-play"></i>
-					Play
-				</span>
-				<span id="pause" ng-show="!paused">
-					<i class="glyphicon glyphicon-pause"></i>
-					Pause
-				</span>
-			</button>
+			<button class="btn btn-success btn-block" ng-click="saveAnnotations()">Save annotations</button>
 		</div>
 
 		<div class="row top-padding">
