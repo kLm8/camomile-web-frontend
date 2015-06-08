@@ -131,10 +131,10 @@ function getAllQueues(callback) {
                 getQueueByName('activelearning.shot.out', callback);
             },
             // Active learning "Head" use case
-            shotIn: function (callback) {
+            headIn: function (callback) {
                 getQueueByName('activelearning.head.in', callback);
             },
-            shotOut: function (callback) {
+            headOut: function (callback) {
                 getQueueByName('activelearning.head.out', callback);
             },
             // MediaEval "Evidence" use case

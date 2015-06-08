@@ -1,4 +1,4 @@
-<div ng-controller="EvidenceCtrl" ng-show='isLogged()' ng-init="initPopup()">
+<div ng-controller="EvidenceCtrl" ng-show='isLogged()' ng-init="model.popQueueElement()">
 <div class="container-fluid">
 
     <div class="row top-padding">
@@ -50,11 +50,19 @@
     </div>
      <span style="float: right" ng-show="model.isDisplayedVideo">
         <div id="evidence_button_id" style="margin-top: 30px;margin-left: -180px;" alt="">
-            <input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
+            <input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true, false)" width="90px" height="90px">
         </div>
 
         <div id="not_evidence_button_id" style="margin-top: 60px;;margin-left: -180px;">
-            <input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false)" width="90px" height="90px">
+            <input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false, false)" width="90px" height="90px">
+        </div>
+
+        <div id="evidence_button_id_and_ciao" style="margin-top: 90px;margin-left: -180px;" alt="">
+            <input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true, true)" width="30px" height="30px">
+        </div>
+
+        <div id="not_evidence_button_id_and_ciao" style="margin-top: 120px;;margin-left: -180px;">
+            <input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false, true)" width="30px" height="30px">
         </div>
 
          <!--<div id="button-tooltip"></div>-->
@@ -73,45 +81,11 @@
                 <span class="input-group-addon" data-title="Enter your own annotation here"><b>Element:</b></span>
 
                 <form ng-submit="model.addEntry()" class="ng-pristine ng-valid">
-                    <input id="entry_input" type="text" class="form-control ui-autocomplete-input ng-pristine ng-valid" ng-model="model.corrected_data" >
+                    <input id="entry_input" type="text" style="font-size:25px;height:50px;" class="form-control ui-autocomplete-input ng-pristine ng-valid" ng-model="model.corrected_data" >
                 </form>
             </div>
         </div>
     </div>
 
-    <!--<div class="container-fluid" ng-show="model.isDisplayedVideo">-->
-        <!--<div class="col-lg-1 col-md-pull-0 col-xs-pull-0">-->
-        <!--</div>-->
-        <!--<div class="col-lg-8 col-md-12 col-xs-12">-->
-            <!--<div data-title="This is an evidence">-->
-                <!--<input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true)" >-->
-            <!--</div>-->
-
-            <!--<div data-title="This isn't an evidence" >-->
-                <!--<input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false)">-->
-            <!--</div>-->
-
-
-
-        <!--</div>-->
-    <!--</div>-->
-
-    <div id="myModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Confirmation</h4>
-                </div>
-                <div class="modal-body">
-                    <p>Ici tu mets ton tuto</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.popQueueElement()">Start</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </div>
