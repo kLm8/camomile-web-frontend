@@ -182,7 +182,7 @@ angular.module('myApp.controllers')
 
 			$scope.updateTime = function(currentTime, duration) {
 				$scope.timeline.setCustomTime(currentTime*1000);
-				$scope.wavesurfer.seekAndCenter(currentTime*1000/$scope.API.totalTime);
+				$scope.wavesurfer.seekTo(currentTime*1000/$scope.API.totalTime);
 			};
 
 			$scope.updateState = function(state) {
@@ -375,7 +375,7 @@ angular.module('myApp.controllers')
 
 			$scope.items.on('update', function (event, properties) {
 				$scope.API.seekTime(properties.data[0].start/1000);
-				$scope.wavesurfer.seekAndCenter(properties.data[0].start/$scope.API.totalTime);
+				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
 			});
 
 			$scope.items.on('remove', function (event, properties) {
@@ -443,7 +443,7 @@ angular.module('myApp.controllers')
 			$scope.onTimeChange = function (props) {
 				// console.log('onTimeChange');
 				$scope.API.seekTime((props.time).getTime()/1000);
-				$scope.wavesurfer.seekAndCenter((props.time).getTime()/$scope.API.totalTime);
+				$scope.wavesurfer.seekTo((props.time).getTime()/$scope.API.totalTime);
 			};
 
 			$scope.onTimeChanged = function (props) {
@@ -491,15 +491,16 @@ angular.module('myApp.controllers')
 				for (i in ids) {
 					var content = $scope.groups.get(i).content;
 					// get annotations on this layer
-					var data = $scope.items.get({
+					var x = $scope.items.get({
 						filter: function(item) {
 							return item.group == i;
 						}
 					});
 
-					// convert this data to Camomile format
-					var annotations = visjs2camomile(data);
+					// convert visjs data to Camomile format
+					var annotations = visjs2camomile(x);
 
+					// look for the layer if it exists in the DB
 					var found = false;
 					console.log("Looking for : " + content);
 
@@ -511,7 +512,39 @@ angular.module('myApp.controllers')
 					};
 
 					if (found) {
-						console.log('Found !');
+						console.log('Found layer ' + content);
+						camomileService.getAnnotations(function (err, data) {
+							if (!err) {
+								// first remove annotations already saved (those preloaded on the timeline when selecting the layer)
+								var a = 0;
+								for (var i = 0; i < data.length; i++) {
+									for (var j = a; j < annotations.length; j++) {
+										if (annotations[j].fragment.start > data[i].fragment.end) {
+											a = j;
+											break;
+										};
+
+										if (annotations[j].fragment.start == data[i].fragment.start && annotations[j].fragment.end == data[i].fragment.end) {
+											annotations.splice(j, 1);
+										};
+									};
+								};
+
+								// then save the new annotations
+								camomileService.createAnnotations($scope.model.available_layers[j]._id, annotations, 
+																	function(err, data) {
+																	  	if(err) alert(data.message);
+																	});
+							} else {
+		                        console.log(err, data);
+		                        alert(data.error);
+							}
+						}, {
+							filter: {
+								id_layer: $scope.model.available_layers[j]._id,
+								id_medium: $scope.model.selected_medium
+							}
+						});
 					}
 					else {
 						console.log('Not found : creating layer \'' + content + '\'');
@@ -526,7 +559,7 @@ angular.module('myApp.controllers')
 															alert(data.message);
 														}
 													});
-					}
+					};
 				};
 
 				// alert("Annotations saved successfully");
