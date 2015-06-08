@@ -112,7 +112,8 @@ angular.module('myApp.controllers')
                             {
                                 camomileService.getMedium($scope.model.queueData.fragment.id_medium, function(err, data)
                                 {
-                                    $scope.model.video = $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url +'.webm');
+                                    $scope.model.video = $sce.trustAsResourceUrl($scope.model.videoPath+ '/' + data.url +'.mp4');
+//                                    $scope.model.video = $sce.trustAsResourceUrl($scope.model.videoPath+ '/' + data.url +'.webm');
 
                                 });
                             }
@@ -207,63 +208,47 @@ angular.module('myApp.controllers')
 
             // Event launched when click on the save button.
             $scope.model.saveQueueElement = function () {
-                // Get the queue
-                camomileService.getQueue($scope.model.outcomingQueue, function (err, data) {
 
-                    if(!err)
+                // Creates the data to push into the queue
+                var dataToPush = {};
+                // Information relative to the shot
+                dataToPush["fragment"] = {};
+                dataToPush["fragment"]["medium_id"] = $scope.model.queueData.fragment.id_medium;
+                dataToPush["fragment"]["id_shot"] = $scope.model.queueData.fragment.id_shot;
+
+                // Information relative to the person
+                dataToPush["data"] = [];
+                var name;
+                var value;
+                var obj;
+                for(var i= 0, maxI = $scope.model.queueTableData.length; i < maxI; i++)
+                {
+                    value = $scope.model.person_visibility[i];
+                    if(value !== "none")
                     {
-                        var newOutcomingQueue;
-                        newOutcomingQueue = data;
+                        name = $scope.model.queueTableData[i].person_name;
+                        obj = {};
+                        obj[name] = value;
+                        dataToPush["data"].push(obj);
+                    }
 
-                        var dataToPush = {};
+                }
 
-//                        var date = new Date(); // already UTC ddate in JSON Format...
-
-                        var user = $cookieStore.get("current.user");
-
-                        dataToPush["fragment"] = {};
-                        dataToPush["fragment"]["medium_id"] = $scope.model.queueData.fragment.id_medium;
-                        dataToPush["fragment"]["id_shot"] = $scope.model.queueData.fragment.id_shot;
-                        dataToPush["data"] = [];
-
-                        var name;
-                        var value;
-                        var obj;
-                        for(var i= 0, maxI = $scope.model.queueTableData.length; i < maxI; i++)
-                        {
-                            value = $scope.model.person_visibility[i];
-                            if(value !== "none")
-                            {
-                                name = $scope.model.queueTableData[i].person_name;
-                                obj = {};
-                                obj[name] = value;
-                                dataToPush["data"].push(obj);
-                            }
-
-                        }
-
-                        newOutcomingQueue.list = [dataToPush];
-
-                        // Update the queue by adding list element to the end of it
-                        camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue.list, function(err, data){
-                            if(err)
-                            {
-                                alert(data.error);
-                                console.log(data);
-                            }
-                        });
+                // Update the queue by adding list element to the end of it
+                camomileService.enqueue($scope.model.outcomingQueue, dataToPush, function (err, data) {
+                    // Handle error
+                    if(err)
+                    {
+                        alert(data.error);
+                        console.log(data);
                     }
                     else
                     {
-                        console.log(data);
-                        alert(data.error);
+                        console.log("save");
+                        $scope.model.popQueueElement();
                     }
 
                 });
-
-
-                console.log("save");
-                $scope.model.popQueueElement();
 
             };
 
