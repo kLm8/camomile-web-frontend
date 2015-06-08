@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="myApp">
 <head>
-    <title>Camomile @ ERRARE</title>
+    <title>Camomile Annotation Tool</title>
 
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/videogular-themes-default/videogular.css">
+    <link rel="stylesheet" href="bower_components/vis/dist/vis.css" type="text/css"/>
 
     <link rel="stylesheet" href="css/app.css"/>
     <link rel="stylesheet" href="css/sticky-footer-navbar.css"/>
@@ -35,6 +37,20 @@
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="bower_components/angular-strap/dist/angular-strap.min.js"></script>
     <script src="bower_components/angular-strap/dist/angular-strap.tpl.min.js"></script>
+
+    <!-- Videogular lib-->
+    <script src="bower_components/videogular/videogular.js"></script>
+    <script src="bower_components/videogular-controls/vg-controls.js"></script>
+    <script src="bower_components/videogular-overlay-play/vg-overlay-play.js"></script>
+
+    <!-- Vis.js lib-->
+    <script src="bower_components/vis/dist/vis.js"></script>
+
+    <!-- Wavesurfer.js lib-->
+    <script src="bower_components/wavesurfer.js/dist/wavesurfer.min.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.timeline.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.regions.js"></script>
+    <script src="bower_components/wavesurfer.js/plugin/wavesurfer.minimap.js"></script>
 
     <!-- Json to Human lib-->
     <script src="./bower_components/json-human/lib/crel.js"></script>
@@ -72,10 +88,11 @@
     <script src="js/directives/cmEditModal.js"></script>
     <script src="js/directives/cmLegend.js"></script>
     <script src="js/directives/cmPiechart.js"></script>
-    <script src="js/directives/cmTimeLine.js"></script>
+    <script src="js/directives/cmVisTimeLine.js"></script>
     <script src="js/directives/cmTreemap.js"></script>
     <script src="js/directives/cmVideoPlayer.js"></script>
     <script src="js/directives/cmVideoThumbnail.js"></script>
+    <script src="js/directives/cmWavesurfer.js"></script>
     <script src="js/directives/ngLoginSubmit.js"></script>
     <script src="js/directives/ngRightClick.js"></script>
 
@@ -86,7 +103,7 @@
     <script src="js/controllers/sessionCtrl.js"></script>
     <script src="js/controllers/regressionCtrl.js"></script>
     <script src="js/controllers/fusionCtrl.js"></script>
-    <script src="js/controllers/diffCtrl.js"></script>
+    <script src="js/controllers/segmentationCtrl.js"></script>
     <script src="js/controllers/queueCtrl.js"></script>
     <script src="js/controllers/evidenceCtrl.js"></script>
     <script src="js/controllers/labelCtrl.js"></script>
@@ -119,13 +136,13 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <!--<li><a href="" onclick="TogetherJS(this); return false;">Start Multi-user session</a></li>-->
-                    <li><a href="#/diff">Diff</a></li>
-                    <li><a href="#/regression">Regression</a></li>
+                    <li><a href="#/segmentation">Segmentation</a></li>
+                    <!-- <li><a href="#/regression">Regression</a></li> -->
                     <!--<li><a href="#/fusion">Fusion</a></li>-->
                     <li><a href="#/queue?type=shot">Annotate shot</a></li>
-                    <li><a href="#/queue?type=head">Annotate head</a></li>
-                    <li><a href="#/evidence">Evidence</a></li>
-                    <li><a href="#/label">Label</a></li>
+                    <!-- <li><a href="#/queue?type=head">Annotate head</a></li> -->
+                    <!-- <li><a href="#/evidence">Evidence</a></li> -->
+                    <!-- <li><a href="#/label">Label</a></li> -->
                 </ul>
 
                 <div id="parameterButtons_button_id" ng-controller="ParameterButtonCtrl">

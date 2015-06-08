@@ -132,6 +132,13 @@ rect.legend, rect.barchart-bar, rect.node {
     position: relative;
 }
 
+.videogular-container {
+    width: 640px;
+    height: 410px;
+    margin: auto;
+    overflow: hidden;
+}
+
 #svgcontrol {
     display: block;
 }

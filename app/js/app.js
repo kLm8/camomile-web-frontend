@@ -7,23 +7,26 @@ angular.module('myApp.services', ['ngResource']);
 
 angular.module(
         'myApp',
-        ['myApp.filters',
+        [
+            'myApp.filters',
             'myApp.services',
             'myApp.directives',
             'myApp.controllers',
             'ngRoute',
             'ngCookies',
             'ngSanitize',
-            'mgcrea.ngStrap'
+            'mgcrea.ngStrap',
+            'com.2fdevs.videogular',
+            'com.2fdevs.videogular.plugins.controls',
+            'com.2fdevs.videogular.plugins.overlayplay'
         ])
     .config(['$routeProvider', function ($routeProvider) {
-//        $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
         $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
         $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
-        $routeProvider.when('/diff', {templateUrl:'partials/diff.html'});
+        $routeProvider.when('/segmentation', {templateUrl:'partials/segmentation.html'});
         $routeProvider.when('/evidence', {templateUrl:'partials/evidence.html'});
-				$routeProvider.when('/label', {templateUrl:'partials/label.html'});
+		$routeProvider.when('/label', {templateUrl:'partials/label.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 

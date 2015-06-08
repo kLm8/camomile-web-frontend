@@ -1,0 +1,87 @@
+<div ng-controller="SegmentationCtrl">
+
+<div class="form-group container">
+
+	<!-- http://stackoverflow.com/questions/8605516/default-select-option-as-blank
+	for not having a selectable "dummy option" -->
+	<!-- cm-selector allows the inline display of the selector and its associated label -->
+
+	<div class="container">
+
+		<!-- Corpus selection -->
+		<div class="col-xs-6 cm-selector" ng-show='isLogged()'>
+			<label>Corpus: </label>
+			<select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
+				<option ng-repeat='corpus in model.available_corpora  | orderBy : "name"' value={{corpus._id}}>{{corpus.name}}</option>
+			</select>
+		</div>
+
+		<!-- Medium selection -->
+		<div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
+			<label>Medium: </label>
+			<select class="form-control" ng-model='model.selected_medium'>
+				<option ng-repeat='medium in model.available_media | orderBy : "name"' value={{medium._id}}>{{medium.name}}</option>
+			</select>
+		</div>
+
+	</div>
+
+	<div class="container">
+
+		<!-- Reference selection -->
+		<div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
+			<label>Reference: </label>
+			<select class="form-control" ng-model='model.selected_reference'>
+				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
+			</select>
+		</div>
+
+		<!-- Hypothesis selection -->
+		<div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
+			<label>Hypothesis: </label>
+			<select class="form-control" ng-model='model.selected_hypothesis'>
+				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
+			</select>
+		</div>
+
+	</div>
+
+</div>
+
+
+<div class="container-fluid" ng-show="model.selected_medium">
+
+	<div class="row top-padding">
+		<div class="videogular-container">
+			<videogular vg-player-ready="onPlayerReady($API)"
+						vg-update-time="updateTime($currentTime, $duration)"
+						vg-update-state="updateState($state)">
+				<vg-media vg-src="model.video"></vg-media>
+				<vg-controls>
+					<vg-play-pause-button></vg-play-pause-button>
+					<vg-time-display>{{ currentTime | date:'mm:ss' }}</vg-time-display>
+					<vg-scrub-bar>
+						<vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+					</vg-scrub-bar>
+					<vg-time-display>{{ timeLeft | date:'mm:ss' }}</vg-time-display>
+					<vg-volume>
+						<vg-mute-button></vg-mute-button>
+						<vg-volume-bar></vg-volume-bar>
+					</vg-volume>
+				</vg-controls>
+				<vg-overlay-play></vg-overlay-play>
+			</videogular>
+		</div>
+		
+		<div class="row top-padding">
+			<div id="wavesurfer-timeline"></div>
+			<cm-wavesurfer></cm-wavesurfer>
+
+			<button class="btn btn-success btn-block" ng-click="saveAnnotations()">Save annotations</button>
+		</div>
+
+		<div class="row top-padding">
+			<cm-vis-timeline data="data" options="options" events="events"></cm-vis-timeline>
+		</div>
+	</div>
+</div>
