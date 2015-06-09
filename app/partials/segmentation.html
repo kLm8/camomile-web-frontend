@@ -30,19 +30,19 @@
 
 		<!-- Reference selection -->
 		<div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
-			<label>Reference: </label>
+			<label>Load annotations on a layer: </label>
 			<select class="form-control" ng-model='model.selected_reference'>
 				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
 			</select>
 		</div>
 
 		<!-- Hypothesis selection -->
-		<div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
+		<!-- <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
 			<label>Hypothesis: </label>
 			<select class="form-control" ng-model='model.selected_hypothesis'>
 				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
 			</select>
-		</div>
+		</div> -->
 
 	</div>
 

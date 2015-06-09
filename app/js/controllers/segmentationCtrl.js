@@ -500,70 +500,76 @@ angular.module('myApp.controllers')
 					// convert visjs data to Camomile format
 					var annotations = visjs2camomile(x);
 
+					// remove duplicates on this layer (not necessary, as there should be none)
+					for (var i = 0; i < annotations.length-1; i++) {
+						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
+							annotations[i].fragment.end == annotations[i+1].fragment.end &&
+							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
+								annotations.splice(i, 1);
+						}
+					};
+
 					// look for the layer if it exists in the DB
 					var found = false;
-					console.log("Looking for : " + content);
+					// console.log("Looking for : " + content);
 
+					var id_layer = -1;
 					for (var j = 0; j < $scope.model.available_layers.length; j++) {
 						if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
 							found = true;
+							id_layer = j;
 							break;
 						};
 					};
 
 					if (found) {
-						console.log('Found layer ' + content);
-						camomileService.getAnnotations(function (err, data) {
-							if (!err) {
-								// first remove annotations already saved (those preloaded on the timeline when selecting the layer)
-								var a = 0;
-								for (var i = 0; i < data.length; i++) {
-									for (var j = a; j < annotations.length; j++) {
-										if (annotations[j].fragment.start > data[i].fragment.end) {
-											a = j;
-											break;
-										};
-
-										if (annotations[j].fragment.start == data[i].fragment.start && annotations[j].fragment.end == data[i].fragment.end) {
-											annotations.splice(j, 1);
-										};
-									};
-								};
-
-								// then save the new annotations
-								camomileService.createAnnotations($scope.model.available_layers[j]._id, annotations, 
-																	function(err, data) {
-																	  	if(err) alert(data.message);
-																	});
-							} else {
-		                        console.log(err, data);
-		                        alert(data.error);
-							}
-						}, {
-							filter: {
-								id_layer: $scope.model.available_layers[j]._id,
-								id_medium: $scope.model.selected_medium
-							}
-						});
+						$scope.saveLayer(content, id_layer, annotations);
 					}
 					else {
-						console.log('Not found : creating layer \'' + content + '\'');
+						// console.log('Not found : creating layer \'' + content + '\'');
 						camomileService.createLayer($scope.model.selected_corpus, 
-													content, "", 'segment', 'label',
+													content, '', 'segment', 'label',
 													annotations, 
 													function(err, data) {
-														if(!err) {
-															// ...
-														}
-														else {
-															alert(data.message);
-														}
+														if(err) alert(data.message);
+														else $scope.get_layers($scope.model.selected_corpus);
 													});
 					};
 				};
 
-				// alert("Annotations saved successfully");
-				$scope.get_layers($scope.model.selected_corpus);
+				alert("Annotations saved successfully.");
+			};
+
+			$scope.saveLayer = function(content, id_layer, annotations) {
+				// console.log('Found layer ' + content + ' ' + id_layer);
+				camomileService.getAnnotations(function (err, data) {
+					if (!err) {
+						// first remove annotations already saved
+						for (var i = 0; i < data.length; i++) {
+							for (var j = 0; j < annotations.length; j++) {
+								if (annotations[j].fragment.start == data[i].fragment.start && 
+									annotations[j].fragment.end == data[i].fragment.end) {
+										annotations.splice(j, 1);
+								};
+							};
+						};
+
+						// then save the new annotations
+						camomileService.createAnnotations($scope.model.available_layers[id_layer]._id, annotations, 
+															function(err, data) {
+																if(err) alert(data.message);
+																else $scope.get_layers($scope.model.selected_corpus);
+															});
+					} else {
+						console.log(err, data);
+						alert(data.error);
+					}
+				}, {
+					filter: {
+						id_layer: $scope.model.available_layers[id_layer]._id,
+						id_medium: $scope.model.selected_medium
+					}
+				});
 			};
 
 
@@ -698,7 +704,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.$watch('id', function (newValue, oldValue, scope) {
-				console.log('ID of last annotation changed to : ' + newValue);
+				// console.log('ID of last annotation changed to : ' + newValue);
 			});
 
 			$scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
