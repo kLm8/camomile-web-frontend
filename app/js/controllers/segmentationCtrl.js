@@ -15,7 +15,6 @@ angular.module('myApp.controllers')
 					Session: Session
 				});
 
-
 			// placeholder definitions
 			var defaultReferenceLayer = {
 				'label': 'Reference',
@@ -42,134 +41,26 @@ angular.module('myApp.controllers')
 				defaultDiffLayer
 			];
 
-			// get list of reference annotations from a given layer,
-			// replace current reference layer,
-			// and update difference with hypothesis when it's done
-			$scope.get_reference_annotations = function (corpus_id, medium_id, layer_id, do_update) {
-
-				if(do_update == undefined)
+			// get list of reference annotations from a given layer
+			$scope.get_annotations = function (corpus_id, medium_id, layer_id) {
+				camomileService.getAnnotations(function(err, data) {
+					if(!err) {
+						$scope.$apply(function() {
+							$scope.model.current_layer = data;
+						});
+					}
+					else {
+						console.log('dommage');
+						alert(data.message);
+					}
+				},
 				{
-					do_update = true;
-				}
-				$scope.model.layers[0] = {
-					'label': 'Reference',
-					'_id': layer_id + "_0"
-				};
-
-				camomileService.getAnnotations(function(err, data)
-					{
-						if(!err)
-						{
-							$scope.$apply(function(){
-								$scope.model.layers[0].layer = data;
-
-								if(do_update)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-								else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-							});
-						}
-						else
-						{
-							alert(data.message);
-						}
-
-					},
-					{
-						filter: {
-							id_layer: layer_id,
-							id_medium: medium_id
-						}
-					});
+					filter: {
+						id_layer: layer_id,
+						id_medium: medium_id
+					}
+				});
 			};
-
-			// get list of hypothesis annotations from a given layer,
-			// replace current hypothesis layer,
-			// and update difference with reference when it's done
-			$scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id, do_update) {
-
-				if(do_update == undefined)
-				{
-					do_update = true;
-				}
-				$scope.model.layers[1] = {
-					'label': 'Hypothesis',
-					'_id': layer_id + "_1"
-				};
-
-				camomileService.getAnnotations(function(err, data)
-					{
-						if(!err)
-						{
-							$scope.$apply(function(){
-								$scope.model.layers[1].layer = data;
-								if(do_update)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-								else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-
-							});
-						}
-						else
-						{
-							alert(data.message);
-						}
-
-					},
-					{
-						filter: {
-							id_layer: layer_id,
-							id_medium: medium_id
-						}
-					});
-			};
-
-			// recompute difference between reference and hypothesis,
-			// and replace diff layer.
-			$scope.compute_diff = function () {
-
-				if ($scope.model.selected_medium != undefined
-					&& $scope.model.layers[1].layer != undefined
-					&& $scope.model.layers[1].layer.length > 0
-					&& $scope.model.layers[0].layer != undefined
-					&& $scope.model.layers[0].layer.length > 0) {
-					var reference_and_hypothesis = {
-						'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
-						'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
-					};
-
-					CMError.diff(reference_and_hypothesis).success(function (data) {
-						$scope.model.layers[2] = {
-							'label': 'Difference',
-							'_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
-							'mapping': defaults.diffMapping,
-							'tooltipFunc': defaults.tooltip
-						};
-
-						$scope.model.layers[2].layer = pyannote2camomileFilter(data);
-						$scope.model.layersUpdated = true;
-					});
-				}
-
-			};
-
-
-			$scope.computeLastLayer = function () {
-				$scope.compute_diff();
-			};
-
 
 		/*********************************************************************************************************/
 
@@ -345,6 +236,9 @@ angular.module('myApp.controllers')
 
 			/**********************************************************************************************/
 
+			// Load the layers in the config
+			$scope.model.current_layer = [];
+
 			$http.get('config.json').
 				success(function(data, status, headers, config) {
 					// called asynchronously when response is available
@@ -361,8 +255,6 @@ angular.module('myApp.controllers')
 					// called asynchronously if error
 					alert("Error loading layers");
 			});
-
-			// $scope.timeline.redraw();
 
 			/**********************************************************************************************/
 
@@ -582,13 +474,11 @@ angular.module('myApp.controllers')
 					scope.get_media(scope.model.selected_corpus);
 					// blank the medium selection
 					scope.model.selected_medium = undefined;
-					$scope.resetSummaryView(true);
 				}
 			});
 
-
+			// the selected media changed
 			$scope.$watch('model.selected_medium', function (newValue, oldValue, scope) {
-				// when the medium changes, the viz is reinit, and the select box gets the new layers
 				if (newValue) {
 					// scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
 
@@ -622,6 +512,8 @@ angular.module('myApp.controllers')
 				/*********************************************************************************************************/
 
 
+					// loading the audio waveform into wavesurfer.js
+					// TODO: load the audio of the correct video (alignment has to be done)
 					$scope.wavesurfer.load("audio0.wav");
 
 					$scope.data = {groups: $scope.groups, items: $scope.items};
@@ -629,40 +521,20 @@ angular.module('myApp.controllers')
 
 				/*********************************************************************************************************/
 
+					// get the layers and store them in $scope.model.available_layers
 					scope.get_layers(scope.model.selected_corpus);
-
-					// re-initialize the reference if needed
-					if (scope.model.selected_reference != undefined) {
-						$scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
-					}
-
-					// re-initialize the hypothesis if needed
-					if (scope.model.selected_hypothesis != undefined) {
-						$scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis, false);
-					}
-
-					$scope.resetSummaryView(true);
-
 				}
 			});
 
 			$scope.$watch('model.selected_reference', function (newValue, oldValue, scope) {
-				// handle the reinit case
-				if (newValue === undefined) {
-					scope.model.layers[0] = defaultReferenceLayer;
-					scope.compute_diff();
-				} else {
-					scope.get_reference_annotations(
-						scope.model.selected_corpus,
-						scope.model.selected_medium,
-						scope.model.selected_reference);
-					$scope.resetSummaryView(true);
-				}
+				if (newValue) {
+					scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference);
+				};
 			});
 
-			$scope.$watch('model.layers[0].layer', function () {
-				if ($scope.model.layers[0].layer && $scope.model.layers[0].layer.length > 0) {
-					camomileService.getLayer($scope.model.layers[0].layer[0]['id_layer'],
+			$scope.$watch('model.current_layer', function () {
+				if ($scope.model.current_layer && $scope.model.current_layer.length > 0) {
+					camomileService.getLayer($scope.model.current_layer[0]['id_layer'],
 						function(err, data) {
 							if(!err) {
 								var ids = $scope.groups.getIds();
@@ -682,14 +554,14 @@ angular.module('myApp.controllers')
 								});
 								for (var i = 0; i < itemsToRemove.length; i++) $scope.items.remove(itemsToRemove[i].id);
 
-								for (var i = 0; i < $scope.model.layers[0].layer.length; i++) {
+								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({
-										title: parseInt($scope.model.layers[0].layer[i]['_id'], 16),
+										title: parseInt($scope.model.current_layer[i]['_id'], 16),
 										id: $scope.id,
 										group: g,
-										content: $scope.model.layers[0].layer[i]['data'],
-										start: $scope.model.layers[0].layer[i]['fragment']['start']*1000,
-										end: $scope.model.layers[0].layer[i]['fragment']['end']*1000
+										content: $scope.model.current_layer[i]['data'],
+										start: $scope.model.current_layer[i]['fragment']['start']*1000,
+										end: $scope.model.current_layer[i]['fragment']['end']*1000
 									});
 									$scope.id += 1;
 									$scope.$apply();
@@ -717,21 +589,5 @@ angular.module('myApp.controllers')
 					}
 				}
 			);
-
-
-			$scope.$watch('model.selected_hypothesis', function (newValue, oldValue, scope) {
-				// handle the reinit case
-				if (newValue === undefined) {
-					scope.model.layers[1] = defaultHypothesisLayer;
-					scope.compute_diff();
-				} else {
-					scope.get_hypothesis_annotations(
-						scope.model.selected_corpus,
-						scope.model.selected_medium,
-						scope.model.selected_hypothesis);
-					$scope.resetSummaryView(true);
-				}
-			});
-
 		}]);
 
