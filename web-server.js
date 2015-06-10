@@ -135,9 +135,12 @@ function create_one_queue(item, callback) {
     request(
         options, 
         function (error, response, body) {
-            // TODO: error handling
-            console.log(body);
-            callback(error, body._id);
+            if (!body || !body[0] || body/length === 0) {
+                queue = undefined;
+            } else {
+                queue = body[0]._id;
+            };
+            callback(error, queue);
         });
 };
 
