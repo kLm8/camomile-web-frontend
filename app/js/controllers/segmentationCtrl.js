@@ -484,9 +484,6 @@ angular.module('myApp.controllers')
 
 					if($scope.model.useDefaultVideoPath) {
 						$scope.model.video = [{
-							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "mov")),
-							type: "video/quicktime"
-						}, {
 							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "webm")),
 							type: "video/webm"
 						}, {
@@ -500,9 +497,6 @@ angular.module('myApp.controllers')
 					else {
 						camomileService.getMedium(scope.model.selected_medium, function(err, data) {
 							$scope.model.video = [{
-								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'mov'),
-								type: "video/quicktime"
-							}, {
 								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'webm'),
 								type: "video/webm"
 							}, {

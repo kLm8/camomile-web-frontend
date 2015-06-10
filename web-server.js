@@ -96,118 +96,65 @@ function log_out(callback) {
         });
 };
 
-// delete one specific queue (based on its id) and callback
-function delete_one_queue(queue, callback) {
+function getQueueByName(name, callback) {
 
     var options = {
-        method: 'DELETE',
-        url: camomile_api + '/queue/' + queue
-    };
-
-    request(
-        options, 
-        function (error, response, body) {
-            // TODO: error handling
-            console.log('   * deleted /queue/' + queue);
-            callback(error);
-        });
-};
-
-
-// delete several queues in parallel (based on their ids) and callback
-function delete_queues(queues, callback) {
-
-    console.log('Deleting queues');
-
-    async.each(
-        queues, 
-        delete_one_queue,
-        function (error) { 
-            // TODO: error handling
-            callback(error); 
-        }
-    );
-
-};
-
-// create one new queue with name `item`
-// and send queue ID to the callback
-function create_one_queue(item, callback) {
-
-    var options = {
-        method: 'POST',
-        body: {'name': item},
+        url: camomile_api + '/queue',
+        method: 'GET',
+        qs: {
+            name: name
+        },
         json: true,
-        url: camomile_api + '/queue'
     };
 
     request(
-        options, 
+        options,
         function (error, response, body) {
-            if (!body || !body[0] || body.length === 0) {
+            if (body.length === 0) {
                 queue = undefined;
             } else {
                 queue = body[0]._id;
             };
+            callback(error, queue);
         });
 };
 
-// create 4 new queues in parallel (shotIn, shotOut, headIn, headOut),
-// remember to delete them when process is killed,
-// and send queues IDs to the next function (callback)
-function create_queues(callback) {
+function getAllQueues(callback) {
 
-    console.log('Creating queues as user ' + login);
+    async.parallel({
 
-        // PBR patch : support parametrized shotIn and shotOut
-        var queuesToCreate = [];
-        if(shot_in === undefined) {
-            queuesToCreate.push('shotIn');
-        }
-        if(shot_out === undefined) {
-            queuesToCreate.push('shotOut');
-        }
-        queuesToCreate.push('headIn');
-        queuesToCreate.push('headOut');
-
-    async.map(
-        queuesToCreate,
-        create_one_queue, 
-        function(err, queues) {
-
-            // TODO: error handling
-
-            // remember to remove queues when process is sent SIGINT (Ctrl+C)
-                        // hack to account for Win32 platforms, where SIGINT does not exist
-                        if (process.platform === "win32") {
-                            require("readline").createInterface({
-                                input: process.stdin,
-                                output: process.stdout
-                            }).on("SIGINT", function () {
-                                    process.emit("SIGINT");
-                                });
-                        }
-
-            process.on('SIGINT', function() {
-                async.waterfall(
-                    [log_in, function(callback) { delete_queues(queues, callback); }, log_out],
-                    function (error) { 
-                        // TODO: error handling
-                        process.exit(); 
-                    }
-                );
-            });
-
-            var queues_dict = {};
-                        var it = 0;
-                        queues_dict.shotIn = (shot_in !== undefined) ? shot_in : queues[it++];
-                        queues_dict.shotOut = (shot_out !== undefined) ? shot_out : queues[it++];
-                        queues_dict.headIn = queues[it++];
-                        queues_dict.headOut = queues[it++];
-
-            callback(null, queues_dict);
-        }
-    );
+            // Active learning "Shot" use case
+            shotIn: function (callback) {
+                getQueueByName('activelearning.shot.in', callback);
+            },
+            shotOut: function (callback) {
+                getQueueByName('activelearning.shot.out', callback);
+            },
+            // Active learning "Head" use case
+            headIn: function (callback) {
+                getQueueByName('activelearning.head.in', callback);
+            },
+            headOut: function (callback) {
+                getQueueByName('activelearning.head.out', callback);
+            },
+            // MediaEval "Evidence" use case
+            evidenceIn: function (callback) {
+                getQueueByName('mediaeval.evidence.in', callback);
+            },
+            evidenceOut: function (callback) {
+                getQueueByName('mediaeval.evidence.out', callback);
+            },
+            // MediaEval "Label" use case
+            labelIn: function (callback) {
+                getQueueByName('mediaeval.label.in', callback);
+            },
+            labelOut: function (callback) {
+                getQueueByName('mediaeval.label.out', callback);
+            },
+        },
+        function (err, queues) {
+            callback(err, queues);
+        });
 };
 
 // create NodeJS route "GET /config" returning front-end configuration as JSON
@@ -301,6 +248,6 @@ function run_app(err, results) {
 // log in, create queues, create route /config, log out, create /app/config.js
 // and (then only) run the app
 async.waterfall(
-    [log_in, create_queues, create_config_route, log_out, create_config_file],
+    [log_in, getAllQueues, create_config_route, log_out, create_config_file],
     run_app
 );
