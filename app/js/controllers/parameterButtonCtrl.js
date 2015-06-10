@@ -35,8 +35,16 @@ angular.module('myApp.controllers')
 
             // Store parameters in the cookies
             $scope.modifyVideoPath = function () {
-                $cookieStore.put("use.default.video.path", $scope.model.useDefaultVideoPath);
-                $cookieStore.put("video.path", $scope.model.videoPath);
+                var now = new Date(),
+                // this will set the expiration to 1 month
+                    exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
+
+                $cookieStore.put("use.default.video.path", $scope.model.useDefaultVideoPath,{
+                    expires: exp
+                });
+                $cookieStore.put("video.path", $scope.model.videoPath, {
+                    expires: exp
+                });
 
                 // reload page
                 window.location.reload();
