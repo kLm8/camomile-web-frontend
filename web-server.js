@@ -110,7 +110,7 @@ function getQueueByName(name, callback) {
     request(
         options,
         function (error, response, body) {
-            if (body.length === 0) {
+            if (!body || body.length === 0) {
                 queue = undefined;
             } else {
                 queue = body[0]._id;
