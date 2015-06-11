@@ -3,11 +3,12 @@
 ## Deploy with Docker
 
 ```
-$ docker run -d -p 8070:8070
-             -e CAMOMILE_API=https://vmjoker:32769 \
-             -e CAMOMILE_LOGIN=my_login \
-             -e CAMOMILE_PASSWORD=my_password \
-             klm8/camomile-web-frontend
+$ docker run -d -p 8070:8070 -v $CMML_MEDIA:/media:ro \
+			 -e CAMOMILE_API=http://vmjoker:32773 \
+			 -e CAMOMILE_LOGIN=$1 \
+			 -e CAMOMILE_PASSWORD=$2 \
+			 --name web \
+			 klm8/camomile-web-frontend
 ```
 
 ### Docker automated build
