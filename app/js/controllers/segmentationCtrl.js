@@ -515,6 +515,17 @@ angular.module('myApp.controllers')
 					// loading the audio waveform into wavesurfer.js
 					// TODO: load the audio of the correct video (alignment has to be done)
 					$scope.wavesurfer.load("audio0.wav");
+					
+					console.log($rootScope.dataroot + '/media/' + '00/Audio/00_defi');
+
+					$http.get($rootScope.dataroot + '/media/' + '00/Audio/00_defi/00_Audio_00defi_0.wav').
+						success(function(data, status, headers, config) {
+							console.log('Got audio');
+					}).
+						error(function(data, status, headers, config) {
+							// alert("Error loading audio");
+							console.log("Error getting audio");
+					});
 
 					$scope.data = {groups: $scope.groups, items: $scope.items};
 
