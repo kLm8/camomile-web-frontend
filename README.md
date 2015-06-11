@@ -4,20 +4,20 @@
 
 ```
 $ docker run -d
-             -e CAMOMILE_API=https://camomile.fr/api \
+             -e CAMOMILE_API=https://vmjoker:32769 \
              -e CAMOMILE_LOGIN=my_login \
              -e CAMOMILE_PASSWORD=my_password \
-             -e PYANNOTE_API=https://pyannote.fr/tool \
-             camomile/web
+             -p 8070:8070
+             klm8/camomile-web-frontend
 ```
 
 ### Docker automated build
 
-Thanks to Docker automated build, Docker image `camomile/web` is always in track with latest version in branch `master`.
+Thanks to Docker automated build, Docker image `klm8/camomile-web-frontend` is always in track with latest version in branch `dev`.
 
 You can however build your own Docker image using
 ```
-$ git clone https://github.com/camomile-project/camomile-web-frontend.git
+$ git clone https://github.com/kLm8/camomile-web-frontend.git
 $ cd camomile-web-frontend
 $ docker build -t camomile/web . 
 ```
@@ -27,7 +27,7 @@ $ docker build -t camomile/web .
 ### Installation 
 
 ````
-$ git clone https://github.com/camomile-project/camomile-web-frontend
+$ git clone https://github.com/kLm8/camomile-web-frontend.git
 $ cd camomile-web-frontend
 $ npm install
 ```
@@ -45,11 +45,11 @@ Options:
     --pyannote <url>       URL of PyAnnote server (e.g. https://camomile.fr/tool)
 ````
 
-or use environment variables `CAMOMILE_*` and `PYANNOTE_API`:
+or use environment variables `CAMOMILE_*`:
 
 ```
-$ export CAMOMILE_API=https://camomile.fr/api
+$ export CAMOMILE_API=https://vmjoker:32769
 $ export CAMOMILE_LOGIN=my_login
 $ export CAMOMILE_PASSWORD=my_password
-$ export PYANNOTE_API=https://pyannote.fr/tool
 $ node web-server.js
+````
