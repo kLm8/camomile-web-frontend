@@ -3,11 +3,10 @@
 ## Deploy with Docker
 
 ```
-$ docker run -d
+$ docker run -d -p 8070:8070
              -e CAMOMILE_API=https://vmjoker:32769 \
              -e CAMOMILE_LOGIN=my_login \
              -e CAMOMILE_PASSWORD=my_password \
-             -p 8070:8070
              klm8/camomile-web-frontend
 ```
 
@@ -42,7 +41,6 @@ Options:
     --camomile <url>       URL of Camomile server (e.g. https://camomile.fr/api)
     --login <login>        Login for Camomile server (for queues creation)
     --password <password>  Password for Camomile server
-    --pyannote <url>       URL of PyAnnote server (e.g. https://camomile.fr/tool)
 ````
 
 or use environment variables `CAMOMILE_*`:
