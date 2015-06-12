@@ -21,12 +21,12 @@ angular.module(
             'com.2fdevs.videogular.plugins.overlayplay'
         ])
     .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
-        $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
-        $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
+        // $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
+        // $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
+        // $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.when('/segmentation', {templateUrl:'partials/segmentation.html'});
-        $routeProvider.when('/evidence', {templateUrl:'partials/evidence.html'});
-		$routeProvider.when('/label', {templateUrl:'partials/label.html'});
+  //       $routeProvider.when('/evidence', {templateUrl:'partials/evidence.html'});
+		// $routeProvider.when('/label', {templateUrl:'partials/label.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 
