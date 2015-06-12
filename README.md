@@ -3,7 +3,7 @@
 ## Deploy with Docker
 
 ```
-$ docker run -d -p 8070:8070 -v $CMML_MEDIA:/media:ro \
+$ docker run -d -p 8070:8070 \
 			 -e CAMOMILE_API=http://vmjoker:32773 \
 			 -e CAMOMILE_LOGIN=$1 \
 			 -e CAMOMILE_PASSWORD=$2 \
