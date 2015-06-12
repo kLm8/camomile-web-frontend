@@ -503,7 +503,7 @@ angular.module('myApp.controllers')
 								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'mp4'),
 								type: "video/mp4"
 							}, {
-								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'ogg"'),
+								src: $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url + 'ogg'),
 								type: "video/ogg"
 							}];
 						});
@@ -531,7 +531,7 @@ angular.module('myApp.controllers')
 
 						camomileService.getMedia(function(err, data) {
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
-							var audioPath = camomileService.getMediumURL(data[0]._id);
+							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath);
 							$scope.wavesurfer.load(audioPath);
 
