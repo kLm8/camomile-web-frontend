@@ -530,11 +530,17 @@ angular.module('myApp.controllers')
 						console.log('Loading audio: ' + audioName);
 
 						camomileService.getMedia(function(err, data) {
-
-							var audioPath = data.url + '.wav'
+							var audioPath = $rootScope.dataroot + '/' + data.url + '.wav'
+							console.log('audio path: ' + audioPath);
 							$scope.wavesurfer.load(audioPath);
 
-						}, $scope.model.selected_corpus, audioName); // options of getMedia() : id of selected corpus and name of the medium
+						}, {
+							filter: {
+								id_corpus: $scope.model.selected_corpus,
+								name: audioName
+							}
+						});
+						
 					});
 
 					$scope.data = {groups: $scope.groups, items: $scope.items};
