@@ -530,10 +530,27 @@ angular.module('myApp.controllers')
 						console.log('Loading audio: ' + audioName);
 
 						camomileService.getMedia(function(err, data) {
+							// TODO: can't load a .wav file -> Camomile server restriction (same for .mov files)
+							// HOW TO FIX: 
+							// in camomile-server/routes.js add:
+								// stream one medium in wav
+								// app.get('/medium/:id_medium/wav',
+								//   Authentication.middleware.isLoggedIn,
+								//   _.middleware.fExistsWithRights(mMedium, _.READ),
+								//   Medium.streamWav);
+							// and in camomile-server/controllers/Medium.js add:
+								// exports.streamWav = function (req, res) {
+								//   streamFormat(req, res, 'wav');
+								// };
+							// the same could be done for .mov files
+
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
-							console.log('audio path: ' + audioPath);
-							$scope.wavesurfer.load(audioPath);
+							console.log('audio path: ' + audioPath); // "http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav"
+							// "GET http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav 404 (Not Found)"
+							
+							// $scope.wavesurfer.load(audioPath);
+							$scope.wavesurfer.load("audio0.wav");
 
 						}, {
 							filter: {
