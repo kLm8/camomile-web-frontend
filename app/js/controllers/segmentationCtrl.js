@@ -531,6 +531,7 @@ angular.module('myApp.controllers')
 
 						camomileService.getMedia(function(err, data) {
 							var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav'
+							var audioPath = camomileService.getMediumURL(data[0]._id, "wav")
 							console.log('audio path: ' + audioPath);
 							$scope.wavesurfer.load(audioPath);
 
