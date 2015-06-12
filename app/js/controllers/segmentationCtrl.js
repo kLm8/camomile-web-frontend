@@ -94,7 +94,7 @@ angular.module('myApp.controllers')
 				
 				$scope.wavesurfer.on('ready', function () {
 					$scope.wavesurfer.zoom(100);
-					console.log('Wavesurfer loaded');
+					console.log('Wavesurfer ready');
 				});
 
 				$scope.wavesurfer.on('play', function () {
@@ -513,18 +513,28 @@ angular.module('myApp.controllers')
 
 
 					// loading the audio waveform into wavesurfer.js
-					// TODO: load the audio of the correct video (alignment has to be done)
-					$scope.wavesurfer.load("audio0.wav");
+					// TODO: alignment -> don't change the location or the name of the .wav files (or .webm files)
 					
-					console.log($rootScope.dataroot + '/media/' + '00/Audio/00_defi');
+					// $scope.wavesurfer.load("audio0.wav");
 
-					$http.get($rootScope.dataroot + '/media/' + '00/Audio/00_defi/00_Audio_00defi_0.wav').
-						success(function(data, status, headers, config) {
-							console.log('Got audio');
-					}).
-						error(function(data, status, headers, config) {
-							// alert("Error loading audio");
-							console.log("Error getting audio");
+					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
+						// for instance : data.url = '36/Video/front/03_woz/36_Video_front_03woz_0'
+						var array     = (data.url).split('/');
+						var videoName = array[array.length-1]; 		// '36_Video_front_03woz_0'
+						var id        = videoName.split('_')[0]; 	// '36'
+						var category  = videoName.split('_')[3]; 	// '03woz'
+						var num       = videoName.split('_')[4]; 	// '0'
+
+						var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
+
+						console.log('Loading audio: ' + audioName);
+
+						camomileService.getMedia(function(err, data) {
+
+							var audioPath = data.url + '.wav'
+							$scope.wavesurfer.load(audioPath);
+
+						}, $scope.model.selected_corpus, audioName); // options of getMedia() : id of selected corpus and name of the medium
 					});
 
 					$scope.data = {groups: $scope.groups, items: $scope.items};
