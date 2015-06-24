@@ -243,6 +243,7 @@ angular.module('myApp.controllers')
 				success(function(data, status, headers, config) {
 					// called asynchronously when response is available
 					console.log('Layers loaded');
+					console.log(data.layers);
 
 					for (var i = 0; i < data.layers.length; i++) {
 						$scope.groups.add({
