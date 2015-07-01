@@ -3,9 +3,9 @@
 ## Docker Machines
 
 -   git : branch 'dev'
--   3 layered machines
-    -   Frontend
-    -   CAMOMILE Server
+-   3 layered Docker containers
+    -   camomile-web-frontend
+    -   camomile-server
     -   Mongo DB
 -   Reboot
     -   everything (`docker ps -a`, `docker logs db|camomile|web`)
