@@ -563,8 +563,8 @@ angular.module('myApp.controllers')
 
 							console.log(data[0]);
 							$scope.wavesurfer.load(data[0].url);
-							console.log('-------');
-							$scope.wavesurfer.loadBlob(data[0].url);
+							
+							// $scope.wavesurfer.loadBlob(data[0].url);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
