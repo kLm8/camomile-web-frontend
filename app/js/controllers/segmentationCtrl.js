@@ -561,7 +561,7 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
-							$scope.wavesurfer.load(audioPath);
+							$scope.wavesurfer.load(camomileService.getMediumURL(data[0]._id, 'wav'));
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
