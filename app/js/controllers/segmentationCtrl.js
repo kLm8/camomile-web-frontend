@@ -572,7 +572,7 @@ angular.module('myApp.controllers')
 							console.log(blob);
 							console.log(url);
 
-							$scope.wavesurfer.load(url);
+							$scope.wavesurfer.loadBlob(blob);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
