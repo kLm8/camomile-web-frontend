@@ -493,6 +493,9 @@ angular.module('myApp.controllers')
 						}, {
 							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "ogg")),
 							type: "video/ogg"
+						}, {
+							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "wav")),
+							type: "audio/wav"
 						}];
 					}
 					else {
