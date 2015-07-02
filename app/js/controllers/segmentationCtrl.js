@@ -562,9 +562,8 @@ angular.module('myApp.controllers')
 							// });
 
 							var audio = $resource(audioPath);
-							console.log('audio : ' + audio);
 
-							$scope.wavesurfer.loadBlob(audio);
+							// $scope.wavesurfer.loadBlob(audio);
 							$scope.wavesurfer.load(audio);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
