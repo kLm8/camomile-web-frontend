@@ -528,7 +528,7 @@ angular.module('myApp.controllers')
 
 						var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
 
-						console.log('Loading audio: ' + audioName);
+						console.log('Loading audio: ' + audioName + '.wav');
 
 						camomileService.getMedia(function(err, data) {
 							// TODO: can't load a .wav file -> Camomile server restriction (same for .mov files)
@@ -550,8 +550,8 @@ angular.module('myApp.controllers')
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav"
 							// "GET http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav 404 (Not Found)"
 							
-							// $scope.wavesurfer.load(audioPath);
-							$scope.wavesurfer.load("audio0.wav");
+							$scope.wavesurfer.load(audioPath);
+							// $scope.wavesurfer.load("audio0.wav");
 
 						}, {
 							filter: {
