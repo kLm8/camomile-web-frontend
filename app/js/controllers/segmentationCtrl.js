@@ -550,7 +550,11 @@ angular.module('myApp.controllers')
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav"
 							// "GET http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav 404 (Not Found)"
 							
-							$scope.wavesurfer.load(audioPath);
+							var audio = [{  src: $sce.trustAsResourceUrl(audioPath, "wav"),
+											type: "audio/wav"
+										}];
+
+							$scope.wavesurfer.load(audio);
 							// $scope.wavesurfer.load("audio0.wav");
 
 						}, {
