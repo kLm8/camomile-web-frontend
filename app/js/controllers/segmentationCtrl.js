@@ -561,20 +561,10 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
+							$scope.audio = $sce.trustAsResourceUrl(audioPath);
 
-							var audio = [{
-								src: $sce.trustAsResourceUrl(audioPath),
-								type: "audio/wav"
-							}];
-
-							var blob = new Blob([audio[0]], {type: 'audio/wav'});
-							
-							var url = URL.createObjectURL(blob);
-
-							console.log(blob);
-							console.log(url);
-
-							$scope.wavesurfer.loadBlob(blob);
+							console.log($scope.audio);
+							$scope.wavesurfer.load($scope.audio);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
