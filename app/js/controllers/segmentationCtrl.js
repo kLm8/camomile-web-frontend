@@ -547,10 +547,11 @@ angular.module('myApp.controllers')
 
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
-							console.log('audio path: ' + audioPath); // "http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav"
-							// "GET http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav 404 (Not Found)"
+							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
-							$scope.wavesurfer.load(audioPath);
+							$scope.wavesurfer.loadBlob($sce.trustAsResourceUrl(audioPath)); 
+							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
+
 							// $scope.wavesurfer.load("audio0.wav");
 
 						}, {
