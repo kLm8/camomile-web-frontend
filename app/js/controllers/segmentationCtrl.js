@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-	.controller('SegmentationCtrl', ['$ngAudio', '$sce', '$scope', '$http',
+	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
-		function ($ngAudio, $sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
+		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
 			$controller('ExplorationBaseCtrl',
 				{
@@ -561,17 +561,18 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
-							var audio = [{
-								src: $sce.trustAsResourceUrl(audioPath),
-								type: "audio/wav"
-							}];
+							var blob = new Blob([audioPath], {type: 'audio/wav'});
+							var url = URL.createObjectURL(blob);
 
-							var aa = $ngAudio.load(audioPath);
+							// var audio = [{
+							// 	src: $sce.trustAsResourceUrl(audioPath),
+							// 	type: "audio/wav"
+							// }];
 
-							console.log(audio);
-							console.log(aa);
+							console.log(blob);
+							console.log(url);
 
-							$scope.wavesurfer.load(aa);
+							$scope.wavesurfer.load(url);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
