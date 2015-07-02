@@ -545,7 +545,7 @@ angular.module('myApp.controllers')
 								// };
 							// the same could be done for .mov files
 
-							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
+							var aaa = $rootScope.dataroot + '/' + data[0].url + '.wav';
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
@@ -561,9 +561,9 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
-							console.log(data[0]);
-							$scope.wavesurfer.load(data[0].url);
-							
+							console.log(aaa);
+							$scope.wavesurfer.load(aaa);
+
 							// $scope.wavesurfer.loadBlob(data[0].url);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
