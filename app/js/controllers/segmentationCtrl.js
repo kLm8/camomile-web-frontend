@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-	.controller('SegmentationCtrl', ['$resource', '$sce', '$scope', '$http',
+	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
-		function ($resource, $sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
+		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
 			$controller('ExplorationBaseCtrl',
 				{
@@ -549,22 +549,27 @@ angular.module('myApp.controllers')
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
-							// $http.get($sce.trustAsResourceUrl(audioPath)).
-							// 	success(function(data, status, headers, config) {
-							// 		// called asynchronously when response is available
-							// 		console.log('Audio loaded');
-							// 		console.log(data);
-							// 		$scope.wavesurfer.load(data); 
-							// }).
-							// 	error(function(data, status, headers, config) {
-							// 		// called asynchronously if error
-							// 		console.log("Error loading audio");
-							// });
+							$http({
+								url: audioPath,
+								method: 'GET',
+								data: json,
+								headers: {
+									'Content-type': 'audio/wav'
+								},
+								responseType: 'arraybuffer'
+							}).
+								success(function(data, status, headers, config) {
+									// called asynchronously when response is available
+									console.log('Audio loaded');
+									console.log(data);
 
-							var audio = $resource(audioPath);
-
-							// $scope.wavesurfer.loadBlob(audio);
-							$scope.wavesurfer.load(audio);
+									var blob = new Blob([data], {type: "audio/wav"});
+									$scope.wavesurfer.load(blob); 
+							}).
+								error(function(data, status, headers, config) {
+									// called asynchronously if error
+									console.log("Error loading audio");
+							});
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
