@@ -20,7 +20,7 @@
 		<div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
 			<label>Medium: </label>
 			<select class="form-control" ng-model='model.selected_medium'>
-				<option ng-repeat='medium in model.available_media | orderBy : "name" | filter: "!Audio"' value={{medium._id}}>{{medium.name}}</option>
+				<option ng-repeat='medium in model.available_media | orderBy : "name"' value={{medium._id}}>{{medium.name}}</option>
 			</select>
 		</div>
 
