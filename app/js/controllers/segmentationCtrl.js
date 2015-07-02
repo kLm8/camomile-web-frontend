@@ -549,21 +549,25 @@ angular.module('myApp.controllers')
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
-							if ($scope.isLogged()) {
-								$http.get(audioPath).
-									success(function(data, status, headers, config) {
-										// called asynchronously when response is available
-										console.log('Audio loaded');
-										console.log(data);
-										$scope.wavesurfer.load(data); 
-								}).
-									error(function(data, status, headers, config) {
-										// called asynchronously if error
-										console.log("Error loading audio");
-								});
-							} else {
-								console.log('not logged in ?');
-							};
+							// $http.get(audioPath).
+							// 	success(function(data, status, headers, config) {
+							// 		// called asynchronously when response is available
+							// 		console.log('Audio loaded');
+							// 		console.log(data);
+							// 		$scope.wavesurfer.load(data); 
+							// }).
+							// 	error(function(data, status, headers, config) {
+							// 		// called asynchronously if error
+							// 		console.log("Error loading audio");
+							// });
+
+							var audio = [{
+								src: $sce.trustAsResourceUrl(audioPath),
+								type: "audio/wav"
+							}];
+							
+							console.log(audio);
+							$scope.wavesurfer.load(audio); 
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
