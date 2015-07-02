@@ -561,13 +561,15 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
-							var blob = new Blob([audioPath], {type: 'audio/wav'});
-							var url = URL.createObjectURL(blob);
 
-							// var audio = [{
-							// 	src: $sce.trustAsResourceUrl(audioPath),
-							// 	type: "audio/wav"
-							// }];
+							var audio = [{
+								src: $sce.trustAsResourceUrl(audioPath),
+								type: "audio/wav"
+							}];
+
+							var blob = new Blob([audio[0]], {type: 'audio/wav'});
+							
+							var url = URL.createObjectURL(blob);
 
 							console.log(blob);
 							console.log(url);
