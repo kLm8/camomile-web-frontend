@@ -493,9 +493,6 @@ angular.module('myApp.controllers')
 						}, {
 							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "ogg")),
 							type: "video/ogg"
-						}, {
-							src: $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.selected_medium, "wav")),
-							type: "audio/wav"
 						}];
 					}
 					else {
@@ -564,13 +561,13 @@ angular.module('myApp.controllers')
 							// 		console.log("Error loading audio");
 							// });
 
-							// var audioResource = $sce.trustAsResourceUrl(audioPath);
-							// var audioURL = URL.createObjectURL(audioResource);
-							// var audio = new Audio(audioPath).load();;
+							var audio = $sce.trustAsResourceUrl(audioPath);
+							var audioURL = URL.createObjectURL(audio);
+							// var audio = new Audio(audioResource);
 
-							// console.log(audio);
+							console.log(audioURL);
 
-							// $scope.wavesurfer.loadBlob(audio);
+							$scope.wavesurfer.load(audio);
 							
 							// "GET http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav 401 (Unauthorized)"
 
