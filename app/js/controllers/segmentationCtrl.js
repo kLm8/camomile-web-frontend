@@ -549,7 +549,7 @@ angular.module('myApp.controllers')
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
-							$http(xsrfCookieName="current.user").get(audioPath).
+							$http.get(audioPath, {'username': Session.username, 'password': '+++gdd+++'}).
 								success(function(data, status, headers, config) {
 									// called asynchronously when response is available
 									console.log('Audio loaded');
