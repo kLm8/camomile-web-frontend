@@ -598,7 +598,7 @@ angular.module('myApp.controllers')
 									var index = 44;
 									var volume = 1;
 									for (var i = 0; i < len; i++){
-									    view.setInt16(index, data[i] * (0x7FFF * volume), true);
+									    view.setInt16(index, data.charCodeAt(i) * (0x7FFF * volume), true);
 									    index += 2;
 									}
 
