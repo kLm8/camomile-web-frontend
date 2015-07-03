@@ -563,7 +563,7 @@ angular.module('myApp.controllers')
 									console.log('Audio loaded');
 									console.log(data);
 									var dataView = new DataView(data);
-									var blob = new Blob([dataView], options)
+									var blob = new Blob([dataView], {type: "audio/wav"});
 									$scope.wavesurfer.loadBlob(blob);
 							}).
 								error(function(data, status, headers, config) {
