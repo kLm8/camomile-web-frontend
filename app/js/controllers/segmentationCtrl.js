@@ -576,6 +576,13 @@ angular.module('myApp.controllers')
 									var buffer = new ArrayBuffer(44 + len);
 									var view = new DataView(buffer);
 
+									function writeUTFBytes(view, offset, string){ 
+									  var lng = string.length;
+									  for (var i = 0; i < lng; i++){
+									    view.setUint8(offset + i, string.charCodeAt(i));
+									  }
+									}
+									
 									// RIFF chunk descriptor
 									writeUTFBytes(view, 0, 'RIFF');
 									view.setUint32(4, 44 + len, true);
