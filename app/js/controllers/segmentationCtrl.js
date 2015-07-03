@@ -570,8 +570,8 @@ angular.module('myApp.controllers')
 									for (var i = 0; i < len; i++) {
 										view[i] = data.charCodeAt(i) & 0xff;
 									}
-									var blob = new Blob([view], {type: "audio/x-wav"});
-									
+									var blob = new Blob([view], {type: "audio/wav"});
+
 									$scope.wavesurfer.loadBlob(blob);
 							}).
 								error(function(data, status, headers, config) {
