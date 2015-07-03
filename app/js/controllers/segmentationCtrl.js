@@ -554,7 +554,8 @@ angular.module('myApp.controllers')
 								url: audioPath,
 								xsrfCookieName: 'current.user',
 								xsrfCookieName: 'camomile.sid',
-								withCredentials: true
+								withCredentials: true,
+								responseType: 'arraybuffer'
 							};
 
 							$http(req).
@@ -563,7 +564,8 @@ angular.module('myApp.controllers')
 									console.log('Audio loaded');
 									console.log(data);
 									var blob = new Blob([data], {type: "audio/wav"});
-									$scope.wavesurfer.loadBlob(blob);
+									var url = URL.createObjectURL(blob);
+									$scope.wavesurfer.load(url);
 							}).
 								error(function(data, status, headers, config) {
 									// called asynchronously if error
