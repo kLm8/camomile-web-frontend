@@ -562,9 +562,9 @@ angular.module('myApp.controllers')
 									// called asynchronously when response is available
 									console.log('Audio loaded');
 									console.log(data);
-									var a = new Audio(audioPath);
-									console.log(a);
-									$scope.wavesurfer.loadBlob(a); 
+									var dataView = new DataView(data);
+									var blob = new Blob([dataView], options)
+									$scope.wavesurfer.loadBlob(blob);
 							}).
 								error(function(data, status, headers, config) {
 									// called asynchronously if error
