@@ -563,9 +563,16 @@ angular.module('myApp.controllers')
 									// called asynchronously when response is available
 									console.log('Audio loaded');
 									console.log(data);
-									var blob = new Blob([data], {type: "audio/wav"});
-									var url = URL.createObjectURL(blob);
-									$scope.wavesurfer.load(url);
+
+									var len = data.length;
+									var buf = new ArrayBuffer(len);
+									var view = new Uint8Array(buf);
+									for (var i = 0; i < len; i++) {
+										view[i] = data.charCodeAt(i) & 0xff;
+									}
+									var blob = new Blob([view], {type: "audio/x-wav"});
+									
+									$scope.wavesurfer.loadBlob(blob);
 							}).
 								error(function(data, status, headers, config) {
 									// called asynchronously if error
