@@ -566,7 +566,7 @@ angular.module('myApp.controllers')
 
 									var len = data.length;
 									var buf = new ArrayBuffer(len);
-									var view = new Uint8Array(buf);
+									var view = new DataView(buf);
 									for (var i = 0; i < len; i++) {
 										view[i] = data.charCodeAt(i) & 0xff;
 									}
