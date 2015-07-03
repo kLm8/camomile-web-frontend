@@ -552,7 +552,9 @@ angular.module('myApp.controllers')
 							var req = {
 								method: 'GET',
 								url: audioPath,
-								params: {'username': Session.username, 'password': '+++gdd+++'}
+								xsrfCookieName: 'current.user',
+								xsrfCookieName: 'camomile.sid',
+								withCredentials: true
 							};
 
 							$http(req).
