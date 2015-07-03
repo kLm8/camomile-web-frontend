@@ -564,6 +564,8 @@ angular.module('myApp.controllers')
 									console.log('Audio loaded');
 									console.log(data);
 
+									var array = data;
+
 									var len = data.length;
 
 									// var buf = new ArrayBuffer(len);
@@ -582,7 +584,7 @@ angular.module('myApp.controllers')
 									    view.setUint8(offset + i, string.charCodeAt(i));
 									  }
 									}
-									
+
 									// RIFF chunk descriptor
 									writeUTFBytes(view, 0, 'RIFF');
 									view.setUint32(4, 44 + len, true);
@@ -605,7 +607,7 @@ angular.module('myApp.controllers')
 									var index = 44;
 									var volume = 1;
 									for (var i = 0; i < len; i++){
-									    view.setInt16(index, data.charCodeAt(i) * (0x7FFF * volume), true);
+									    view.setInt16(index, array.charCodeAt(i) * (0x7FFF * volume), true);
 									    index += 2;
 									}
 
