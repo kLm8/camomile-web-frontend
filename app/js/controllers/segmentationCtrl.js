@@ -553,7 +553,6 @@ angular.module('myApp.controllers')
 								method: 'GET',
 								url: audioPath,
 								xsrfCookieName: 'current.user',
-								xsrfCookieName: 'camomile.sid',
 								withCredentials: true
 							};
 
