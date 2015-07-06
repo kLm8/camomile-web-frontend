@@ -566,7 +566,8 @@ angular.module('myApp.controllers')
 
 									var context = new AudioContext();
 									context.decodeAudioData(data, function(decodedData) {
-										var blob = new Blob([decodedData], {type: "audio/wav"});
+										console.log(decodedData);
+										var blob = new Blob([decodedData], {type: "audio/x-wav"});
 										$scope.wavesurfer.loadBlob(blob);
 									});
 
