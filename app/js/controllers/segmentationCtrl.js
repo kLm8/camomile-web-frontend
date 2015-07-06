@@ -564,7 +564,7 @@ angular.module('myApp.controllers')
 									console.log('Audio loaded');
 									console.log(data);
 
-									var context = new webkitAudioContext();
+									var context = new AudioContext();
 									context.decodeAudioData(data, function(decodedData) {
 										var blob = new Blob([decodedData], {type: "audio/wav"});
 										$scope.wavesurfer.loadBlob(blob);
