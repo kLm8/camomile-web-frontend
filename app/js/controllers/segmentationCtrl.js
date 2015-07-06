@@ -553,7 +553,6 @@ angular.module('myApp.controllers')
 								method: 'GET',
 								url: audioPath,
 								// cookies needed for authentication of GET request on Camomile DB :
-								xsrfCookieName: 'current.user',
 								xsrfCookieName: 'camomile.sid',
 								withCredentials: true,
 								responseType: 'arraybuffer' // returns wav audio data in an ArrayBuffer
