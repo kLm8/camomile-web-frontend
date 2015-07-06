@@ -564,55 +564,61 @@ angular.module('myApp.controllers')
 									console.log('Audio loaded');
 									console.log(data);
 
-									var array = data;
+									var context = new webkitAudioContext();
+									context.decodeAudioData(data, function(decodedData) {
+										var blob = new Blob([decodedData], {type: "audio/wav"});
+										$scope.wavesurfer.loadBlob(blob);
+									});
 
-									var len = data.length;
+									// var array = data;
 
-									// var buf = new ArrayBuffer(len);
-									// var view = new Uint8Array(buf);
-									// for (var i = 0; i < len; i++) {
-									// 	view[i] = data.charCodeAt(i) & 0xff;
+									// var len = data.length;
+
+									// // var buf = new ArrayBuffer(len);
+									// // var view = new Uint8Array(buf);
+									// // for (var i = 0; i < len; i++) {
+									// // 	view[i] = data.charCodeAt(i) & 0xff;
+									// // }
+									// // var blob = new Blob([view], {type: "audio/wav"});
+
+									// var buffer = new ArrayBuffer(44 + len);
+									// var view = new DataView(buffer);
+
+									// function writeUTFBytes(view, offset, string){ 
+									//   var lng = string.length;
+									//   for (var i = 0; i < lng; i++){
+									//     view.setUint8(offset + i, string.charCodeAt(i));
+									//   }
 									// }
-									// var blob = new Blob([view], {type: "audio/wav"});
 
-									var buffer = new ArrayBuffer(44 + len);
-									var view = new DataView(buffer);
-
-									function writeUTFBytes(view, offset, string){ 
-									  var lng = string.length;
-									  for (var i = 0; i < lng; i++){
-									    view.setUint8(offset + i, string.charCodeAt(i));
-									  }
-									}
-
-									// RIFF chunk descriptor
-									writeUTFBytes(view, 0, 'RIFF');
-									view.setUint32(4, 44 + len, true);
-									writeUTFBytes(view, 8, 'WAVE');
-									// FMT sub-chunk
-									writeUTFBytes(view, 12, 'fmt ');
-									view.setUint32(16, 16, true);
-									view.setUint16(20, 1, true);
-									// stereo (2 channels)
-									view.setUint16(22, 2, true);
-									view.setUint32(24, sampleRate, true);
-									view.setUint32(28, sampleRate * 4, true);
-									view.setUint16(32, 4, true);
-									view.setUint16(34, 16, true);
-									// data sub-chunk
-									writeUTFBytes(view, 36, 'data');
-									view.setUint32(40, len, true);
+									// // RIFF chunk descriptor
+									// writeUTFBytes(view, 0, 'RIFF');
+									// view.setUint32(4, 44 + len, true);
+									// writeUTFBytes(view, 8, 'WAVE');
+									// // FMT sub-chunk
+									// writeUTFBytes(view, 12, 'fmt ');
+									// view.setUint32(16, 16, true);
+									// view.setUint16(20, 1, true);
+									// // stereo (2 channels)
+									// view.setUint16(22, 2, true);
+									// view.setUint32(24, sampleRate, true);
+									// view.setUint32(28, sampleRate * 4, true);
+									// view.setUint16(32, 4, true);
+									// view.setUint16(34, 16, true);
+									// // data sub-chunk
+									// writeUTFBytes(view, 36, 'data');
+									// view.setUint32(40, len, true);
 									 
-									// write the PCM samples
-									var index = 44;
-									var volume = 1;
-									for (var i = 0; i < len; i++){
-									    view.setInt16(index, array.charCodeAt(i) * (0x7FFF * volume), true);
-									    index += 2;
-									}
+									// // write the PCM samples
+									// var index = 44;
+									// var volume = 1;
+									// for (var i = 0; i < len; i++){
+									//     view.setInt16(index, array.charCodeAt(i) * (0x7FFF * volume), true);
+									//     index += 2;
+									// }
 
-									var blob = new Blob([view], {type: "audio/wav"});
-									$scope.wavesurfer.loadBlob(blob);
+									// var blob = new Blob([view], {type: "audio/wav"});
+									// $scope.wavesurfer.loadBlob(blob);
 							}).
 								error(function(data, status, headers, config) {
 									// called asynchronously if error
