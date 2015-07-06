@@ -549,6 +549,31 @@ angular.module('myApp.controllers')
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 							
+							// var req = {
+							// 	method: 'GET',
+							// 	url: '01_Audio_00defi_0.wav',
+							// 	responseType: 'arraybuffer'
+							// };
+
+							// $http(req).
+							// 	success(function(data, status, headers, config) {
+							// 		console.log('Audio loaded');
+							// 		console.log(data);
+							// 		var blob = new Blob([data], {type: "audio/wav"});
+							// 		$scope.wavesurfer.loadBlob(blob);
+
+							// 		// var context = new AudioContext();
+							// 		// context.decodeAudioData(data, function(decodedData) {
+							// 		// 	console.log(decodedData);
+							// 		// 	var blob = new Blob([decodedData], {type: "audio/wav"});
+							// 		// 	$scope.wavesurfer.loadBlob(blob);
+							// 		// });
+							// }).
+							// 	error(function(data, status, headers, config) {
+							// 		// called asynchronously if error
+							// 		alert("Error loading layers");
+							// });
+
 							var req = {
 								method: 'GET',
 								url: audioPath,
@@ -563,13 +588,15 @@ angular.module('myApp.controllers')
 									// called asynchronously when response is available
 									console.log('Audio loaded');
 									console.log(data);
+									var blob = new Blob([data], {type: "audio/wav"});
+									$scope.wavesurfer.loadBlob(blob);
 
-									var context = new AudioContext();
-									context.decodeAudioData(data, function(decodedData) {
-										console.log(decodedData);
-										var blob = new Blob([decodedData], {type: "audio/x-wav"});
-										$scope.wavesurfer.loadBlob(blob);
-									});
+									// var context = new AudioContext();
+									// context.decodeAudioData(data, function(decodedData) {
+									// 	console.log(decodedData);
+									// 	var blob = new Blob([decodedData], {type: "audio/x-wav"});
+									// 	$scope.wavesurfer.loadBlob(blob);
+									// });
 
 									// var array = data;
 
