@@ -72,6 +72,12 @@
 				<vg-overlay-play></vg-overlay-play>
 			</videogular>
 		</div>
+
+		<div class="row top-padding">
+			<div class="text-center">
+				<h4 ng-bind="model.video_name"></h4>
+			</div>
+		</div>
 		
 		<div class="row top-padding">
 			<div id="wavesurfer-timeline"></div>
@@ -80,8 +86,23 @@
 			<button class="btn btn-success btn-block" ng-click="saveAnnotations()">Save annotations</button>
 		</div>
 
-		<div class="row top-padding">
-			<cm-vis-timeline data="data" options="options" events="events"></cm-vis-timeline>
+		<div id="visjs-timeline" class="row top-padding">
+			<cm-vis-timeline data="data" options="options" events="events">
+				<div class="visjs-navigation-menu">
+					<button ng-click="zoomIn()" type="button" class="btn btn-primary btn-sm">
+						<span class="glyphicon glyphicon-zoom-in"></span> Zoom in
+					</button>
+					<button ng-click="zoomOut()" type="button" class="btn btn-primary btn-sm">
+						<span class="glyphicon glyphicon-zoom-out"></span> Zoom out
+					</button>
+					<button ng-click="moveLeft()" type="button" class="btn btn-primary btn-sm">
+						<span class="glyphicon glyphicon-chevron-left"></span> Move left
+					</button>
+					<button ng-click="moveRight()" type="button" class="btn btn-primary btn-sm">
+						Move right <span class="glyphicon glyphicon-chevron-right"></span>
+					</button>
+				</div>
+			</cm-vis-timeline>
 		</div>
 	</div>
 </div>

@@ -134,7 +134,7 @@ angular.module('myApp.controllers')
 				$scope.wavesurfer.on('region-updated', (function(region) {
 					$scope.items.update({
 						id: -1,
-						group: 0,
+						group: $scope.lastGroup,
 						content: "rename me",
 						start: region.start*1000,
 						end: region.end*1000
@@ -176,6 +176,7 @@ angular.module('myApp.controllers')
 
 			// Vis.js Timeline
 			$scope.id = 0;
+			$scope.lastGroup = 0;
 
 			$scope.options = {
 				editable: {add: true, remove: true, updateGroup: true, updateTime: false},
@@ -193,6 +194,7 @@ angular.module('myApp.controllers')
 					if (content != item.content && content != null) {
 						item.content = content;
 						item.id = $scope.id;
+						$scope.lastGroup = item.group;
 						$scope.id += 1;
 						$scope.$apply();
 						$scope.items.remove(-1);
@@ -221,7 +223,7 @@ angular.module('myApp.controllers')
 				// snap: null,
 				zoomMax: 1000*60*2, // 2 minutes
 				zoomMin: 1000,      // 1 second
-				maxHeight: '400px',
+				maxHeight: '800px',
 				minHeight: '200px',
 				groupOrder: function (a, b) {
 					return a.value - b.value;
@@ -267,6 +269,7 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
+				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
 			});
@@ -519,6 +522,8 @@ angular.module('myApp.controllers')
 					// $scope.wavesurfer.load("audio0.wav");
 
 					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
+						$scope.model.video_name = data.name;
+
 						// for instance : data.url = '36/Video/front/03_woz/36_Video_front_03woz_0'
 						var array     = (data.url).split('/');
 						var videoName = array[array.length-1]; 		// '36_Video_front_03woz_0'

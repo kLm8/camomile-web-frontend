@@ -164,6 +164,18 @@ button.video-control {
     color: #EEE;
 }
 
+#visjs-timeline {
+    position: relative;
+}
+
+.visjs-navigation-menu {
+    position: absolute;
+    top: 15px;
+    right: 0;
+    margin: 8px;
+    z-index: 9999;
+}
+
 .top-padding {
     padding-top: 20px;
 }
