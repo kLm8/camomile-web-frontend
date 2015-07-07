@@ -134,7 +134,7 @@ angular.module('myApp.controllers')
 				$scope.wavesurfer.on('region-updated', (function(region) {
 					$scope.items.update({
 						id: -1,
-						group: 0,
+						group: $scope.lastGroup,
 						content: "rename me",
 						start: region.start*1000,
 						end: region.end*1000
@@ -176,6 +176,8 @@ angular.module('myApp.controllers')
 
 			// Vis.js Timeline
 			$scope.id = 0;
+			$scope.lastGroup = 0;
+			$scope.hashTable = {};
 
 			$scope.options = {
 				editable: {add: true, remove: true, updateGroup: true, updateTime: false},
@@ -191,11 +193,17 @@ angular.module('myApp.controllers')
 				onUpdate: function (item, callback) {
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
-						item.content = content;
-						item.id = $scope.id;
-						$scope.id += 1;
-						$scope.$apply();
-						$scope.items.remove(-1);
+						if (item.content != 'rename me') {
+							item.content = content;
+						} else {
+							item.content = content;
+							item.id = $scope.id;
+							$scope.hashTable[item.id] = '';
+							$scope.lastGroup = item.group;
+							$scope.id += 1;
+							$scope.$apply();
+							$scope.items.remove(-1);
+						};
 						callback(item); // send back adjusted item
 					}
 					else {
@@ -221,7 +229,7 @@ angular.module('myApp.controllers')
 				// snap: null,
 				zoomMax: 1000*60*2, // 2 minutes
 				zoomMin: 1000,      // 1 second
-				maxHeight: '400px',
+				maxHeight: '800px',
 				minHeight: '200px',
 				groupOrder: function (a, b) {
 					return a.value - b.value;
@@ -243,7 +251,7 @@ angular.module('myApp.controllers')
 				success(function(data, status, headers, config) {
 					// called asynchronously when response is available
 					console.log('Layers loaded');
-					console.log(data.layers);
+					// console.log(data.layers);
 
 					for (var i = 0; i < data.layers.length; i++) {
 						$scope.groups.add({
@@ -267,6 +275,7 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
+				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
 			});
@@ -356,6 +365,34 @@ angular.module('myApp.controllers')
 				timechanged: $scope.onTimeChanged
 			};
 
+			/**
+			 * Move the timeline a given percentage to left or right
+			 * @param {Number} percentage   For example 0.1 (left) or -0.1 (right)
+			 */
+			$scope.zoom = function (percentage) {
+				var range = $scope.timeline.getWindow();
+				var interval = range.end - range.start;
+
+				$scope.timeline.setWindow({
+					start: range.start.valueOf() - interval * percentage,
+					end:   range.end.valueOf()   + interval * percentage
+				});
+			};
+
+			/**
+			 * Zoom the timeline a given percentage in or out
+			 * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
+			 */
+			$scope.move = function (percentage) {
+				var range = $scope.timeline.getWindow();
+				var interval = range.end - range.start;
+
+				$scope.timeline.setWindow({
+					start: range.start.valueOf() - interval * percentage,
+					end:   range.end.valueOf()   - interval * percentage
+				});
+			};
+
 		/*********************************************************************************************************/
 
 			var visjs2camomile = function(visjs) {
@@ -368,6 +405,7 @@ angular.module('myApp.controllers')
 					var label = visjs[i].content;
 
 					camomile.push({
+						'_id': visjs[i].id,
 						'fragment': {'start': start, 'end': end},
 						'data': label,
 						'id_medium': $scope.model.selected_medium
@@ -441,18 +479,36 @@ angular.module('myApp.controllers')
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
 								if (annotations[j].fragment.start == data[i].fragment.start && 
-									annotations[j].fragment.end == data[i].fragment.end) {
+									annotations[j].fragment.end == data[i].fragment.end &&
+									annotations[j].data == data[i].data) {
 										annotations.splice(j, 1);
 								};
 							};
 						};
 
-						// then save the new annotations
-						camomileService.createAnnotations($scope.model.available_layers[id_layer]._id, annotations, 
-															function(err, data) {
-																if(err) alert(data.message);
-																else $scope.get_layers($scope.model.selected_corpus);
-															});
+						// then save or update the new annotations
+						for (var k = 0; k < annotations.length; k++) {
+							// console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
+							if ($scope.hashTable[annotations[k]._id] != '') {
+								// update annotation
+								// console.log('Updating existing annotation');
+								camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
+																 {fragment: annotations[k].fragment, data: annotations[k].data},
+																 function(err, data) {
+																 	if(err) alert(data.message);
+																 	else $scope.get_layers($scope.model.selected_corpus);
+																 });
+							} else {
+								// create annotation
+								// console.log('Creating new annotation');
+								$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
+							};
+						};
+						// camomileService.createAnnotations($scope.model.available_layers[id_layer]._id, annotations, 
+						// 									function(err, data) {
+						// 										if(err) alert(data.message);
+						// 										else $scope.get_layers($scope.model.selected_corpus);
+						// 									});
 					} else {
 						console.log(err, data);
 						alert(data.error);
@@ -463,6 +519,25 @@ angular.module('myApp.controllers')
 						id_medium: $scope.model.selected_medium
 					}
 				});
+			};
+
+			$scope.createAnnotation = function(layerID, annotation) {
+				camomileService.createAnnotation(layerID,
+												 annotation.id_medium,
+												 annotation.fragment,
+												 annotation.data, 
+												 function(err, data) {
+												 	if(err) alert(data.message);
+												 	else {
+														console.log('id: ' + data._id);
+														$scope.hashTable[annotation._id] = data._id;
+														console.log('annotation: ' + annotation.data + ' ' +
+																	'id: ' + annotation._id + ' ' +
+																	'hash: ' + $scope.hashTable[annotation._id]);
+
+														$scope.get_layers($scope.model.selected_corpus);
+													};
+												 });
 			};
 
 
@@ -514,11 +589,12 @@ angular.module('myApp.controllers')
 
 
 					// loading the audio waveform into wavesurfer.js
-					// TODO: alignment -> don't change the location or the name of the .wav files (or .webm files)
 					
 					// $scope.wavesurfer.load("audio0.wav");
 
 					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
+						$scope.model.video_name = data.name;
+
 						// for instance : data.url = '36/Video/front/03_woz/36_Video_front_03woz_0'
 						var array     = (data.url).split('/');
 						var videoName = array[array.length-1]; 		// '36_Video_front_03woz_0'
@@ -528,18 +604,17 @@ angular.module('myApp.controllers')
 
 						var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
 
-						console.log('Loading audio: ' + audioName);
+						console.log('Loading audio: ' + audioName + '.wav');
 
 						camomileService.getMedia(function(err, data) {
-							// TODO: can't load a .wav file -> Camomile server restriction (same for .mov files)
-							// HOW TO FIX: 
-							// in camomile-server/routes.js add:
+							// Improvement added to camomile-server in order to load .wav files: 
+							// in camomile-server/routes.js :
 								// stream one medium in wav
 								// app.get('/medium/:id_medium/wav',
 								//   Authentication.middleware.isLoggedIn,
 								//   _.middleware.fExistsWithRights(mMedium, _.READ),
 								//   Medium.streamWav);
-							// and in camomile-server/controllers/Medium.js add:
+							// and in camomile-server/controllers/Medium.js :
 								// exports.streamWav = function (req, res) {
 								//   streamFormat(req, res, 'wav');
 								// };
@@ -547,11 +622,29 @@ angular.module('myApp.controllers')
 
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
-							console.log('audio path: ' + audioPath); // "http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav"
-							// "GET http://vmjoker:32774/medium/557ad06fff4a6b01002d649b/wav 404 (Not Found)"
-							
-							// $scope.wavesurfer.load(audioPath);
-							$scope.wavesurfer.load("audio0.wav");
+							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
+
+							// GET request
+							var req = {
+								method: 'GET',
+								url: audioPath,
+								// cookies needed for authentication of GET request on Camomile DB :
+								xsrfCookieName: 'camomile.sid',
+								withCredentials: true,
+								responseType: 'arraybuffer' // returns wav audio data in an ArrayBuffer
+							};
+
+							$http(req).
+								success(function(data, status, headers, config) {
+									// called asynchronously when response is available
+									console.log('Audio loaded');
+									var blob = new Blob([data], {type: "audio/wav"}); // create a Blob from the ArrayBuffer
+									$scope.wavesurfer.loadBlob(blob); // load the Blob in WaveSurfer.js
+							}).
+								error(function(data, status, headers, config) {
+									// called asynchronously if error
+									console.log("Error loading audio");
+							});
 
 						}, {
 							filter: {
@@ -598,17 +691,20 @@ angular.module('myApp.controllers')
 										return item.group == g;
 									}
 								});
+
 								for (var i = 0; i < itemsToRemove.length; i++) $scope.items.remove(itemsToRemove[i].id);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({
-										title: parseInt($scope.model.current_layer[i]['_id'], 16),
+										// title: parseInt($scope.model.current_layer[i]['_id'], 16),
+										// title: $scope.model.current_layer[i]['_id'],
 										id: $scope.id,
 										group: g,
 										content: $scope.model.current_layer[i]['data'],
 										start: $scope.model.current_layer[i]['fragment']['start']*1000,
 										end: $scope.model.current_layer[i]['fragment']['end']*1000
 									});
+									$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
 									$scope.id += 1;
 									$scope.$apply();
 								};
@@ -621,9 +717,14 @@ angular.module('myApp.controllers')
 				}
 			});
 
-			$scope.$watch('id', function (newValue, oldValue, scope) {
-				// console.log('ID of last annotation changed to : ' + newValue);
-			});
+			// $scope.$watch('id', function (newValue, oldValue, scope) {
+			// 	console.log('ID of last annotation changed to : ' + newValue);
+			// });
+
+			// $scope.$watch('hashTable', function (newValue, oldValue, scope) {
+			// 	console.log('hashTable updated : ');
+			// 	console.log(newValue);
+			// });
 
 			$scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
 				function (newValue, oldValue) {
