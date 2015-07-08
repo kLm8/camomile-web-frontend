@@ -45,13 +45,6 @@ app.post('/', function(req, res){
     res.redirect('/'); 
 });
 
-app.get('/lig', function(req, res){
-    res.sendfile(__dirname + '/app/indexLIG.html');
-});
-
-app.get('/limsi', function(req, res){
-    res.sendfile(__dirname + '/app/indexLimsi.html');
-});
 
 // log in Camomile API and callback
 function log_in(callback) {
