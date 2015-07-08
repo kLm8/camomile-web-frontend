@@ -529,15 +529,51 @@ angular.module('myApp.controllers')
 												 function(err, data) {
 												 	if(err) alert(data.message);
 												 	else {
-														console.log('id: ' + data._id);
+														// console.log('id: ' + data._id);
 														$scope.hashTable[annotation._id] = data._id;
-														console.log('annotation: ' + annotation.data + ' ' +
-																	'id: ' + annotation._id + ' ' +
-																	'hash: ' + $scope.hashTable[annotation._id]);
+														// console.log('annotation: ' + annotation.data + ' ' +
+														// 			'id: ' + annotation._id + ' ' +
+														// 			'hash: ' + $scope.hashTable[annotation._id]);
 
 														$scope.get_layers($scope.model.selected_corpus);
 													};
 												 });
+			};
+
+
+		/*********************************************************************************************************/
+
+			// remove annotations on a layer
+			$scope.cleanLayer = function (layer_name) {
+				var ids = $scope.groups.getIds();
+				var g = -1;
+				for (i in ids) {
+					if ($scope.groups.get(i).content.toLowerCase() == layer_name.toLowerCase()) {
+						g = i;
+						break;
+					};
+				};
+				var itemsToRemove = $scope.items.get({
+					filter: function(item) {
+						return item.group == g;
+					}
+				});
+
+				for (var i = 0; i < itemsToRemove.length; i++) $scope.items.remove(itemsToRemove[i].id);
+
+				return g;
+			};
+
+
+			// a layer has been (un)checked
+			$scope.toggleCheck = function (layer) {
+				if (!layer.selected) {
+					// load layer
+					$scope.model.selected_reference = layer._id;
+				} else {
+					// clean layer
+					$scope.cleanLayer(layer.name);
+				};
 			};
 
 
@@ -655,6 +691,7 @@ angular.module('myApp.controllers')
 						
 					});
 
+					$scope.items.clear();
 					$scope.data = {groups: $scope.groups, items: $scope.items};
 
 
@@ -663,6 +700,15 @@ angular.module('myApp.controllers')
 					// get the layers and store them in $scope.model.available_layers
 					scope.get_layers(scope.model.selected_corpus);
 				}
+			});
+
+			$scope.$watch('model.available_layers', function (newValue, oldValue, scope) {
+				if (newValue) {
+					// add a 'selected' field used in the checkbox
+					for (var i = 0; i < scope.model.available_layers.length; i++) {
+						scope.model.available_layers[i]['selected'] = false;
+					};
+				};
 			});
 
 			$scope.$watch('model.selected_reference', function (newValue, oldValue, scope) {
@@ -676,23 +722,7 @@ angular.module('myApp.controllers')
 					camomileService.getLayer($scope.model.current_layer[0]['id_layer'],
 						function(err, data) {
 							if(!err) {
-								var ids = $scope.groups.getIds();
-								var g = -1;
-
-								for (i in ids) {
-									if ($scope.groups.get(i).content.toLowerCase() == data.name.toLowerCase()) {
-										g = i;
-										break;
-									};
-								};
-
-								var itemsToRemove = $scope.items.get({
-									filter: function(item) {
-										return item.group == g;
-									}
-								});
-
-								for (var i = 0; i < itemsToRemove.length; i++) $scope.items.remove(itemsToRemove[i].id);
+								g = $scope.cleanLayer(data.name);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({

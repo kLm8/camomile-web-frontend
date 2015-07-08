@@ -92,6 +92,23 @@ span.label {
     display: table-cell;
 }
 
+.cm-checkbox {
+    display: table;
+}
+
+.cm-checkbox label {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.cm-checkbox input {
+    display: table-cell;
+}
+
+.cm-checkbox-text {
+    font-size: 110%;
+}
+
 .cm-infomsg {
     color: white;
 }

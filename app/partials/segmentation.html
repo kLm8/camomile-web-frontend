@@ -28,21 +28,19 @@
 
 	<div class="container">
 
-		<!-- Reference selection -->
-		<div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
-			<label>Load annotations on a layer: </label>
-			<select class="form-control" ng-model='model.selected_reference'>
-				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type" | filter: "!old"' value={{layer._id}}>{{layer.name}}</option>
-			</select>
+		<div class="row top-padding">
+			<!-- Reference selection -->
+			<div class="col-xs-3 cm-checkbox" ng-show='model.selected_medium'>
+				<label>Load annotations on a layer: </label>
+			</div>
+			<div class="col-xs-9 cm-checkbox" ng-show='model.selected_medium'>
+				<label class="checkbox-inline" ng-repeat='layer in model.available_layers | orderBy : "layer_type" | filter: "!old"'>
+					<input type="checkbox" ng-model="layer.selected" value={{layer._id}} ng-click="toggleCheck(layer)">
+						<span class="cm-checkbox-text">{{layer.name}}</span>
+					</input>
+				</label>
+			</div>
 		</div>
-
-		<!-- Hypothesis selection -->
-		<!-- <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
-			<label>Hypothesis: </label>
-			<select class="form-control" ng-model='model.selected_hypothesis'>
-				<option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}</option>
-			</select>
-		</div> -->
 
 	</div>
 
