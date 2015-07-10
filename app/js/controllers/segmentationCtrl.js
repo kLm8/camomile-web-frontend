@@ -495,8 +495,8 @@ angular.module('myApp.controllers')
 								camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
 																 {fragment: annotations[k].fragment, data: annotations[k].data},
 																 function(err, data) {
-																 	if(err) alert(data.message);
-																 	else $scope.get_layers($scope.model.selected_corpus);
+																	if(err) alert(data.message);
+																	else $scope.get_layers($scope.model.selected_corpus);
 																 });
 							} else {
 								// create annotation
@@ -527,8 +527,8 @@ angular.module('myApp.controllers')
 												 annotation.fragment,
 												 annotation.data, 
 												 function(err, data) {
-												 	if(err) alert(data.message);
-												 	else {
+													if(err) alert(data.message);
+													else {
 														// console.log('id: ' + data._id);
 														$scope.hashTable[annotation._id] = data._id;
 														// console.log('annotation: ' + annotation.data + ' ' +
@@ -626,57 +626,57 @@ angular.module('myApp.controllers')
 
 					// loading the audio waveform into wavesurfer.js
 					
-					// $scope.wavesurfer.load("01_Audio_03woz_0-aligned.wav");
+					$scope.wavesurfer.load("01_Audio_03woz_0-aligned.wav");
 
-					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
-						$scope.model.video_name = data.name;
+					// camomileService.getMedium($scope.model.selected_medium, function(err, data) {
+					// 	$scope.model.video_name = data.name;
 
-						// for instance : data.url = '36/Video/front/03_woz/36_Video_front_03woz_0'
-						var array     = (data.url).split('/');
-						var videoName = array[array.length-1]; 		// '36_Video_front_03woz_0'
-						var id        = videoName.split('_')[0]; 	// '36'
-						var category  = videoName.split('_')[3]; 	// '03woz'
-						var num       = videoName.split('_')[4]; 	// '0'
+					// 	// for instance : data.url = '36/Video/front/03_woz/36_Video_front_03woz_0'
+					// 	var array     = (data.url).split('/');
+					// 	var videoName = array[array.length-1]; 		// '36_Video_front_03woz_0'
+					// 	var id        = videoName.split('_')[0]; 	// '36'
+					// 	var category  = videoName.split('_')[3]; 	// '03woz'
+					// 	var num       = videoName.split('_')[4]; 	// '0'
 
-						var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
+					// 	var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
 
-						console.log('Loading audio: ' + audioName + '.wav');
+					// 	console.log('Loading audio: ' + audioName + '.wav');
 
-						camomileService.getMedia(function(err, data) {
-							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
-							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
-							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
+					// 	camomileService.getMedia(function(err, data) {
+					// 		// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
+					// 		var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
+					// 		console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 
-							// GET request
-							var req = {
-								method: 'GET',
-								url: audioPath,
-								// cookies needed for authentication of GET request on Camomile DB :
-								xsrfCookieName: 'camomile.sid',
-								withCredentials: true,
-								responseType: 'arraybuffer' // returns audio data in an ArrayBuffer
-							};
+					// 		// GET request
+					// 		var req = {
+					// 			method: 'GET',
+					// 			url: audioPath,
+					// 			// cookies needed for authentication of GET request on Camomile DB :
+					// 			xsrfCookieName: 'camomile.sid',
+					// 			withCredentials: true,
+					// 			responseType: 'arraybuffer' // returns audio data in an ArrayBuffer
+					// 		};
 
-							$http(req).
-								success(function(data, status, headers, config) {
-									// called asynchronously when response is available
-									console.log('Audio loaded');
-									var blob = new Blob([data], {type: "audio/wav"}); // create a Blob from the ArrayBuffer
-									$scope.wavesurfer.loadBlob(blob); // load the Blob in WaveSurfer.js
-							}).
-								error(function(data, status, headers, config) {
-									// called asynchronously if error
-									console.log("Error loading audio");
-							});
+					// 		$http(req).
+					// 			success(function(data, status, headers, config) {
+					// 				// called asynchronously when response is available
+					// 				console.log('Audio loaded');
+					// 				var blob = new Blob([data], {type: "audio/wav"}); // create a Blob from the ArrayBuffer
+					// 				$scope.wavesurfer.loadBlob(blob); // load the Blob in WaveSurfer.js
+					// 		}).
+					// 			error(function(data, status, headers, config) {
+					// 				// called asynchronously if error
+					// 				console.log("Error loading audio");
+					// 		});
 
-						}, {
-							filter: {
-								id_corpus: $scope.model.selected_corpus,
-								name: audioName
-							}
-						});
+					// 	}, {
+					// 		filter: {
+					// 			id_corpus: $scope.model.selected_corpus,
+					// 			name: audioName
+					// 		}
+					// 	});
 						
-					});
+					// });
 
 					$scope.items.clear();
 					$scope.data = {groups: $scope.groups, items: $scope.items};

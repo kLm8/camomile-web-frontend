@@ -1,26 +1,46 @@
 angular.module('myApp.directives')
-    .directive('cmWavesurfer', [function () {
-    	return {
-            restrict: 'E',
+	.directive('cmWavesurfer', [function () {
+		return {
+			restrict: 'E',
 
-            link: function ($scope, $element, $attrs) {
-                $element.css('display', 'block');
+			link: function ($scope, $element, $attrs) {
+				$element.css('display', 'block');
 
-                var options = angular.extend({ container: $element[0] }, {
-                    // backend: 'MediaElement',
-                    waveColor: 'violet',
-                    progressColor: 'purple',
-                    cursorColor: 'navy',
-                    height: '100'
-                });
+				var options = angular.extend({ container: $element[0] }, {
+					// backend: 'MediaElement',
+					waveColor: 'violet',
+					progressColor: 'purple',
+					cursorColor: 'navy',
+					height: '100'
+				});
 
-                var wavesurfer = WaveSurfer.create(options);
+				var wavesurfer = WaveSurfer.create(options);
 
-                if ($attrs.url) {
-                    wavesurfer.load($attrs.url, $attrs.data || null);
-                }
+				/* Progress bar */
+				(function () {
+					var progressDiv = document.querySelector('#progress-bar');
+					var progressBar = progressDiv.querySelector('.progress-bar');
 
-                $scope.$emit('wavesurferInit', wavesurfer);
-            }
-        };
-    }]);
+					var showProgress = function (percent) {
+						progressDiv.style.display = 'block';
+						progressBar.style.width = percent + '%';
+					};
+
+					var hideProgress = function () {
+						progressDiv.style.display = 'none';
+					};
+
+					wavesurfer.on('loading', showProgress);
+					wavesurfer.on('ready', hideProgress);
+					wavesurfer.on('destroy', hideProgress);
+					wavesurfer.on('error', hideProgress);
+				}());
+
+				if ($attrs.url) {
+					wavesurfer.load($attrs.url, $attrs.data || null);
+				}
+
+				$scope.$emit('wavesurferInit', wavesurfer);
+			}
+		};
+	}]);

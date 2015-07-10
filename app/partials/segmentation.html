@@ -79,7 +79,11 @@
 		
 		<div class="row top-padding">
 			<div id="wavesurfer-timeline"></div>
-			<cm-wavesurfer></cm-wavesurfer>
+			<cm-wavesurfer>
+				<div class="progress progress-striped active" id="progress-bar">
+					<div class="progress-bar progress-bar-info"></div>
+				</div>
+			</cm-wavesurfer>
 
 			<button class="btn btn-success btn-block" ng-click="saveAnnotations()">Save annotations</button>
 		</div>
