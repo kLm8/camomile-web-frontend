@@ -93,7 +93,7 @@ angular.module('myApp.controllers')
 				});
 				
 				$scope.wavesurfer.on('ready', function () {
-					$scope.wavesurfer.zoom(100);
+					// $scope.wavesurfer.zoom(100);
 					console.log('Wavesurfer ready');
 				});
 
