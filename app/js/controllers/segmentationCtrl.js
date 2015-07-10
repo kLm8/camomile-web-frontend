@@ -640,12 +640,12 @@ angular.module('myApp.controllers')
 
 						var audioName = id + '_Audio_' + category + '_' + num; 	// 36_Audio_03woz_0
 
-						console.log('Loading audio: ' + audioName + '.wav');
+						console.log('Loading audio: ' + audioName + '.mp3');
 
 						camomileService.getMedia(function(err, data) {
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
 							var audioPath = camomileService.getMediumURL(data[0]._id, 'mp3');
-							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
+							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/mp3"
 
 							// GET request
 							var req = {
@@ -654,14 +654,14 @@ angular.module('myApp.controllers')
 								// cookies needed for authentication of GET request on Camomile DB :
 								xsrfCookieName: 'camomile.sid',
 								withCredentials: true,
-								responseType: 'arraybuffer' // returns wav audio data in an ArrayBuffer
+								responseType: 'arraybuffer' // returns audio data in an ArrayBuffer
 							};
 
 							$http(req).
 								success(function(data, status, headers, config) {
 									// called asynchronously when response is available
 									console.log('Audio loaded');
-									var blob = new Blob([data], {type: "audio/wav"}); // create a Blob from the ArrayBuffer
+									var blob = new Blob([data], {type: "audio/mp3"}); // create a Blob from the ArrayBuffer
 									$scope.wavesurfer.loadBlob(blob); // load the Blob in WaveSurfer.js
 							}).
 								error(function(data, status, headers, config) {
