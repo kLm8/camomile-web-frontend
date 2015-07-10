@@ -1,8 +1,8 @@
 {
   "name": "wavesurfer.js",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "Interactive navigable audio visualization using Web Audio and Canvas",
-  "main": "dist/wavesurfer.cjs.js",
+  "main": "dist/wavesurfer.min.js",
   "directories": {
     "example": "example"
   },
@@ -15,7 +15,7 @@
     "url": "git://github.com/katspaugh/wavesurfer.js.git"
   },
   "author": "",
-  "license": "CC-BY 3.0",
+  "license": "CC-BY-3.0",
   "bugs": {
     "url": "https://github.com/katspaugh/wavesurfer.js/issues"
   },

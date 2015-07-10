@@ -1,15 +1,15 @@
 {
   "name": "wavesurfer.js",
   "homepage": "https://github.com/katspaugh/wavesurfer.js",
-  "version": "1.0.28",
-  "_release": "1.0.28",
+  "version": "1.0.29",
+  "_release": "1.0.29",
   "_resolution": {
     "type": "version",
-    "tag": "1.0.28",
-    "commit": "cc2ad8f6a48c4d08d5d0d892434ac2424b250737"
+    "tag": "1.0.29",
+    "commit": "fdbe5adebb5911d76540cf5c07f7233df99b5d38"
   },
   "_source": "git://github.com/katspaugh/wavesurfer.js.git",
-  "_target": "~1.0.28",
+  "_target": "~1.0.29",
   "_originalSource": "wavesurfer.js",
   "_direct": true
 }
