@@ -626,7 +626,7 @@ angular.module('myApp.controllers')
 
 					// loading the audio waveform into wavesurfer.js
 					
-					// $scope.wavesurfer.load("audio0.wav");
+					// $scope.wavesurfer.load("01_Audio_03woz_0-aligned.wav");
 
 					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
 						$scope.model.video_name = data.name;
@@ -643,21 +643,8 @@ angular.module('myApp.controllers')
 						console.log('Loading audio: ' + audioName + '.wav');
 
 						camomileService.getMedia(function(err, data) {
-							// Improvement added to camomile-server in order to load .wav files: 
-							// in camomile-server/routes.js :
-								// stream one medium in wav
-								// app.get('/medium/:id_medium/wav',
-								//   Authentication.middleware.isLoggedIn,
-								//   _.middleware.fExistsWithRights(mMedium, _.READ),
-								//   Medium.streamWav);
-							// and in camomile-server/controllers/Medium.js :
-								// exports.streamWav = function (req, res) {
-								//   streamFormat(req, res, 'wav');
-								// };
-							// the same could be done for .mov files
-
 							// var audioPath = $rootScope.dataroot + '/' + data[0].url + '.wav';
-							var audioPath = camomileService.getMediumURL(data[0]._id, 'wav');
+							var audioPath = camomileService.getMediumURL(data[0]._id, 'mp3');
 							console.log('audio path: ' + audioPath); // "http://vmjoker:32772/medium/557ad06fff4a6b01002d64ab/wav"
 
 							// GET request

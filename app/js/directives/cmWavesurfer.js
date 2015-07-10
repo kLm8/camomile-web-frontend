@@ -7,6 +7,7 @@ angular.module('myApp.directives')
                 $element.css('display', 'block');
 
                 var options = angular.extend({ container: $element[0] }, {
+                    // backend: 'MediaElement',
                     waveColor: 'violet',
                     progressColor: 'purple',
                     cursorColor: 'navy',
