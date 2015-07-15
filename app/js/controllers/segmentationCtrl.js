@@ -492,30 +492,7 @@ angular.module('myApp.controllers')
 							if ($scope.hashTable[annotations[k]._id] != '') {
 								// update annotation
 								// console.log('Updating existing annotation');
-								camomileService.getAnnotation($scope.hashTable[annotations[k]._id], function (err, data) {
-									if (!err) {
-										// check if annotation's layer has changed
-										if (data.id_layer != $scope.model.available_layers[id_layer]._id) {
-											// changed: create new annotation and delete old one
-											console.log('layer changed: create new annotation and delete the old one');
-											$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
-											// camomileService.deleteAnnotation($scope.hashTable[annotations[k]._id],
-											// 								 function(err, data) {
-											// 									if(err) alert(data.message);
-											// 									else $scope.get_layers($scope.model.selected_corpus);
-											// 								 });
-										} else {
-											// not changed, update the annotation
-											console.log('layer didn\'t changed');
-											camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
-																			 {fragment: annotations[k].fragment, data: annotations[k].data},
-																			 function(err, data) {
-																				if(err) alert(data.message);
-																				else $scope.get_layers($scope.model.selected_corpus);
-																			 });
-										};
-									};
-								});
+								$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
 							} else {
 								// create annotation
 								// console.log('Creating new annotation');
@@ -536,6 +513,33 @@ angular.module('myApp.controllers')
 						id_layer: $scope.model.available_layers[id_layer]._id,
 						id_medium: $scope.model.selected_medium
 					}
+				});
+			};
+
+			$scope.checkAnnotation = function(layerID, annotation) {
+				camomileService.getAnnotation($scope.hashTable[annotation._id], function (err, data) {
+					if (!err) {
+						// check if annotation's layer has changed
+						if (data.id_layer != layerID) {
+							// changed: create new annotation and delete old one
+							console.log('layer changed: create new annotation and delete the old one');
+							$scope.createAnnotation(layerID, annotation);
+							// camomileService.deleteAnnotation($scope.hashTable[annotation._id],
+							// 								 function(err, data) {
+							// 									if(err) alert(data.message);
+							// 									else $scope.get_layers($scope.model.selected_corpus);
+							// 								 });
+						} else {
+							// not changed, update the annotation
+							console.log('layer didn\'t change');
+							camomileService.updateAnnotation($scope.hashTable[annotation._id],
+															 {fragment: annotation.fragment, data: annotation.data},
+															 function(err, data) {
+																if(err) alert(data.message);
+																else $scope.get_layers($scope.model.selected_corpus);
+															 });
+						};
+					};
 				});
 			};
 
