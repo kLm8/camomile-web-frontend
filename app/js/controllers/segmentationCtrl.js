@@ -280,14 +280,17 @@ angular.module('myApp.controllers')
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
 
 				// group could have been changed
-				if (properties.data[0].group != $scope.items[properties.items[0]].group) {
-					console.log('group changed');
-					console.log('before:');
-					console.log($scope.items[properties.items[0]]);
-					$scope.items[properties.items[0]].group = properties.data[0].group;
-					console.log('after:');
-					console.log($scope.items[properties.items[0]]);
-				};
+				console.log(properties.data);
+				console.log(properties.items);
+
+				// if (properties.data[0].group != $scope.items[properties.items[0]].group) {
+				// 	console.log('group changed');
+				// 	console.log('before:');
+				// 	console.log($scope.items[properties.items[0]]);
+				// 	$scope.items[properties.items[0]].group = properties.data[0].group;
+				// 	console.log('after:');
+				// 	console.log($scope.items[properties.items[0]]);
+				// };
 			});
 
 			$scope.items.on('remove', function (event, properties) {
