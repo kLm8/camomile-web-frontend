@@ -518,11 +518,7 @@ angular.module('myApp.controllers')
 						if (data.id_layer != layerID) {
 							// changed: create new annotation and delete old one
 							$scope.createAnnotation(layerID, annotation);
-							camomileService.deleteAnnotation($scope.hashTable[annotation._id],
-															 function(err, data) {
-																if(err) alert(data.message);
-																else $scope.get_layers($scope.model.selected_corpus);
-															 });
+							$scope.deleteAnnotation(annotation._id);
 						} else {
 							// not changed, update the annotation
 							camomileService.updateAnnotation($scope.hashTable[annotation._id],
@@ -552,6 +548,14 @@ angular.module('myApp.controllers')
 
 														$scope.get_layers($scope.model.selected_corpus);
 													};
+												 });
+			};
+
+			$scope.deleteAnnotation = function(annotationID) {
+				camomileService.deleteAnnotation($scope.hashTable[annotationID],
+												 function(err, data) {
+													if(err) alert(data.message);
+													else $scope.get_layers($scope.model.selected_corpus);
 												 });
 			};
 
