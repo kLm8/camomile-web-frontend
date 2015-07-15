@@ -191,6 +191,7 @@ angular.module('myApp.controllers')
 					}
 				},
 				onUpdate: function (item, callback) {
+					console.log('onUpdate');
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
 						if (item.content != 'rename me') {
@@ -278,20 +279,6 @@ angular.module('myApp.controllers')
 				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
-
-				// group could have been changed
-				console.log(properties.data);
-				console.log(properties.items);
-				console.log($scope.items.get(properties.items[0]));
-
-				// if (properties.data[0].group != $scope.items[properties.items[0]].group) {
-				// 	console.log('group changed');
-				// 	console.log('before:');
-				// 	console.log($scope.items[properties.items[0]]);
-				// 	$scope.items[properties.items[0]].group = properties.data[0].group;
-				// 	console.log('after:');
-				// 	console.log($scope.items[properties.items[0]]);
-				// };
 			});
 
 			$scope.items.on('remove', function (event, properties) {
@@ -299,7 +286,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				// logEvent(event, properties);
+				logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
