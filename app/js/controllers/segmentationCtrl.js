@@ -282,6 +282,7 @@ angular.module('myApp.controllers')
 				// group could have been changed
 				console.log(properties.data);
 				console.log(properties.items);
+				console.log($scope.items[properties.items[0]]);
 
 				// if (properties.data[0].group != $scope.items[properties.items[0]].group) {
 				// 	console.log('group changed');
