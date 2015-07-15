@@ -191,7 +191,6 @@ angular.module('myApp.controllers')
 					}
 				},
 				onUpdate: function (item, callback) {
-					console.log('onUpdate');
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
 						if (item.content != 'rename me') {
@@ -286,7 +285,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				logEvent(event, properties);
+				// logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -295,14 +294,13 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onSelect = function (props) {
-				console.log('onSelect');
+				// console.log('onSelect');
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
-				console.log($scope.items.get(selection[0]));
 
 				var x = ((($scope.items.get(selection[0])).start));
 				x = Math.round(x * 1000) / 1000;
-				console.log(x);
+				// console.log(x);
 
 				// $scope.API.seekTime(x/1000);
 				$scope.timeline.setCustomTime(x);
@@ -430,44 +428,48 @@ angular.module('myApp.controllers')
 						}
 					});
 
+					console.log(x);
+
 					// convert visjs data to Camomile format
 					var annotations = visjs2camomile(x);
 
-					// remove duplicates on this layer (not necessary, as there should be none)
-					for (var i = 0; i < annotations.length-1; i++) {
-						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
-							annotations[i].fragment.end == annotations[i+1].fragment.end &&
-							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
-								annotations.splice(i, 1);
-						}
-					};
+					console.log(annotations);
 
-					// look for the layer if it exists in the DB
-					var found = false;
-					// console.log("Looking for : " + content);
+					// // remove duplicates on this layer (not necessary, as there should be none)
+					// for (var i = 0; i < annotations.length-1; i++) {
+					// 	if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
+					// 		annotations[i].fragment.end == annotations[i+1].fragment.end &&
+					// 		annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
+					// 			annotations.splice(i, 1);
+					// 	}
+					// };
 
-					var id_layer = -1;
-					for (var j = 0; j < $scope.model.available_layers.length; j++) {
-						if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
-							found = true;
-							id_layer = j;
-							break;
-						};
-					};
+					// // look for the layer if it exists in the DB
+					// var found = false;
+					// // console.log("Looking for : " + content);
 
-					if (found) {
-						$scope.saveLayer(content, id_layer, annotations);
-					}
-					else {
-						// console.log('Not found : creating layer \'' + content + '\'');
-						camomileService.createLayer($scope.model.selected_corpus, 
-													content, '', 'segment', 'label',
-													annotations, 
-													function(err, data) {
-														if(err) alert(data.message);
-														else $scope.get_layers($scope.model.selected_corpus);
-													});
-					};
+					// var id_layer = -1;
+					// for (var j = 0; j < $scope.model.available_layers.length; j++) {
+					// 	if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
+					// 		found = true;
+					// 		id_layer = j;
+					// 		break;
+					// 	};
+					// };
+
+					// if (found) {
+					// 	$scope.saveLayer(content, id_layer, annotations);
+					// }
+					// else {
+					// 	// console.log('Not found : creating layer \'' + content + '\'');
+					// 	camomileService.createLayer($scope.model.selected_corpus, 
+					// 								content, '', 'segment', 'label',
+					// 								annotations, 
+					// 								function(err, data) {
+					// 									if(err) alert(data.message);
+					// 									else $scope.get_layers($scope.model.selected_corpus);
+					// 								});
+					// };
 				};
 
 				alert("Annotations saved successfully.");
