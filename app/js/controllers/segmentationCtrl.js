@@ -285,7 +285,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				logEvent(event, properties);
+				// logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -453,9 +453,6 @@ angular.module('myApp.controllers')
 						};
 					};
 
-					console.log('x:' + x.length);
-					console.log('annotations:' + annotations.length);
-
 					if (found) {
 						$scope.saveLayer(content, id_layer, annotations);
 					}
@@ -475,7 +472,7 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.saveLayer = function(content, id_layer, annotations) {
-				console.log('Found layer ' + content + ' ' + id_layer);
+				// console.log('Found layer ' + content + ' ' + id_layer);
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
@@ -484,13 +481,12 @@ angular.module('myApp.controllers')
 								if (annotations[j].fragment.start == data[i].fragment.start && 
 									annotations[j].fragment.end == data[i].fragment.end &&
 									annotations[j].data == data[i].data) {
-										console.log('splice annotation: ' + annotations[j]);
 										annotations.splice(j, 1);
 								};
 							};
 						};
 
-						console.log('annotations: ' + annotations.length);
+						console.log(annotations);
 
 						// // then save or update the new annotations
 						// for (var k = 0; k < annotations.length; k++) {
