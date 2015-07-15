@@ -516,9 +516,16 @@ angular.module('myApp.controllers')
 					if (!err) {
 						// check if annotation's layer has changed
 						if (data.id_layer != layerID) {
-							// changed: create new annotation and delete old one
+							// changed: create new annotation and modify the old one
 							$scope.createAnnotation(layerID, annotation);
-							$scope.deleteAnnotation(annotation._id);
+							// $scope.deleteAnnotation(annotation._id); // deletion can't be done (permissions)
+							var string = 'DELETE__' + annotation.data;
+							camomileService.updateAnnotation($scope.hashTable[annotation._id],
+															 {fragment: annotation.fragment, data: string},
+															 function(err, data) {
+																if(err) alert(data.message);
+																else $scope.get_layers($scope.model.selected_corpus);
+															 });
 						} else {
 							// not changed, update the annotation
 							camomileService.updateAnnotation($scope.hashTable[annotation._id],
@@ -551,13 +558,14 @@ angular.module('myApp.controllers')
 												 });
 			};
 
-			$scope.deleteAnnotation = function(annotationID) {
-				camomileService.deleteAnnotation($scope.hashTable[annotationID],
-												 function(err, data) {
-													if(err) alert(data.message);
-													else $scope.get_layers($scope.model.selected_corpus);
-												 });
-			};
+			// lambda users can't delete an annotation (no permission)
+			// $scope.deleteAnnotation = function(annotationID) {
+			// 	camomileService.deleteAnnotation($scope.hashTable[annotationID],
+			// 									 function(err, data) {
+			// 										if(err) alert(data.message);
+			// 										else $scope.get_layers($scope.model.selected_corpus);
+			// 									 });
+			// };
 
 
 		/*********************************************************************************************************/
