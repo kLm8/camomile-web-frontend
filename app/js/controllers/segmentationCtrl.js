@@ -428,12 +428,12 @@ angular.module('myApp.controllers')
 						}
 					});
 
-					console.log(x);
+					console.log('x:' + x.length);
 
 					// convert visjs data to Camomile format
 					var annotations = visjs2camomile(x);
 
-					console.log(annotations);
+					console.log('annotations:' + annotations.length);
 
 					// // remove duplicates on this layer (not necessary, as there should be none)
 					// for (var i = 0; i < annotations.length-1; i++) {
