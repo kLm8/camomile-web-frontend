@@ -486,26 +486,24 @@ angular.module('myApp.controllers')
 							};
 						};
 
-						console.log(annotations);
-
-						// // then save or update the new annotations
-						// for (var k = 0; k < annotations.length; k++) {
-						// 	// console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
-						// 	if ($scope.hashTable[annotations[k]._id] != '') {
-						// 		// update annotation
-						// 		// console.log('Updating existing annotation');
-						// 		camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
-						// 										 {fragment: annotations[k].fragment, data: annotations[k].data},
-						// 										 function(err, data) {
-						// 											if(err) alert(data.message);
-						// 											else $scope.get_layers($scope.model.selected_corpus);
-						// 										 });
-						// 	} else {
-						// 		// create annotation
-						// 		// console.log('Creating new annotation');
-						// 		$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
-						// 	};
-						// };
+						// then save or update the new annotations
+						for (var k = 0; k < annotations.length; k++) {
+							console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
+							if ($scope.hashTable[annotations[k]._id] != '') {
+								// update annotation
+								console.log('Updating existing annotation');
+								// camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
+								// 								 {fragment: annotations[k].fragment, data: annotations[k].data},
+								// 								 function(err, data) {
+								// 									if(err) alert(data.message);
+								// 									else $scope.get_layers($scope.model.selected_corpus);
+								// 								 });
+							} else {
+								// create annotation
+								console.log('Creating new annotation');
+								// $scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
+							};
+						};
 						// camomileService.createAnnotations($scope.model.available_layers[id_layer]._id, annotations, 
 						// 									function(err, data) {
 						// 										if(err) alert(data.message);
