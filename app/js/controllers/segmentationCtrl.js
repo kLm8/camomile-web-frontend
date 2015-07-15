@@ -275,6 +275,7 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
+				console.log('update');
 				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
@@ -285,7 +286,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				// logEvent(event, properties);
+				logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -488,7 +489,7 @@ angular.module('myApp.controllers')
 
 						// then save or update the new annotations
 						for (var k = 0; k < annotations.length; k++) {
-							console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
+							// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
 							if ($scope.hashTable[annotations[k]._id] != '') {
 								// update annotation
 								console.log('Updating existing annotation');
