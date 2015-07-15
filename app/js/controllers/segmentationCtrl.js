@@ -207,7 +207,6 @@ angular.module('myApp.controllers')
 						callback(item); // send back adjusted item
 					}
 					else {
-						console.log('nothing has changed');
 						callback(null); // cancel updating the item
 					}
 				},
@@ -276,10 +275,19 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
-				console.log('hello there');
 				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
+
+				// group could have been changed
+				if (properties.data[0].group != $scope.items[properties.items[0]].group) {
+					console.log('group changed');
+					console.log('before:');
+					console.log($scope.items[properties.items[0]]);
+					$scope.items[properties.items[0]].group = properties.data[0].group;
+					console.log('after:');
+					console.log($scope.items[properties.items[0]]);
+				};
 			});
 
 			$scope.items.on('remove', function (event, properties) {
@@ -287,7 +295,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				logEvent(event, properties);
+				// logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
