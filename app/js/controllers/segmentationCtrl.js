@@ -285,7 +285,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				// logEvent(event, properties);
+				logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -428,55 +428,54 @@ angular.module('myApp.controllers')
 						}
 					});
 
-					console.log('x:' + x.length);
-
 					// convert visjs data to Camomile format
 					var annotations = visjs2camomile(x);
 
+					// remove duplicates on this layer (not necessary, as there should be none)
+					for (var i = 0; i < annotations.length-1; i++) {
+						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
+							annotations[i].fragment.end == annotations[i+1].fragment.end &&
+							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
+								annotations.splice(i, 1);
+						}
+					};
+
+					// look for the layer if it exists in the DB
+					var found = false;
+					// console.log("Looking for : " + content);
+
+					var id_layer = -1;
+					for (var j = 0; j < $scope.model.available_layers.length; j++) {
+						if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
+							found = true;
+							id_layer = j;
+							break;
+						};
+					};
+
+					console.log('x:' + x.length);
 					console.log('annotations:' + annotations.length);
 
-					// // remove duplicates on this layer (not necessary, as there should be none)
-					// for (var i = 0; i < annotations.length-1; i++) {
-					// 	if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
-					// 		annotations[i].fragment.end == annotations[i+1].fragment.end &&
-					// 		annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
-					// 			annotations.splice(i, 1);
-					// 	}
-					// };
-
-					// // look for the layer if it exists in the DB
-					// var found = false;
-					// // console.log("Looking for : " + content);
-
-					// var id_layer = -1;
-					// for (var j = 0; j < $scope.model.available_layers.length; j++) {
-					// 	if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
-					// 		found = true;
-					// 		id_layer = j;
-					// 		break;
-					// 	};
-					// };
-
-					// if (found) {
-					// 	$scope.saveLayer(content, id_layer, annotations);
-					// }
-					// else {
-					// 	// console.log('Not found : creating layer \'' + content + '\'');
-					// 	camomileService.createLayer($scope.model.selected_corpus, 
-					// 								content, '', 'segment', 'label',
-					// 								annotations, 
-					// 								function(err, data) {
-					// 									if(err) alert(data.message);
-					// 									else $scope.get_layers($scope.model.selected_corpus);
-					// 								});
-					// };
+					if (found) {
+						$scope.saveLayer(content, id_layer, annotations);
+					}
+					else {
+						// console.log('Not found : creating layer \'' + content + '\'');
+						camomileService.createLayer($scope.model.selected_corpus, 
+													content, '', 'segment', 'label',
+													annotations, 
+													function(err, data) {
+														if(err) alert(data.message);
+														else $scope.get_layers($scope.model.selected_corpus);
+													});
+					};
 				};
 
 				alert("Annotations saved successfully.");
 			};
 
 			$scope.saveLayer = function(content, id_layer, annotations) {
-				// console.log('Found layer ' + content + ' ' + id_layer);
+				console.log('Found layer ' + content + ' ' + id_layer);
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
@@ -485,29 +484,32 @@ angular.module('myApp.controllers')
 								if (annotations[j].fragment.start == data[i].fragment.start && 
 									annotations[j].fragment.end == data[i].fragment.end &&
 									annotations[j].data == data[i].data) {
+										console.log('splice annotation: ' + annotations[j]);
 										annotations.splice(j, 1);
 								};
 							};
 						};
 
-						// then save or update the new annotations
-						for (var k = 0; k < annotations.length; k++) {
-							// console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
-							if ($scope.hashTable[annotations[k]._id] != '') {
-								// update annotation
-								// console.log('Updating existing annotation');
-								camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
-																 {fragment: annotations[k].fragment, data: annotations[k].data},
-																 function(err, data) {
-																	if(err) alert(data.message);
-																	else $scope.get_layers($scope.model.selected_corpus);
-																 });
-							} else {
-								// create annotation
-								// console.log('Creating new annotation');
-								$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
-							};
-						};
+						console.log('annotations: ' + annotations.length);
+
+						// // then save or update the new annotations
+						// for (var k = 0; k < annotations.length; k++) {
+						// 	// console.log('annotation: ' + annotations[k].data + 'id: ' + annotations[k]._id + '- hash: ' + $scope.hashTable[annotations[k]._id]);
+						// 	if ($scope.hashTable[annotations[k]._id] != '') {
+						// 		// update annotation
+						// 		// console.log('Updating existing annotation');
+						// 		camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
+						// 										 {fragment: annotations[k].fragment, data: annotations[k].data},
+						// 										 function(err, data) {
+						// 											if(err) alert(data.message);
+						// 											else $scope.get_layers($scope.model.selected_corpus);
+						// 										 });
+						// 	} else {
+						// 		// create annotation
+						// 		// console.log('Creating new annotation');
+						// 		$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
+						// 	};
+						// };
 						// camomileService.createAnnotations($scope.model.available_layers[id_layer]._id, annotations, 
 						// 									function(err, data) {
 						// 										if(err) alert(data.message);
