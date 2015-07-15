@@ -295,13 +295,14 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.onSelect = function (props) {
-				// console.log('onSelect');
+				console.log('onSelect');
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
+				console.log($scope.items.get(selection[0]));
 
 				var x = ((($scope.items.get(selection[0])).start));
 				x = Math.round(x * 1000) / 1000;
-				// console.log(x);
+				console.log(x);
 
 				// $scope.API.seekTime(x/1000);
 				$scope.timeline.setCustomTime(x);
