@@ -207,6 +207,7 @@ angular.module('myApp.controllers')
 						callback(item); // send back adjusted item
 					}
 					else {
+						console.log('nothing has changed');
 						callback(null); // cancel updating the item
 					}
 				},
@@ -275,6 +276,7 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
+				console.log('hello there');
 				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
