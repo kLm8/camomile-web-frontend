@@ -285,7 +285,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				// logEvent(event, properties);
+				logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
