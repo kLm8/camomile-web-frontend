@@ -275,7 +275,6 @@ angular.module('myApp.controllers')
 			
 
 			$scope.items.on('update', function (event, properties) {
-				console.log('update');
 				$scope.lastGroup = properties.data[0].group;
 				$scope.API.seekTime(properties.data[0].start/1000);
 				$scope.wavesurfer.seekTo(properties.data[0].start/$scope.API.totalTime);
@@ -286,7 +285,7 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.items.on('*', function (event, properties) {
-				logEvent(event, properties);
+				// logEvent(event, properties);
 			});
 
 			function logEvent(event, properties) {
@@ -493,6 +492,12 @@ angular.module('myApp.controllers')
 							if ($scope.hashTable[annotations[k]._id] != '') {
 								// update annotation
 								console.log('Updating existing annotation');
+								camomileService.getAnnotation($scope.hashTable[annotations[k]._id], function (err, data) {
+									if (!err) {
+										console.log(data);
+										console.log('id_layer: ' + $scope.model.available_layers[id_layer]._id);
+									};
+								});
 								// camomileService.updateAnnotation($scope.hashTable[annotations[k]._id],
 								// 								 {fragment: annotations[k].fragment, data: annotations[k].data},
 								// 								 function(err, data) {
