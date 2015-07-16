@@ -444,9 +444,9 @@ angular.module('myApp.controllers')
 					});
 
 					// convert visjs data to Camomile format
-					var a = visjs2camomile(x);
-					var b = visjs2camomile(y);
-					var annotations = angular.extend({}, a, b);
+					var annotations = visjs2camomile(x);
+					// var b = visjs2camomile(y);
+					// var annotations = angular.extend({}, a, b);
 
 
 					// remove duplicates on this layer (not necessary, as there should be none)
@@ -609,7 +609,7 @@ angular.module('myApp.controllers')
 			$scope.createAnnotation = function(layerID, annotation) {
 				console.log('createAnnotation()');
 				console.log(annotation);
-				
+
 				camomileService.createAnnotation(layerID,
 												 annotation.id_medium,
 												 annotation.fragment,
