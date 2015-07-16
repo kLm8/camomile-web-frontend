@@ -485,6 +485,8 @@ angular.module('myApp.controllers')
 
 							if (found_annotateur) {
 								console.log('Updating layer : ' + content_annotateur);
+								console.log('annotations to be saved on ' + content_annotateur);
+								console.log(annotations);
 								$scope.saveLayer(content_annotateur, id_layer_annotateur, annotations, false);
 							}
 							else {
@@ -522,6 +524,8 @@ angular.module('myApp.controllers')
 			// update (boolean) is used to copy the annotation to the annotator's layer
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				// console.log('saveLayer()');
+				console.log('annotations to be saved on ' + content);
+				console.log(annotations);
 
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
