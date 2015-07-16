@@ -529,6 +529,9 @@ angular.module('myApp.controllers')
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
+						console.log('annotations on layer : ');
+						console.log(data);
+
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
 								if (annotations[j].fragment.start == data[i].fragment.start && 
@@ -539,7 +542,7 @@ angular.module('myApp.controllers')
 							};
 						};
 
-						console.log('annotations to be saved :');
+						console.log('annotations to be saved : ');
 						console.log(annotations);
 
 						// then save or update the new annotations
