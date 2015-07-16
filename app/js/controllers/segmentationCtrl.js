@@ -478,23 +478,25 @@ angular.module('myApp.controllers')
 
 					// if user is "segmenteur", update layers for "annotateur"
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
-						content = $scope.groups.get(i).content + '_' + Session.username;
-						var id_layer = $scope.searchLayer(content);
-						var found = id_layer == -1 ? false : true;
+						for(username in ["annotateur1", "annotateur2", "annotateur3"]) {
+							content = $scope.groups.get(i).content + '_' + username;
+							var id_layer = $scope.searchLayer(content);
+							var found = id_layer == -1 ? false : true;
 
-						if (found) {
-							console.log('Updating layer : ' + content);
-							$scope.saveLayer(content, id_layer, annotations);
-						}
-						else {
-							console.log('Creating layer \'' + content + '\'');
-							camomileService.createLayer($scope.model.selected_corpus, 
-														content, '', 'segment', 'label',
-														annotations, 
-														function(err, data) {
-															if(err) alert(data.message);
-															else $scope.get_layers($scope.model.selected_corpus);
-														});
+							if (found) {
+								console.log('Updating layer : ' + content);
+								$scope.saveLayer(content, id_layer, annotations);
+							}
+							else {
+								console.log('Creating layer \'' + content + '\'');
+								camomileService.createLayer($scope.model.selected_corpus, 
+															content, '', 'segment', 'label',
+															annotations, 
+															function(err, data) {
+																if(err) alert(data.message);
+																else $scope.get_layers($scope.model.selected_corpus);
+															});
+							};
 						};
 					};
 				};

@@ -34,7 +34,7 @@
 				<label>Load annotations on a layer: </label>
 			</div>
 			<div class="col-xs-9 cm-checkbox" ng-show='model.selected_medium'>
-				<label class="checkbox-inline" ng-repeat='layer in model.available_layers | orderBy : "layer_type" | filter: "!old"'>
+				<label class="checkbox-inline" ng-repeat='layer in model.available_layers | orderBy : "layer_type" | filter: "!old" | filter: "!annotateur"'>
 					<input type="checkbox" ng-model="layer.selected" value={{layer._id}} ng-click="toggleCheck(layer)">
 						<span class="cm-checkbox-text">{{layer.name}}</span>
 					</input>
