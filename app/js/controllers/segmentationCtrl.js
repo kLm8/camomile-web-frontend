@@ -436,27 +436,29 @@ angular.module('myApp.controllers')
 							return item.group == i;
 						}
 					});
-					// get annotations to remove on this layer
-					var y = $scope.itemsToRemove.get({
-						filter: function(item) {
-							return item.group == i;
-						}
-					});
+					// // get annotations to remove on this layer
+					// var y = $scope.itemsToRemove.get({
+					// 	filter: function(item) {
+					// 		return item.group == i;
+					// 	}
+					// });
 
 					// convert visjs data to Camomile format
 					var annotations = visjs2camomile(x);
 					// var b = visjs2camomile(y);
 					// var annotations = angular.extend({}, a, b);
 
+					console.log('saveAnnotations()');
+					console.log(annotations);
 
-					// remove duplicates on this layer (not necessary, as there should be none)
-					for (var i = 0; i < annotations.length-1; i++) {
-						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
-							annotations[i].fragment.end == annotations[i+1].fragment.end &&
-							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
-								annotations.splice(i, 1);
-						}
-					};
+					// // remove duplicates on this layer (not necessary, as there should be none)
+					// for (var i = 0; i < annotations.length-1; i++) {
+					// 	if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
+					// 		annotations[i].fragment.end == annotations[i+1].fragment.end &&
+					// 		annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
+					// 			annotations.splice(i, 1);
+					// 	}
+					// };
 
 					var id_layer = $scope.searchLayer(content);
 					var found = id_layer == -1 ? false : true;
