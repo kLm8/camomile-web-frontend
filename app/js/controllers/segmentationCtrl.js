@@ -547,7 +547,7 @@ angular.module('myApp.controllers')
 
 						// then save or update the new annotations
 						for (var k = 0; k < annotations.length; k++) {
-							// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
+							console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
 							if ($scope.hashTable[annotations[k]._id] != '') {
 								// update annotation
 								console.log('Updating existing annotation');
