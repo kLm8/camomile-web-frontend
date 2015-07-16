@@ -448,9 +448,6 @@ angular.module('myApp.controllers')
 					// var b = visjs2camomile(y);
 					// var annotations = angular.extend({}, a, b);
 
-					console.log('saveAnnotations()');
-					console.log(annotations);
-
 					// // remove duplicates on this layer (not necessary, as there should be none)
 					// for (var i = 0; i < annotations.length-1; i++) {
 					// 	if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
@@ -464,11 +461,11 @@ angular.module('myApp.controllers')
 					var found = id_layer == -1 ? false : true;
 
 					if (found) {
-						console.log('Found it !');
-						$scope.saveLayer(content, id_layer, annotations);
+						// console.log('Found it !');
+						$scope.saveLayer(content, id_layer, annotations, true);
 					}
 					else {
-						console.log('Not found : creating layer \'' + content + '\'');
+						// console.log('Not found : creating layer \'' + content + '\'');
 						camomileService.createLayer($scope.model.selected_corpus, 
 													content, '', 'segment', 'label',
 													annotations, 
@@ -483,12 +480,12 @@ angular.module('myApp.controllers')
 						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
 						for (var i = 0; i < usernames.length; i++) {
 							var content_annotateur = content + '_' + usernames[i];
-							var id_layer = $scope.searchLayer(content_annotateur);
-							var found = id_layer == -1 ? false : true;
+							var id_layer_annotateur = $scope.searchLayer(content_annotateur);
+							var found_annotateur = id_layer_annotateur == -1 ? false : true;
 
-							if (found) {
+							if (found_annotateur) {
 								console.log('Updating layer : ' + content_annotateur);
-								$scope.saveLayer(content_annotateur, id_layer, annotations, false);
+								$scope.saveLayer(content_annotateur, id_layer_annotateur, annotations, false);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
@@ -509,7 +506,7 @@ angular.module('myApp.controllers')
 
 			$scope.searchLayer = function(content) {
 				// look for the layer if it exists in the DB
-				console.log("Looking for : " + content);
+				// console.log("Looking for : " + content);
 
 				var id_layer = -1;
 				for (var j = 0; j < $scope.model.available_layers.length; j++) {
@@ -522,12 +519,9 @@ angular.module('myApp.controllers')
 				return id_layer;
 			};
 
+			// update (boolean) is used to copy the annotation to the annotator's layer
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
-				console.log('saveLayer()');
-				console.log(annotations);
-
-				// update (boolean) is used to copy the annotation to the annotator's layer
-				if (typeof update === 'undefined') update = true;
+				// console.log('saveLayer()');
 
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
@@ -550,7 +544,7 @@ angular.module('myApp.controllers')
 
 						// then save or update the new annotations
 						for (var k = 0; k < annotations.length; k++) {
-							console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
+							// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
 							if ($scope.hashTable[annotations[k]._id] != '') {
 								// update annotation
 								console.log('Updating existing annotation');
@@ -574,7 +568,7 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.checkAnnotation = function(layerID, annotation, update) {
-				console.log('checkAnnotation()');
+				// console.log('checkAnnotation()');
 
 				camomileService.getAnnotation($scope.hashTable[annotation._id], function (err, data) {
 					if (!err) {
@@ -610,8 +604,7 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.createAnnotation = function(layerID, annotation) {
-				console.log('createAnnotation()');
-				console.log(annotation);
+				// console.log('createAnnotation()');
 
 				camomileService.createAnnotation(layerID,
 												 annotation.id_medium,
