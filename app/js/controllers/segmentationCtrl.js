@@ -502,7 +502,7 @@ angular.module('myApp.controllers')
 					};
 				};
 
-				alert("Annotations saved successfully.");
+				// alert("Annotations saved successfully.");
 			};
 
 			$scope.searchLayer = function(content) {
@@ -529,7 +529,7 @@ angular.module('myApp.controllers')
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
-						console.log('annotations on layer : ');
+						console.log('annotations on layer ' + content);
 						console.log(data);
 
 						for (var i = 0; i < data.length; i++) {
@@ -542,7 +542,7 @@ angular.module('myApp.controllers')
 							};
 						};
 
-						console.log('annotations to be saved : ');
+						console.log('annotations to be saved on ' + content);
 						console.log(annotations);
 
 						// then save or update the new annotations
@@ -582,6 +582,7 @@ angular.module('myApp.controllers')
 							$scope.createAnnotation(layerID, annotation);
 							
 							if (update) {
+								console.log('update was true');
 								// $scope.deleteAnnotation(annotation._id); // deletion can't be done (permissions)
 								var string = 'DELETE__' + annotation.data;
 								camomileService.updateAnnotation($scope.hashTable[annotation._id],
@@ -592,6 +593,7 @@ angular.module('myApp.controllers')
 																 });
 							};
 						} else {
+							console.log('updating the annotation on the same layer');
 							// not changed, update the annotation
 							camomileService.updateAnnotation($scope.hashTable[annotation._id],
 															 {fragment: annotation.fragment, data: annotation.data},
@@ -605,6 +607,9 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.createAnnotation = function(layerID, annotation) {
+				console.log('createAnnotation()');
+				console.log(annotation);
+				
 				camomileService.createAnnotation(layerID,
 												 annotation.id_medium,
 												 annotation.fragment,
