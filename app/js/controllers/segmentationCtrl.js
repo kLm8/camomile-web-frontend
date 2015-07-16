@@ -486,7 +486,7 @@ angular.module('myApp.controllers')
 
 							if (found_annotateur) {
 								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
-								$scope.getAnnots(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
+								setTimeout($scope.getAnnots(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false), 2000);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
