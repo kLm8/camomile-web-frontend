@@ -477,6 +477,7 @@ angular.module('myApp.controllers')
 
 					// if user is "segmenteur", update layers for "annotateur"
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
+						$scope.annotations_annotateur = annotations;
 						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
 						for (var i = 0; i < usernames.length; i++) {
 							var content_annotateur = content + '_' + usernames[i];
@@ -484,15 +485,14 @@ angular.module('myApp.controllers')
 							var found_annotateur = id_layer_annotateur == -1 ? false : true;
 
 							if (found_annotateur) {
-								console.log('Updating layer : ' + content_annotateur);
-								$scope.annotations_annotateur = annotations;
-								$scope.saveLayer(content_annotateur, id_layer_annotateur, annotations, false);
+								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
+								$scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
 								camomileService.createLayer($scope.model.selected_corpus, 
 															content_annotateur, '', 'segment', 'label',
-															annotations, 
+															$scope.annotations_annotateur, 
 															function(err, data) {
 																if(err) alert(data.message);
 																else $scope.get_layers($scope.model.selected_corpus);
@@ -530,10 +530,6 @@ angular.module('myApp.controllers')
 						console.log('annotations on layer ' + content);
 						console.log(data);
 
-						if (!update) annotations = $scope.annotations_annotateur;
-						console.log('annotations to be saved on ' + content);
-						console.log(annotations);
-
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
 								if (annotations[j].fragment.start == data[i].fragment.start && 
@@ -543,6 +539,9 @@ angular.module('myApp.controllers')
 								};
 							};
 						};
+
+						console.log('annotations to be saved on ' + content);
+						console.log(annotations);
 
 						// then save or update the new annotations
 						for (var k = 0; k < annotations.length; k++) {
