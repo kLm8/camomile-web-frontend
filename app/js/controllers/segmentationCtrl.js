@@ -178,6 +178,7 @@ angular.module('myApp.controllers')
 			$scope.id = 0;
 			$scope.lastGroup = 0;
 			$scope.hashTable = {};
+			$scope.itemsToRemove = new vis.DataSet([]);
 
 			$scope.options = {
 				editable: {add: true, remove: true, updateGroup: true, updateTime: false},
@@ -213,6 +214,8 @@ angular.module('myApp.controllers')
 
 				onRemove: function (item, callback) {
 					if (confirm('Remove label "' + item.content + '" ?')) {
+						item.content = 'DELETE__' + item.content;
+						$scope.itemsToRemove.add(item);
 						callback(item); // confirm deletion
 					}
 					else {
@@ -420,16 +423,31 @@ angular.module('myApp.controllers')
 				var ids = $scope.groups.getIds();
 
 				for (i in ids) {
-					var content = $scope.groups.get(i).content;
+					var content = '';
+					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
+						content = $scope.groups.get(i).content + '_' + Session.username;
+					} else {
+						content = $scope.groups.get(i).content;
+					};
+
 					// get annotations on this layer
 					var x = $scope.items.get({
 						filter: function(item) {
 							return item.group == i;
 						}
 					});
+					// get annotations to remove on this layer
+					var y = $scope.itemsToRemove.get({
+						filter: function(item) {
+							return item.group == i;
+						}
+					});
 
 					// convert visjs data to Camomile format
-					var annotations = visjs2camomile(x);
+					var a = visjs2camomile(x);
+					var b = visjs2camomile(y);
+					var annotations = angular.extend({}, a, b);
+
 
 					// remove duplicates on this layer (not necessary, as there should be none)
 					for (var i = 0; i < annotations.length-1; i++) {
@@ -440,24 +458,15 @@ angular.module('myApp.controllers')
 						}
 					};
 
-					// look for the layer if it exists in the DB
-					var found = false;
-					// console.log("Looking for : " + content);
-
-					var id_layer = -1;
-					for (var j = 0; j < $scope.model.available_layers.length; j++) {
-						if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
-							found = true;
-							id_layer = j;
-							break;
-						};
-					};
+					var id_layer = $scope.searchLayer(content);
+					var found = id_layer == -1 ? false : true;
 
 					if (found) {
+						console.log('Found it !');
 						$scope.saveLayer(content, id_layer, annotations);
 					}
 					else {
-						// console.log('Not found : creating layer \'' + content + '\'');
+						console.log('Not found : creating layer \'' + content + '\'');
 						camomileService.createLayer($scope.model.selected_corpus, 
 													content, '', 'segment', 'label',
 													annotations, 
@@ -466,9 +475,46 @@ angular.module('myApp.controllers')
 														else $scope.get_layers($scope.model.selected_corpus);
 													});
 					};
+
+					// if user is "segmenteur", update layers for "annotateur"
+					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
+						content = $scope.groups.get(i).content + '_' + Session.username;
+						var id_layer = $scope.searchLayer(content);
+						var found = id_layer == -1 ? false : true;
+
+						if (found) {
+							console.log('Updating layer : ' + content);
+							$scope.saveLayer(content, id_layer, annotations);
+						}
+						else {
+							console.log('Creating layer \'' + content + '\'');
+							camomileService.createLayer($scope.model.selected_corpus, 
+														content, '', 'segment', 'label',
+														annotations, 
+														function(err, data) {
+															if(err) alert(data.message);
+															else $scope.get_layers($scope.model.selected_corpus);
+														});
+						};
+					};
 				};
 
 				alert("Annotations saved successfully.");
+			};
+
+			$scope.searchLayer = function(content) {
+				// look for the layer if it exists in the DB
+				console.log("Looking for : " + content);
+
+				var id_layer = -1;
+				for (var j = 0; j < $scope.model.available_layers.length; j++) {
+					if (content.toLowerCase() == $scope.model.available_layers[j].name.toLowerCase()) {
+						id_layer = j;
+						break;
+					};
+				};
+
+				return id_layer;
 			};
 
 			$scope.saveLayer = function(content, id_layer, annotations) {
@@ -597,6 +643,7 @@ angular.module('myApp.controllers')
 				if (!layer.selected) {
 					// load layer
 					$scope.model.selected_reference = layer._id;
+					$scope.model.selected_reference_name = layer.name;
 				} else {
 					// clean layer
 					$scope.cleanLayer(layer.name);
@@ -727,7 +774,28 @@ angular.module('myApp.controllers')
 
 			$scope.$watch('model.selected_reference', function (newValue, oldValue, scope) {
 				if (newValue) {
-					scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference);
+					// get annotations for the selected layer
+					// if user is an annotator, get the annotations on his specific layer (duplicate of segmenter's layer)
+					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
+						var layer = scope.model.selected_reference_name + '_' + Session.username;
+						console.log('Loading annotations of ' + Session.username + ' on ' + layer);
+						var b = false;
+						for (var i = 0; i < scope.model.available_layers.length; i++) {
+							if (scope.model.available_layers[i].name.toLowerCase().indexOf(layer) > -1) {
+								// layer found
+								b = true;
+								scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.available_layers[i]._id);
+								break;
+							};
+						};
+						if (!b) {
+							// layer not found -> has to be segmented first by user "segmenteur"
+							console.log('No annotations available');
+						};
+					} else {
+						console.log('Loading segmentation layer');
+						scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference);
+					};					
 				};
 			});
 
