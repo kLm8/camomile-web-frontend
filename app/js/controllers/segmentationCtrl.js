@@ -524,34 +524,30 @@ angular.module('myApp.controllers')
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				// console.log('saveLayer()');
 				console.log('0. annotations to be saved on ' + content);
-				console.log(annotations);
+				console.log($scope.annotations_annotateur);
 
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
-						if (!update) {
-							delete annotations;
-							var annotations = $scope.annotations_annotateur;
-						};
-
 						// first remove annotations already saved
 						console.log('annotations on layer ' + content);
 						console.log(data);
 
 						console.log('1. annotations to be saved on ' + content);
-						console.log(annotations);
+						console.log($scope.annotations_annotateur);
 
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
 								if (annotations[j].fragment.start == data[i].fragment.start && 
 									annotations[j].fragment.end == data[i].fragment.end &&
 									annotations[j].data == data[i].data) {
+										console.log('spliced');
 										annotations.splice(j, 1);
 								};
 							};
 						};
 
 						console.log('2. annotations to be saved on ' + content);
-						console.log(annotations);
+						console.log($scope.annotations_annotateur);
 
 						// then save or update the new annotations
 						for (var k = 0; k < annotations.length; k++) {
