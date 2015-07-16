@@ -782,7 +782,6 @@ angular.module('myApp.controllers')
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						var layer = scope.model.selected_reference_name + '_' + Session.username;
 						console.log('Loading annotations of ' + Session.username + ' on ' + layer);
-						console.log($scope.model.available_layers);
 						var id_layer = $scope.searchLayer(layer);
 						var found = id_layer == -1 ? false : true;
 						if (found) {
@@ -803,7 +802,11 @@ angular.module('myApp.controllers')
 					camomileService.getLayer($scope.model.current_layer[0]['id_layer'],
 						function(err, data) {
 							if(!err) {
+								console.log('Clean layer : ' + data.name);
 								g = $scope.cleanLayer(data.name);
+
+								console.log('current_layer : ');
+								console.log($scope.model.current_layer);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({
@@ -819,6 +822,10 @@ angular.module('myApp.controllers')
 									$scope.id += 1;
 									$scope.$apply();
 								};
+
+								console.log('items :');
+								console.log($scope.items);
+								
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
 							}
 							else {
