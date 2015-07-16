@@ -480,18 +480,18 @@ angular.module('myApp.controllers')
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
 						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
 						for (var i = 0; i < usernames.length; i++) {
-							content = content + '_' + usernames[i];
-							var id_layer = $scope.searchLayer(content);
+							var content_annotateur = content + '_' + usernames[i];
+							var id_layer = $scope.searchLayer(content_annotateur);
 							var found = id_layer == -1 ? false : true;
 
 							if (found) {
-								console.log('Updating layer : ' + content);
-								$scope.saveLayer(content, id_layer, annotations);
+								console.log('Updating layer : ' + content_annotateur);
+								$scope.saveLayer(content_annotateur, id_layer, annotations);
 							}
 							else {
-								console.log('Creating layer \'' + content + '\'');
+								console.log('Creating layer \'' + content_annotateur + '\'');
 								camomileService.createLayer($scope.model.selected_corpus, 
-															content, '', 'segment', 'label',
+															content_annotateur, '', 'segment', 'label',
 															annotations, 
 															function(err, data) {
 																if(err) alert(data.message);
