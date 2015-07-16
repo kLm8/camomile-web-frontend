@@ -43,9 +43,12 @@ angular.module('myApp.controllers')
 
 			// get list of reference annotations from a given layer
 			$scope.get_annotations = function (corpus_id, medium_id, layer_id) {
+				console.log('Loading annotations');
 				camomileService.getAnnotations(function(err, data) {
 					if(!err) {
 						$scope.$apply(function() {
+							console.log('Loaded :');
+							console.log(data);
 							$scope.model.current_layer = data;
 						});
 					}
@@ -825,7 +828,7 @@ angular.module('myApp.controllers')
 
 								console.log('items :');
 								console.log($scope.items);
-								
+
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
 							}
 							else {
