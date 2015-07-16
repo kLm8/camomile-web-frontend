@@ -523,12 +523,16 @@ angular.module('myApp.controllers')
 			// update (boolean) is used to copy the annotation to the annotator's layer
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				// console.log('saveLayer()');
-				if (!update) annotations = $scope.annotations_annotateur;
 				console.log('0. annotations to be saved on ' + content);
 				console.log(annotations);
 
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
+						if (!update) {
+							delete annotations;
+							var annotations = $scope.annotations_annotateur;
+						};
+
 						// first remove annotations already saved
 						console.log('annotations on layer ' + content);
 						console.log(data);
@@ -541,7 +545,6 @@ angular.module('myApp.controllers')
 								if (annotations[j].fragment.start == data[i].fragment.start && 
 									annotations[j].fragment.end == data[i].fragment.end &&
 									annotations[j].data == data[i].data) {
-										console.log('spliced');
 										annotations.splice(j, 1);
 								};
 							};
