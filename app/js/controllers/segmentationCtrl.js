@@ -784,7 +784,7 @@ angular.module('myApp.controllers')
 						console.log('Loading annotations of ' + Session.username + ' on ' + layer);
 						var b = false;
 						for (var i = 0; i < scope.model.available_layers.length; i++) {
-							if (scope.model.available_layers[i].name.toLowerCase().indexOf(layer) > -1) {
+							if (scope.model.available_layers[i].name.toLowerCase() == layer.toLowerCase()) {
 								// layer found
 								b = true;
 								scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.available_layers[i]._id);
