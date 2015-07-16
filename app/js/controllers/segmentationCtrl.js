@@ -486,7 +486,7 @@ angular.module('myApp.controllers')
 
 							if (found_annotateur) {
 								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
-								setTimeout($scope.getAnnots(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false), 2000);
+								$scope.getAnnots(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
@@ -521,6 +521,10 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.getAnnots = function(content, id_layer, annotations, update) {
+				console.log('getAnnots(' + content + ', '
+										 + id_layer + ', '
+										 + annotations + ', '
+										 + update +')');
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						console.log('calling saveLayer(' + content + ', '
