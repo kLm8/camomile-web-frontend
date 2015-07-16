@@ -782,16 +782,11 @@ angular.module('myApp.controllers')
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						var layer = scope.model.selected_reference_name + '_' + Session.username;
 						console.log('Loading annotations of ' + Session.username + ' on ' + layer);
-						var b = false;
-						for (var i = 0; i < scope.model.available_layers.length; i++) {
-							if (scope.model.available_layers[i].name.toLowerCase() == layer.toLowerCase()) {
-								// layer found
-								b = true;
-								scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.available_layers[i]._id);
-								break;
-							};
-						};
-						if (!b) {
+						var id_layer = $scope.searchLayer(layer);
+						var found = id_layer == -1 ? false : true;
+						if (found) {
+							scope.get_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.available_layers[id_layer]._id);
+						} else {
 							// layer not found -> has to be segmented first by user "segmenteur"
 							console.log('No annotations available');
 						};
