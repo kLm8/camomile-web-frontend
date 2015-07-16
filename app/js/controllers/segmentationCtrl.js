@@ -478,8 +478,9 @@ angular.module('myApp.controllers')
 
 					// if user is "segmenteur", update layers for "annotateur"
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
-						for(username in ["annotateur1", "annotateur2", "annotateur3"]) {
-							content = $scope.groups.get(i).content + '_' + username;
+						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
+						for (var i = 0; i < usernames.length; i++) {
+							content = content + '_' + usernames[i];
 							var id_layer = $scope.searchLayer(content);
 							var found = id_layer == -1 ? false : true;
 
