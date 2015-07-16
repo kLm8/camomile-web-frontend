@@ -782,6 +782,7 @@ angular.module('myApp.controllers')
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						var layer = scope.model.selected_reference_name + '_' + Session.username;
 						console.log('Loading annotations of ' + Session.username + ' on ' + layer);
+						console.log($scope.model.available_layers);
 						var id_layer = $scope.searchLayer(layer);
 						var found = id_layer == -1 ? false : true;
 						if (found) {
