@@ -522,6 +522,7 @@ angular.module('myApp.controllers')
 
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				console.log('saveLayer()');
+				console.log(annotations);
 
 				// update (boolean) is used to copy the annotation to the annotator's layer
 				if (typeof update === 'undefined') update = true;
