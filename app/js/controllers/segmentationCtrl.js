@@ -478,14 +478,26 @@ angular.module('myApp.controllers')
 					// if user is "segmenteur", update layers for "annotateur"
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
 						$scope.annotations_annotateur = annotations;
-						
 						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
 						for (var i = 0; i < usernames.length; i++) {
 							var content_annotateur = content + '_' + usernames[i];
 							var id_layer_annotateur = $scope.searchLayer(content_annotateur);
 							var found_annotateur = id_layer_annotateur == -1 ? false : true;
 
-							$scope.updateAnnotatorsLayers(content_annotateur, id_layer_annotateur, found_annotateur);
+							if (found_annotateur) {
+								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
+								$scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
+							}
+							else {
+								console.log('Creating layer \'' + content_annotateur + '\'');
+								camomileService.createLayer($scope.model.selected_corpus, 
+															content_annotateur, '', 'segment', 'label',
+															$scope.annotations_annotateur, 
+															function(err, data) {
+																if(err) alert(data.message);
+																else $scope.get_layers($scope.model.selected_corpus);
+															});
+							};
 						};
 					};
 				};
@@ -508,75 +520,58 @@ angular.module('myApp.controllers')
 				return id_layer;
 			};
 
-			$scope.updateAnnotatorsLayers = function(content, id_layer, found) {
-				if (found) {
-					console.log('Updating layer ' + id_layer + ' : ' + content);
-					camomileService.getAnnotations(function (err, data) {
-						if (!err) {
-							$scope.saveLayer(content, id_layer, $scope.annotations_annotateur, data, false);
-						} else {
-							console.log(err, data);
-							// alert(data.error);
-						}
-					}, {
-						filter: {
-							id_layer: $scope.model.available_layers[id_layer]._id,
-							id_medium: $scope.model.selected_medium
-						}
-					});
-				}
-				else {
-					console.log('Creating layer \'' + content + '\'');
-					camomileService.createLayer($scope.model.selected_corpus, 
-												content, '', 'segment', 'label',
-												$scope.annotations_annotateur, 
-												function(err, data) {
-													if(err) alert(data.message);
-													else $scope.get_layers($scope.model.selected_corpus);
-												});
-				};
-			};
-
 			// update (boolean) is used to copy (or not) the annotations to the annotator's layer
-			$scope.saveLayer = function(content, id_layer, annotations, data, update) {
+			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				console.log('saveLayer(' + content + ', '
 										 + id_layer + ', '
 										 + annotations + ', '
 										 + update +')');
 
-				console.log('0. annotations to be saved on ' + content);
-				console.log(annotations);
+				camomileService.getAnnotations(function (err, data) {
+					if (!err) {
+						console.log('0. annotations to be saved on ' + content);
+						console.log(annotations);
 
-				console.log('annotations on layer ' + content);
-				console.log(data);
+						console.log('annotations on layer ' + content);
+						console.log(data);
 
-				// first remove annotations already saved
-				for (var i = 0; i < data.length; i++) {
-					for (var j = 0; j < annotations.length; j++) {
-						if (annotations[j].fragment.start == data[i].fragment.start && 
-							annotations[j].fragment.end == data[i].fragment.end &&
-							annotations[j].data == data[i].data) {
-								annotations.splice(j, 1);
+						// first remove annotations already saved
+						for (var i = 0; i < data.length; i++) {
+							for (var j = 0; j < annotations.length; j++) {
+								if (annotations[j].fragment.start == data[i].fragment.start && 
+									annotations[j].fragment.end == data[i].fragment.end &&
+									annotations[j].data == data[i].data) {
+										annotations.splice(j, 1);
+								};
+							};
 						};
-					};
-				};
 
-				console.log('1. annotations to be saved on ' + content);
-				console.log(annotations);
+						console.log('1. annotations to be saved on ' + content);
+						console.log(annotations);
 
-				// then save or update the new annotations
-				for (var k = 0; k < annotations.length; k++) {
-					// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
-					if ($scope.hashTable[annotations[k]._id] != '') {
-						// update annotation
-						console.log('Updating existing annotation');
-						$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k], update);
+						// then save or update the new annotations
+						for (var k = 0; k < annotations.length; k++) {
+							// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
+							if ($scope.hashTable[annotations[k]._id] != '') {
+								// update annotation
+								console.log('Updating existing annotation');
+								$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k], update);
+							} else {
+								// create annotation
+								console.log('Creating new annotation');
+								$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
+							};
+						};
 					} else {
-						// create annotation
-						console.log('Creating new annotation');
-						$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
-					};
-				};
+						console.log(err, data);
+						alert(data.error);
+					}
+				}, {
+					filter: {
+						id_layer: $scope.model.available_layers[id_layer]._id,
+						id_medium: $scope.model.selected_medium
+					}
+				});
 			};
 
 			$scope.checkAnnotation = function(layerID, annotation, update) {
