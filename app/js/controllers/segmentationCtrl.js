@@ -547,7 +547,7 @@ angular.module('myApp.controllers')
 						}
 					});
 				} else {
-					setTimeout($scope.getAnnots(content, id_layer, annotations, update), 1000);
+					setTimeout($scope.getAnnots(content, id_layer, annotations, update), 3000);
 				};
 			};
 
