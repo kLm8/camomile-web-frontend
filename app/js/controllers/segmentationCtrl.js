@@ -628,8 +628,7 @@ angular.module('myApp.controllers')
 
 			// remove annotations on a layer
 			$scope.cleanLayer = function (layer_name) {
-				console.log('cleanLayer(' + layer_name + ')');
-
+				layer_name = layer_name.replace(Session.username, '');
 				var ids = $scope.groups.getIds();
 				var g = -1;
 				for (i in ids) {
@@ -638,9 +637,6 @@ angular.module('myApp.controllers')
 						break;
 					};
 				};
-				
-				console.log('g:' + g);
-
 				var itemsToRemove = $scope.items.get({
 					filter: function(item) {
 						return item.group == g;
@@ -831,9 +827,6 @@ angular.module('myApp.controllers')
 									$scope.$apply();
 								};
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
-
-								console.log('items:');
-								console.log($scope.items);
 							}
 							else {
 								console.log(data.error);
