@@ -811,9 +811,6 @@ angular.module('myApp.controllers')
 							if(!err) {
 								g = $scope.cleanLayer(data.name);
 
-								console.log('$scope.model.current_layer :');
-								console.log($scope.model.current_layer);
-
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({
 										// title: parseInt($scope.model.current_layer[i]['_id'], 16),
@@ -827,9 +824,11 @@ angular.module('myApp.controllers')
 									$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
 									$scope.id += 1;
 									$scope.$apply();
-									console.log('item ' + i + ' added');
 								};
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
+
+								console.log('items:');
+								console.log($scope.items);
 							}
 							else {
 								console.log(data.error);
