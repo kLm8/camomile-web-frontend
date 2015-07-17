@@ -446,8 +446,6 @@ angular.module('myApp.controllers')
 					// convert visjs data to Camomile format
 					var a = visjs2camomile(x);
 					var b = visjs2camomile(y);
-					console.log('annotations to delete:');
-					console.log(b);
 					var annotations = angular.extend({}, a, b);
 
 					// remove duplicates on this layer (not necessary, as there should be none)
@@ -524,19 +522,8 @@ angular.module('myApp.controllers')
 
 			// update (boolean) is used to copy (or not) the annotations to the annotator's layer
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
-				// console.log('saveLayer(' + content + ', '
-				// 						 + id_layer + ', '
-				// 						 + annotations + ', '
-				// 						 + update +')');
-
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
-						// console.log('0. annotations to be saved on ' + content);
-						// console.log(annotations);
-
-						// console.log('annotations on layer ' + content);
-						// console.log(data);
-
 						// first remove annotations already saved
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
@@ -548,20 +535,17 @@ angular.module('myApp.controllers')
 							};
 						};
 
-						console.log('1. annotations to be saved on ' + content);
-						console.log(annotations);
-
 						// then save or update the new annotations
 						for (var k in annotations) {
 							if (annotations.hasOwnProperty(k)) {
 								// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
 								if ($scope.hashTable[annotations[k]._id] != '') {
 									// update annotation
-									console.log('Updating existing annotation');
+									// console.log('Updating existing annotation');
 									$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k], update);
 								} else {
 									// create annotation
-									console.log('Creating new annotation');
+									// console.log('Creating new annotation');
 									$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
 								};
 							};
@@ -579,18 +563,15 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.checkAnnotation = function(layerID, annotation, update) {
-				// console.log('checkAnnotation()');
-
 				camomileService.getAnnotation($scope.hashTable[annotation._id], function (err, data) {
 					if (!err) {
 						// check if annotation's layer has changed
 						if (data.id_layer != layerID) {
-							console.log('Layer has changed');
+							// console.log('Layer has changed');
 							// changed: create new annotation and update the old one if update = true
 							$scope.createAnnotation(layerID, annotation);
 							
 							if (update) {
-								console.log('update was true');
 								// $scope.deleteAnnotation(annotation._id); // deletion can't be done (permissions)
 								var string = 'DELETE__' + annotation.data;
 								camomileService.updateAnnotation($scope.hashTable[annotation._id],
@@ -601,7 +582,7 @@ angular.module('myApp.controllers')
 																 });
 							};
 						} else {
-							console.log('updating the annotation on the same layer');
+							// console.log('Updating the annotation on the same layer');
 							// not changed, update the annotation
 							camomileService.updateAnnotation($scope.hashTable[annotation._id],
 															 {fragment: annotation.fragment, data: annotation.data},
@@ -615,8 +596,6 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.createAnnotation = function(layerID, annotation) {
-				// console.log('createAnnotation()');
-
 				camomileService.createAnnotation(layerID,
 												 annotation.id_medium,
 												 annotation.fragment,
