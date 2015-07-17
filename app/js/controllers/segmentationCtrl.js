@@ -530,7 +530,7 @@ angular.module('myApp.controllers')
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						if (!update) {
-							delete annotations;
+							// delete annotations;
 							var annotations = $scope.annotations_annotateur;
 						};
 						console.log('0. annotations to be saved on ' + content);
