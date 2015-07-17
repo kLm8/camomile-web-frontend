@@ -423,6 +423,7 @@ angular.module('myApp.controllers')
 				var ids = $scope.groups.getIds();
 
 				for (i in ids) {
+					$scope.mutex = true;
 					var content = '';
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						content = $scope.groups.get(i).content + '_' + Session.username;
@@ -521,28 +522,33 @@ angular.module('myApp.controllers')
 			};
 
 			$scope.getAnnots = function(content, id_layer, annotations, update) {
-				// console.log('getAnnots(' + content + ', '
-				// 						 + id_layer + ', '
-				// 						 + annotations + ', '
-				// 						 + update +')');
-				setTimeout(camomileService.getAnnotations(function (err, data) {
-					if (!err) {
-						console.log('calling saveLayer(' + content + ', '
-														 + id_layer + ', '
-														 + annotations + ', '
-														 + data + ', '
-														 + update +')');
-						$scope.saveLayer(content, id_layer, annotations, data, update);
-					} else {
-						console.log(err, data);
-						alert(data.error);
-					}
-				}, {
-					filter: {
-						id_layer: $scope.model.available_layers[id_layer]._id,
-						id_medium: $scope.model.selected_medium
-					}
-				}), 2000);
+				if ($scope.mutex) {
+					$scope.mutex = false;
+					console.log('getAnnots(' + content + ', '
+											 + id_layer + ', '
+											 + annotations + ', '
+											 + update +')');
+					camomileService.getAnnotations(function (err, data) {
+						if (!err) {
+							console.log('calling saveLayer(' + content + ', '
+															 + id_layer + ', '
+															 + annotations + ', '
+															 + data + ', '
+															 + update +')');
+							$scope.saveLayer(content, id_layer, annotations, data, update);
+						} else {
+							console.log(err, data);
+							alert(data.error);
+						}
+					}, {
+						filter: {
+							id_layer: $scope.model.available_layers[id_layer]._id,
+							id_medium: $scope.model.selected_medium
+						}
+					});
+				} else {
+					setTimeout($scope.getAnnots(content, id_layer, annotations, update), 1000);
+				};
 			};
 
 			// update (boolean) is used to copy the annotation to the annotator's layer
@@ -614,6 +620,7 @@ angular.module('myApp.controllers')
 																if(err) alert(data.message);
 																else $scope.get_layers($scope.model.selected_corpus);
 															 });
+							$scope.mutex = true;
 						};
 					};
 				});
@@ -631,6 +638,7 @@ angular.module('myApp.controllers')
 													else {
 														// console.log('id: ' + data._id);
 														$scope.hashTable[annotation._id] = data._id;
+														$scope.mutex = true;
 														// console.log('annotation: ' + annotation.data + ' ' +
 														// 			'id: ' + annotation._id + ' ' +
 														// 			'hash: ' + $scope.hashTable[annotation._id]);
