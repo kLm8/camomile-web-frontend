@@ -444,7 +444,7 @@ angular.module('myApp.controllers')
 					});
 
 					// convert visjs data to Camomile format
-					var annotations = visjs2camomile(x);
+					var a = visjs2camomile(x);
 					var b = visjs2camomile(y);
 					var annotations = angular.extend({}, a, b);
 
