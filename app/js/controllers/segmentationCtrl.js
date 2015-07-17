@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
+	.controller('SegmentationCtrl', ['$sce', '$scope', '$http', '$timeout', 
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
-		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
+		function ($sce, $scope, $http, $timeout, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
 			$controller('ExplorationBaseCtrl',
 				{
@@ -524,6 +524,7 @@ angular.module('myApp.controllers')
 			$scope.getAnnots = function(content, id_layer, annotations, update) {
 				if ($scope.mutex) {
 					$scope.mutex = false;
+					$timeout.flush();
 					console.log('getAnnots(' + content + ', '
 											 + id_layer + ', '
 											 + annotations + ', '
@@ -547,7 +548,7 @@ angular.module('myApp.controllers')
 						}
 					});
 				} else {
-					setTimeout($scope.getAnnots(content, id_layer, annotations, update), 3000);
+					$timeout(function(){$scope.getAnnots(content, id_layer, annotations, update);}, 2000);
 				};
 			};
 
