@@ -446,6 +446,8 @@ angular.module('myApp.controllers')
 					// convert visjs data to Camomile format
 					var a = visjs2camomile(x);
 					var b = visjs2camomile(y);
+					console.log('annotations to delete:');
+					console.log(b);
 					var annotations = angular.extend({}, a, b);
 
 					// remove duplicates on this layer (not necessary, as there should be none)
@@ -522,57 +524,58 @@ angular.module('myApp.controllers')
 
 			// update (boolean) is used to copy (or not) the annotations to the annotator's layer
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
-				console.log(annotations);
 				// console.log('saveLayer(' + content + ', '
 				// 						 + id_layer + ', '
 				// 						 + annotations + ', '
 				// 						 + update +')');
 
-				// camomileService.getAnnotations(function (err, data) {
-				// 	if (!err) {
-				// 		console.log('0. annotations to be saved on ' + content);
-				// 		console.log(annotations);
+				camomileService.getAnnotations(function (err, data) {
+					if (!err) {
+						// console.log('0. annotations to be saved on ' + content);
+						// console.log(annotations);
 
-				// 		console.log('annotations on layer ' + content);
-				// 		console.log(data);
+						// console.log('annotations on layer ' + content);
+						// console.log(data);
 
-				// 		// first remove annotations already saved
-				// 		for (var i = 0; i < data.length; i++) {
-				// 			for (var j = 0; j < annotations.length; j++) {
-				// 				if (annotations[j].fragment.start == data[i].fragment.start && 
-				// 					annotations[j].fragment.end == data[i].fragment.end &&
-				// 					annotations[j].data == data[i].data) {
-				// 						annotations.splice(j, 1);
-				// 				};
-				// 			};
-				// 		};
+						// first remove annotations already saved
+						for (var i = 0; i < data.length; i++) {
+							for (var j = 0; j < annotations.length; j++) {
+								if (annotations[j].fragment.start == data[i].fragment.start && 
+									annotations[j].fragment.end == data[i].fragment.end &&
+									annotations[j].data == data[i].data) {
+										annotations.splice(j, 1);
+								};
+							};
+						};
 
-				// 		console.log('1. annotations to be saved on ' + content);
-				// 		console.log(annotations);
+						console.log('1. annotations to be saved on ' + content);
+						console.log(annotations);
 
-				// 		// then save or update the new annotations
-				// 		for (var k = 0; k < annotations.length; k++) {
-				// 			// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
-				// 			if ($scope.hashTable[annotations[k]._id] != '') {
-				// 				// update annotation
-				// 				console.log('Updating existing annotation');
-				// 				$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k], update);
-				// 			} else {
-				// 				// create annotation
-				// 				console.log('Creating new annotation');
-				// 				$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
-				// 			};
-				// 		};
-				// 	} else {
-				// 		console.log(err, data);
-				// 		alert(data.error);
-				// 	}
-				// }, {
-				// 	filter: {
-				// 		id_layer: $scope.model.available_layers[id_layer]._id,
-				// 		id_medium: $scope.model.selected_medium
-				// 	}
-				// });
+						// then save or update the new annotations
+						for (var k in annotations) {
+							if (annotations.hasOwnProperty(k)) {
+								// console.log('annotation: ' + annotations[k].data + ' id: ' + annotations[k]._id + ' hash: ' + $scope.hashTable[annotations[k]._id]);
+								if ($scope.hashTable[annotations[k]._id] != '') {
+									// update annotation
+									console.log('Updating existing annotation');
+									$scope.checkAnnotation($scope.model.available_layers[id_layer]._id, annotations[k], update);
+								} else {
+									// create annotation
+									console.log('Creating new annotation');
+									$scope.createAnnotation($scope.model.available_layers[id_layer]._id, annotations[k]);
+								};
+							};
+						};
+					} else {
+						console.log(err, data);
+						alert(data.error);
+					}
+				}, {
+					filter: {
+						id_layer: $scope.model.available_layers[id_layer]._id,
+						id_medium: $scope.model.selected_medium
+					}
+				});
 			};
 
 			$scope.checkAnnotation = function(layerID, annotation, update) {
