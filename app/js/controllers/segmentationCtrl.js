@@ -628,9 +628,8 @@ angular.module('myApp.controllers')
 
 			// remove annotations on a layer
 			$scope.cleanLayer = function (layer_name) {
-				layer_name = layer_name.replace(Session.username, '');
-				console.log(layer_name);
-				
+				layer_name = layer_name.replace('_'+Session.username, '');
+
 				var ids = $scope.groups.getIds();
 				var g = -1;
 				for (i in ids) {
