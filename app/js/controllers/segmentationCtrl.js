@@ -461,11 +461,11 @@ angular.module('myApp.controllers')
 					var found = id_layer == -1 ? false : true;
 
 					if (found) {
-						// console.log('Found it !');
+						console.log('Saving layer ' + content);
 						$scope.saveLayer(content, id_layer, annotations, true);
 					}
 					else {
-						// console.log('Not found : creating layer \'' + content + '\'');
+						console.log('Creating layer \'' + content + '\'');
 						camomileService.createLayer($scope.model.selected_corpus, 
 													content, '', 'segment', 'label',
 													annotations, 
@@ -485,7 +485,7 @@ angular.module('myApp.controllers')
 							var found_annotateur = id_layer_annotateur == -1 ? false : true;
 
 							if (found_annotateur) {
-								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
+								console.log('Updating layer : ' + content_annotateur);
 								$scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
 							}
 							else {
@@ -502,7 +502,7 @@ angular.module('myApp.controllers')
 					};
 				};
 
-				// alert("Annotations saved successfully.");
+				alert("Annotations saved successfully.");
 			};
 
 			$scope.searchLayer = function(content) {
@@ -810,6 +810,9 @@ angular.module('myApp.controllers')
 						function(err, data) {
 							if(!err) {
 								g = $scope.cleanLayer(data.name);
+
+								console.log('$scope.model.current_layer :');
+								console.log($scope.model.current_layer);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									$scope.items.add({
