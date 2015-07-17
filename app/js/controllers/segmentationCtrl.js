@@ -827,6 +827,7 @@ angular.module('myApp.controllers')
 									$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
 									$scope.id += 1;
 									$scope.$apply();
+									console.log('item ' + i + ' added');
 								};
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
 							}
