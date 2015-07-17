@@ -628,6 +628,8 @@ angular.module('myApp.controllers')
 
 			// remove annotations on a layer
 			$scope.cleanLayer = function (layer_name) {
+				console.log('cleanLayer(' + layer_name + ')');
+
 				var ids = $scope.groups.getIds();
 				var g = -1;
 				for (i in ids) {
@@ -636,6 +638,9 @@ angular.module('myApp.controllers')
 						break;
 					};
 				};
+				
+				console.log('g:' + g);
+
 				var itemsToRemove = $scope.items.get({
 					filter: function(item) {
 						return item.group == g;
