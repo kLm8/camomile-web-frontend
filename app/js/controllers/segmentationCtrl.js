@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
+	.controller('SegmentationCtrl', ['$sce', '$scope', '$http', '$timeout'
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
-		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
+		function ($sce, $scope, $http, $timeout, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
 			$controller('ExplorationBaseCtrl',
 				{
@@ -486,7 +486,7 @@ angular.module('myApp.controllers')
 
 							if (found_annotateur) {
 								console.log('Updating layer ' + id_layer_annotateur + ' : ' + content_annotateur);
-								$scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
+								$timeout($scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false), 3000);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
