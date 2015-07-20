@@ -814,18 +814,20 @@ angular.module('myApp.controllers')
 								g = $scope.cleanLayer(data.name);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
-									$scope.items.add({
-										// title: parseInt($scope.model.current_layer[i]['_id'], 16),
-										// title: $scope.model.current_layer[i]['_id'],
-										id: $scope.id,
-										group: g,
-										content: $scope.model.current_layer[i]['data'],
-										start: $scope.model.current_layer[i]['fragment']['start']*1000,
-										end: $scope.model.current_layer[i]['fragment']['end']*1000
-									});
-									$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
-									$scope.id += 1;
-									$scope.$apply();
+									if ($scope.model.current_layer[i]['data'].toLowerCase().indexOf("DELETE__") == -1) {
+										$scope.items.add({
+											// title: parseInt($scope.model.current_layer[i]['_id'], 16),
+											// title: $scope.model.current_layer[i]['_id'],
+											id: $scope.id,
+											group: g,
+											content: $scope.model.current_layer[i]['data'],
+											start: $scope.model.current_layer[i]['fragment']['start']*1000,
+											end: $scope.model.current_layer[i]['fragment']['end']*1000
+										});
+										$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
+										$scope.id += 1;
+										$scope.$apply();
+									};
 								};
 								if ($scope.timeline) $scope.timeline.setWindow(0, 12000);
 							}
