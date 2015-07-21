@@ -460,15 +460,23 @@ angular.module('myApp.controllers')
 					console.log(annotations);
 					console.log(keys.length);
 
-					// remove duplicates on this layer (not necessary, as there should be none)
+					// remove duplicates on this layer
 					for (var i = 0; i < keys.length-1; i++) {
-						if (annotations[keys[i]].fragment.start == annotations[keys[i+1]].fragment.start &&
-							annotations[keys[i]].fragment.end == annotations[keys[i+1]].fragment.end &&
-							annotations[keys[i]].data.toLowerCase() == annotations[keys[i+1]].data.toLowerCase()) {
-								annotations.splice(i, 1);
-								console.log('spliced');
+						for (var j = 1; j < keys.length; j++) {
+							if (annotations[keys[i]].fragment.start == annotations[keys[j]].fragment.start &&
+								annotations[keys[i]].fragment.end == annotations[keys[j]].fragment.end &&
+								annotations[keys[i]].data.toLowerCase() == annotations[keys[j]].data.toLowerCase()) {
+									annotations.splice(j, 1);
+									console.log('spliced');
+							};
 						};
 					};
+
+					var keys = [];
+					for (var key in annotations) {
+						if (annotations.hasOwnProperty(key)) keys.push(key);
+					};
+					console.log(keys.length);
 
 					var id_layer = $scope.searchLayer(content);
 					var found = id_layer == -1 ? false : true;
