@@ -470,6 +470,9 @@ angular.module('myApp.controllers')
 					// 	};
 					// };
 
+					console.log(annotations);
+					console.log(annotations.length);
+
 					// remove duplicates on this layer
 					for (var i = 0; i < annotations.length-1; i++) {
 						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
@@ -479,6 +482,10 @@ angular.module('myApp.controllers')
 								console.log('spliced');
 						}
 					};
+					console.log(annotations.length);
+
+
+
 
 					var id_layer = $scope.searchLayer(content);
 					var found = id_layer == -1 ? false : true;
@@ -557,6 +564,7 @@ angular.module('myApp.controllers')
 									annotations[j].fragment.end == data[i].fragment.end &&
 									annotations[j].data == data[i].data) {
 										annotations.splice(j, 1);
+										console.log('spliced2');
 								};
 							};
 						};
