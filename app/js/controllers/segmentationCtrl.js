@@ -452,14 +452,19 @@ angular.module('myApp.controllers')
 					var b = visjs2camomile(y);
 					annotations = angular.extend({}, a, b);
 
+					var keys = [];
+					for (var key in annotations) {
+						if (annotations.hasOwnProperty(key)) keys.push(key);
+					};
+
 					console.log(annotations);
-					console.log(annotations.length);
+					console.log(keys.length);
 
 					// remove duplicates on this layer (not necessary, as there should be none)
-					for (var i = 0; i < annotations.length-1; i++) {
-						if (annotations[i].fragment.start == annotations[i+1].fragment.start &&
-							annotations[i].fragment.end == annotations[i+1].fragment.end &&
-							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
+					for (var i = 0; i < keys.length-1; i++) {
+						if (annotations[keys[i].fragment.start == annotations[keys[i+1].fragment.start &&
+							annotations[keys[i].fragment.end == annotations[keys[i+1].fragment.end &&
+							annotations[keys[i].data.toLowerCase() == annotations[keys[i+1].data.toLowerCase()) {
 								annotations.splice(i, 1);
 								console.log('spliced');
 						}
