@@ -462,12 +462,12 @@ angular.module('myApp.controllers')
 
 					// remove duplicates on this layer (not necessary, as there should be none)
 					for (var i = 0; i < keys.length-1; i++) {
-						if (annotations[keys[i].fragment.start == annotations[keys[i+1].fragment.start &&
-							annotations[keys[i].fragment.end == annotations[keys[i+1].fragment.end &&
-							annotations[keys[i].data.toLowerCase() == annotations[keys[i+1].data.toLowerCase()) {
+						if (annotations[keys[i]].fragment.start == annotations[keys[i+1]].fragment.start &&
+							annotations[keys[i]].fragment.end == annotations[keys[i+1]].fragment.end &&
+							annotations[keys[i]].data.toLowerCase() == annotations[keys[i+1]].data.toLowerCase()) {
 								annotations.splice(i, 1);
 								console.log('spliced');
-						}
+						};
 					};
 
 					var id_layer = $scope.searchLayer(content);
