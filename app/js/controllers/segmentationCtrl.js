@@ -463,7 +463,7 @@ angular.module('myApp.controllers')
 							if (annotations[keys[i]].fragment.start == annotations[keys[j]].fragment.start &&
 								annotations[keys[i]].fragment.end == annotations[keys[j]].fragment.end &&
 								annotations[keys[i]].data.toLowerCase() == annotations[keys[j]].data.toLowerCase()) {
-									delete annotations[keys[j]];
+									// delete annotations[keys[j]];
 							};
 						};
 					};
