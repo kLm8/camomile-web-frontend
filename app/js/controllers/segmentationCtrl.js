@@ -424,8 +424,12 @@ angular.module('myApp.controllers')
 
 				for (i in ids) {
 					var content = '';
+					var annotations = {};
+
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						content = $scope.groups.get(i).content + '_' + Session.username;
+					} else if (Session.username.toLowerCase().indexOf("viewer") > -1) {
+						break;
 					} else {
 						content = $scope.groups.get(i).content;
 					};
@@ -446,7 +450,10 @@ angular.module('myApp.controllers')
 					// convert visjs data to Camomile format
 					var a = visjs2camomile(x);
 					var b = visjs2camomile(y);
-					var annotations = angular.extend({}, a, b);
+					annotations = angular.extend({}, a, b);
+
+					console.log(annotations);
+					console.log(annotaions.length);
 
 					// remove duplicates on this layer (not necessary, as there should be none)
 					for (var i = 0; i < annotations.length-1; i++) {
@@ -454,6 +461,7 @@ angular.module('myApp.controllers')
 							annotations[i].fragment.end == annotations[i+1].fragment.end &&
 							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
 								annotations.splice(i, 1);
+								console.log('spliced');
 						}
 					};
 
@@ -477,7 +485,6 @@ angular.module('myApp.controllers')
 
 					// if user is "segmenteur", update layers for "annotateur"
 					if (Session.username.toLowerCase().indexOf("segmenteur") > -1) {
-						$scope.annotations_annotateur = annotations;
 						var usernames = ["annotateur1", "annotateur2", "annotateur3"];
 						for (var i = 0; i < usernames.length; i++) {
 							var content_annotateur = content + '_' + usernames[i];
@@ -486,13 +493,13 @@ angular.module('myApp.controllers')
 
 							if (found_annotateur) {
 								console.log('Updating layer : ' + content_annotateur);
-								$scope.saveLayer(content_annotateur, id_layer_annotateur, $scope.annotations_annotateur, false);
+								$scope.saveLayer(content_annotateur, id_layer_annotateur, annotations, false);
 							}
 							else {
 								console.log('Creating layer \'' + content_annotateur + '\'');
 								camomileService.createLayer($scope.model.selected_corpus, 
 															content_annotateur, '', 'segment', 'label',
-															$scope.annotations_annotateur, 
+															annotations, 
 															function(err, data) {
 																if(err) alert(data.message);
 																else $scope.get_layers($scope.model.selected_corpus);
@@ -502,7 +509,11 @@ angular.module('myApp.controllers')
 					};
 				};
 
-				alert("Annotations saved successfully.");
+				if (Session.username.toLowerCase().indexOf("viewer") > -1) {
+					alert(Session.username + " can't save annotations.");
+				} else {
+					alert("Annotations saved successfully.");
+				};
 			};
 
 			$scope.searchLayer = function(content) {
