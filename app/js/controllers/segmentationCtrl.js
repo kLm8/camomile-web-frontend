@@ -453,7 +453,7 @@ angular.module('myApp.controllers')
 					annotations = angular.extend({}, a, b);
 
 					console.log(annotations);
-					console.log(annotaions.length);
+					console.log(annotations.length);
 
 					// remove duplicates on this layer (not necessary, as there should be none)
 					for (var i = 0; i < annotations.length-1; i++) {
