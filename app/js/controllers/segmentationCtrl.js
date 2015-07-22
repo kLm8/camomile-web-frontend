@@ -470,8 +470,10 @@ angular.module('myApp.controllers')
 					// 	};
 					// };
 
-					console.log(annotations);
-					console.log(annotations.length);
+					// console.log('annotations');
+					// console.log(annotations);
+					// console.log('annotations.length');
+					// console.log(annotations.length);
 
 					// remove duplicates on this layer
 					for (var i = 0; i < annotations.length-1; i++) {
@@ -480,9 +482,11 @@ angular.module('myApp.controllers')
 							annotations[i].data.toLowerCase() == annotations[i+1].data.toLowerCase()) {
 								annotations.splice(i, 1);
 								console.log('spliced');
-						}
+						};
 					};
-					console.log(annotations.length);
+
+					// console.log('annotations.length after loop');
+					// console.log(annotations.length);
 
 
 
@@ -558,6 +562,7 @@ angular.module('myApp.controllers')
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
+						console.log(annotations);
 						for (var i = 0; i < data.length; i++) {
 							for (var j = 0; j < annotations.length; j++) {
 								if (annotations[j].fragment.start == data[i].fragment.start && 
@@ -746,7 +751,7 @@ angular.module('myApp.controllers')
 
 					// loading the audio waveform into wavesurfer.js
 					
-					// $scope.wavesurfer.load("01_Audio_03woz_0-aligned.wav");
+					// $scope.wavesurfer.load("audio0.wav");
 
 					camomileService.getMedium($scope.model.selected_medium, function(err, data) {
 						$scope.model.video_name = data.name;
@@ -848,7 +853,7 @@ angular.module('myApp.controllers')
 								g = $scope.cleanLayer(data.name);
 
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
-									if ($scope.model.current_layer[i]['data'].toLowerCase().indexOf("DELETE__") == -1) {
+									if ($scope.model.current_layer[i]['data'].indexOf("DELETE__") == -1) {
 										$scope.items.add({
 											// title: parseInt($scope.model.current_layer[i]['_id'], 16),
 											// title: $scope.model.current_layer[i]['_id'],
