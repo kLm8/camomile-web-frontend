@@ -66,6 +66,7 @@
 						<vg-mute-button></vg-mute-button>
 						<vg-volume-bar></vg-volume-bar>
 					</vg-volume>
+					<vg-fullscreen-button></vg-fullscreen-button>
 				</vg-controls>
 				<vg-overlay-play></vg-overlay-play>
 			</videogular>
@@ -97,10 +98,13 @@
 					<button ng-click="zoom(0.2)" type="button" class="btn btn-primary btn-sm">
 						<span class="glyphicon glyphicon-zoom-out"></span> Zoom out
 					</button>
-					<button ng-click="move(0.2)" type="button" class="btn btn-primary btn-sm">
+					<button ng-click="move(0.5)" type="button" class="btn btn-primary btn-sm">
 						<span class="glyphicon glyphicon-chevron-left"></span> Move left
 					</button>
-					<button ng-click="move(-0.2)" type="button" class="btn btn-primary btn-sm">
+					<button ng-click="center()" type="button" class="btn btn-primary btn-sm">
+						<span class="glyphicon glyphicon-align-center"></span> Center
+					</button>
+					<button ng-click="move(-0.5)" type="button" class="btn btn-primary btn-sm">
 						Move right <span class="glyphicon glyphicon-chevron-right"></span>
 					</button>
 				</div>

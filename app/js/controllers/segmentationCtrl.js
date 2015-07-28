@@ -369,8 +369,8 @@ angular.module('myApp.controllers')
 			};
 
 			/**
-			 * Move the timeline a given percentage to left or right
-			 * @param {Number} percentage   For example 0.1 (left) or -0.1 (right)
+			 * Zoom the timeline a given percentage in or out
+			 * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
 			 */
 			$scope.zoom = function (percentage) {
 				var range = $scope.timeline.getWindow();
@@ -383,8 +383,8 @@ angular.module('myApp.controllers')
 			};
 
 			/**
-			 * Zoom the timeline a given percentage in or out
-			 * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
+			 * Move the timeline a given percentage to left or right
+			 * @param {Number} percentage   For example 0.1 (left) or -0.1 (right)
 			 */
 			$scope.move = function (percentage) {
 				var range = $scope.timeline.getWindow();
@@ -393,6 +393,22 @@ angular.module('myApp.controllers')
 				$scope.timeline.setWindow({
 					start: range.start.valueOf() - interval * percentage,
 					end:   range.end.valueOf()   - interval * percentage
+				});
+			};
+
+			/**
+			 * Center the timeline
+			 */
+			$scope.center = function () {
+				var range = $scope.timeline.getWindow();
+				var interval = range.end - range.start;
+
+				var x = Math.round($scope.timeline.getCustomTime() * 1000) / 1000;
+				console.log(x);
+
+				$scope.timeline.setWindow({
+					start: 	x - interval/2,
+					end: 	x + interval/2
 				});
 			};
 
