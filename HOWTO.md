@@ -20,7 +20,7 @@
 
 See doc at <http://camomile-project.github.io/camomile-server/>
 
-```
+``` python
 In [1]: from camomile import Camomile
 
 In [2]: client = Camomile('http://vmjoker:32781')
@@ -49,7 +49,7 @@ Out[3]: {u'success': u'Authentication succeeded.'}
 
 1.  Modify file `config.json` and reboot frontend
 2.  Non-existing layer(s) will be created by the frontend
-3.  Do not forget to setLayerPermissions(...) to the new layer(s)
+3.  Do not forget to ```setLayerPermissions(...)``` to the new layer(s)
 
 
 ## Tips
