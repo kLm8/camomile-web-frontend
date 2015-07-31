@@ -1,4 +1,4 @@
-# Joker Camomile Frontend - How To
+# Joker Camomile - How To
 
 ## Docker Machines
 
@@ -13,36 +13,51 @@
         -   `docker start camomile`
         -   `docker start web`
         -   <https://github.com/camomile-project/camomile-server#mongodb>
-    -   frontend web : script `update-and-start.sh`
+    -   frontend web : script `update-and-start.sh` or `ex.sh`
 
-## Configuration
 
-### Add User
+## Python Client
 
-In directory 'scripts', see file `config.ini`.
+See doc at <http://camomile-project.github.io/camomile-server/>
 
-### Configuration of Annotation Tracks
+```
+In [1]: from camomile import Camomile
 
-1.  Modify file: `config.json`
-2.  Reboot frontend 
+In [2]: client = Camomile('http://vmjoker:32781')
 
-### Add medium
+In [3]: client.login('login', 'password')
+Out[3]: {u'success': u'Authentication succeeded.'}
+```
 
-In directory 'scripts', see file `config.ini`.
+### Corpus
 
-## Python Console 
+-   client.createCorpus(...)
+-   client.setCorpusPermissions(...)
 
-Install Python client: <https://github.com/camomile-project/camomile-client-python>
+### Layer
 
-    from camomile import Camomile
-    client = Camomile('http://camomile.fr/api')
-    client.login('username', 'password')
-    client.logout()
-    client.getCorpora()
-    client.createCorpus(...)
-    
-    client.updateMedium(...)
+-   client.createLayer(...)
+-   client.setLayerPermissions(...)
 
-## Key Shortcuts
+### User
 
-Maj + clic : replay segment
+-   client.createUser('username', 'password', ROLE)
+        with ROLE = 'user', 'admin', 'read'
+
+
+## Configuration of Annotation Tracks
+
+1.  Modify file: `config.json` and reboot frontend
+2.  Non-existing layer(s) will be created by the frontend
+3.  Do not forget to setLayerPermissions(...) to the new layer(s)
+
+
+## Tips
+
+-   Maj + clic (region in waveform): replay segment
+-   Deleting a segment on the frontend will add 'DELETE__' to its data.
+    Annotations with the prefix 'DELETE__' can afterwards be deleted 
+    permanently using script : 
+        python deleteSameAnnotations.py
+    What is more, this script will clean the duplicate annotations if
+    there are ones.
