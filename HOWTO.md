@@ -31,17 +31,17 @@ Out[3]: {u'success': u'Authentication succeeded.'}
 
 ### Corpus
 
--   client.createCorpus(...)
--   client.setCorpusPermissions(...)
+-   ```python client.createCorpus(...)```
+-   ```python client.setCorpusPermissions(...)```
 
 ### Layer
 
--   client.createLayer(...)
--   client.setLayerPermissions(...)
+-   ```python client.createLayer(...)```
+-   ```python client.setLayerPermissions(...)```
 
 ### User
 
--   client.createUser('username', 'password', ROLE)
+-   ```python client.createUser('username', 'password', ROLE)```
         with ROLE = 'user', 'admin', 'read'
 
 
