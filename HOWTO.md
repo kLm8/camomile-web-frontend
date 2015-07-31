@@ -9,9 +9,9 @@
     -   Mongo DB
 -   Reboot
     -   everything (`docker ps -a`, `docker logs db|camomile|web`)
-        -   `docker start db`
-        -   `docker start camomile`
-        -   `docker start web`
+        1.   `docker start db`
+        2.   `docker start camomile`
+        3.   `docker start web`
         -   <https://github.com/camomile-project/camomile-server#mongodb>
     -   frontend web : script `update-and-start.sh` or `ex.sh`
 
@@ -47,7 +47,7 @@ Out[3]: {u'success': u'Authentication succeeded.'}
 
 ## Configuration of Annotation Tracks
 
-1.  Modify file: `config.json` and reboot frontend
+1.  Modify file `config.json` and reboot frontend
 2.  Non-existing layer(s) will be created by the frontend
 3.  Do not forget to setLayerPermissions(...) to the new layer(s)
 
@@ -58,6 +58,6 @@ Out[3]: {u'success': u'Authentication succeeded.'}
 -   Deleting a segment on the frontend will add 'DELETE__' to its data.
     Annotations with the prefix 'DELETE__' can afterwards be deleted 
     permanently using script : 
-        python deleteSameAnnotations.py
+        ```python deleteSameAnnotations.py```
     What is more, this script will clean the duplicate annotations if
     there are ones.
