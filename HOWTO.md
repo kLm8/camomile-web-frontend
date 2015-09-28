@@ -1,5 +1,10 @@
 # Joker Camomile - How To
 
+## Documentation
+
+See all Camomile-* documentation at <https://github.com/camomile-project>
+
+
 ## Docker Machines
 
 -   git : branch 'dev'
@@ -9,11 +14,12 @@
     -   Mongo DB
 -   Reboot
     -   everything (`docker ps -a`, `docker logs db|camomile|web`)
-        1.   `docker start db`
-        2.   `docker start camomile`
-        3.   `docker start web`
+        1.   `docker stop db && docker start db`
+        2.   `docker stop camomile && docker start camomile`
+        3.   `docker stop web && docker start web`
         -   <https://github.com/camomile-project/camomile-server#mongodb>
     -   frontend web : script `update-and-start.sh` or `ex.sh`
+        - <https://github.com/kLm8/scripts>
 
 
 ## Python Client

@@ -1,5 +1,5 @@
 /**
- * Created by stefas on 04/03/15.
+ * Created by Clément on 07/03/15.
  */
 angular.module('myApp.controllers')
 	.controller('SegmentationCtrl', ['$sce', '$scope', '$http',
@@ -50,7 +50,6 @@ angular.module('myApp.controllers')
 						});
 					}
 					else {
-						console.log('dommage');
 						console.log(data.message);
 					}
 				},
@@ -195,8 +194,10 @@ angular.module('myApp.controllers')
 					content = prompt('Edit label:', item.content);
 					if (content != item.content && content != null) {
 						if (item.content != 'rename me') {
+							// content has changed
 							item.content = content;
 						} else {
+							// save item
 							item.content = content;
 							item.id = $scope.id;
 							$scope.hashTable[item.id] = '';
@@ -222,10 +223,10 @@ angular.module('myApp.controllers')
 						callback(null); // cancel deletion
 					}
 				},
-				// showCustomTime: true, // now deprecated, use addCustomeTime() instead
+				// showCustomTime: true, // deprecated, use addCustomeTime() instead
 				start: 0,
 				min: 0,
-				max: 1000*60*10,
+				max: 1000*60*10, // 10 minutes
 				format: {minorLabels: {millisecond:'s[::]SS', second:'m[:]s', minute:'m'}},
 				type: 'range',
 				showMajorLabels: false,
@@ -257,6 +258,7 @@ angular.module('myApp.controllers')
 					// console.log(data.layers);
 
 					for (var i = 0; i < data.layers.length; i++) {
+						// one layer = one group
 						$scope.groups.add({
 							id: i,
 							content: data.layers[i]
@@ -270,6 +272,7 @@ angular.module('myApp.controllers')
 
 			/**********************************************************************************************/
 
+			// Vis.js' events callbacks
 			$scope.items = new vis.DataSet([
 				// {id: 0, group: 0, content: 'item 0', start: 0, end: 1000},
 				// {id: 2, group: 1, content: 'item 2', start: 1500, end: 2000},
@@ -301,10 +304,9 @@ angular.module('myApp.controllers')
 				var selection = $scope.timeline.getSelection();
 				$scope.timeline.focus(selection);
 
+				// get the beginning to center timeline + wavesurfer
 				var x = ((($scope.items.get(selection[0])).start));
 				x = Math.round(x * 1000) / 1000;
-				// console.log(x);
-
 				// $scope.API.seekTime(x/1000);
 				$scope.timeline.setCustomTime(x);
 				$scope.wavesurfer.seekAndCenter(x/$scope.API.totalTime);				
@@ -356,6 +358,7 @@ angular.module('myApp.controllers')
 				$scope.API.seekTime((props.time).getTime()/1000);
 			};
 
+			// set the callbacks
 			$scope.events = {
 				select: $scope.onSelect,
 				click: $scope.onClick,
@@ -414,6 +417,11 @@ angular.module('myApp.controllers')
 
 		/*********************************************************************************************************/
 
+			/**
+			 * Convert visjs data to Camomile format
+			 * @param {array} visjs   array of Vis.js items
+			 * @return {array} 		  array of Camomile segments
+			 */
 			var visjs2camomile = function(visjs) {
 				var camomile = [];
 
@@ -435,6 +443,9 @@ angular.module('myApp.controllers')
 				return camomile
 			};
 
+			/**
+			 * Save the annotations to the database
+			 */
 			$scope.saveAnnotations = function() {
 				var ids = $scope.groups.getIds();
 
@@ -442,11 +453,16 @@ angular.module('myApp.controllers')
 					var content = '';
 					var annotations = {};
 
+					// is user an annotator ?
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						content = $scope.groups.get(i).content + '_' + Session.username;
-					} else if (Session.username.toLowerCase().indexOf("viewer") > -1) {
+					} 
+					// or a viewer ?
+					else if (Session.username.toLowerCase().indexOf("viewer") > -1) {
 						break;
-					} else {
+					} 
+					// or a segmenter
+					else {
 						content = $scope.groups.get(i).content;
 					};
 
@@ -508,7 +524,7 @@ angular.module('myApp.controllers')
 
 
 					var id_layer = $scope.searchLayer(content);
-					var found = id_layer == -1 ? false : true;
+					var found = id_layer == -1 ? false : true; // is the layer found ?
 
 					if (found) {
 						console.log('Saving layer ' + content);
@@ -558,8 +574,12 @@ angular.module('myApp.controllers')
 				};
 			};
 
+			/**
+			 * Look for the layer if it exists in the DB
+			 * @param {string} content   Name of the layer
+			 * @return {int}			 ID of the layer (-1 if not found)
+			 */
 			$scope.searchLayer = function(content) {
-				// look for the layer if it exists in the DB
 				// console.log("Looking for : " + content);
 
 				var id_layer = -1;
@@ -573,8 +593,15 @@ angular.module('myApp.controllers')
 				return id_layer;
 			};
 
-			// update (boolean) is used to copy (or not) the annotations to the annotator's layer
+			/**
+			 * Save the annotations in the layer
+			 * @param {string} content 		Name of the layer
+			 * @param {int} id_layer 		ID of the layer
+			 * @param {array} annotations 	Array of Camomile annotations
+			 * @param {bool} update 		Used to update and delete (or not) the annotations
+			 */
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
+				// TODO: update: async.waterfall() should be used there with getAnnotations()->checkAnnotation()->getAnnotation()->...
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
@@ -617,13 +644,19 @@ angular.module('myApp.controllers')
 				});
 			};
 
+			/**
+			 * Update an existing annotation
+			 * @param {int} layerID 		ID of the layer
+			 * @param {array} annotation 	Annotation's data
+			 * @param {bool} update 		Used to update and delete (or not) the annotations
+			 */
 			$scope.checkAnnotation = function(layerID, annotation, update) {
 				camomileService.getAnnotation($scope.hashTable[annotation._id], function (err, data) {
 					if (!err) {
 						// check if annotation's layer has changed
 						if (data.id_layer != layerID) {
 							// console.log('Layer has changed');
-							// changed: create new annotation and update the old one if update = true
+							// changed: create new annotation and delete the old one if update = true
 							$scope.createAnnotation(layerID, annotation);
 							
 							if (update) {
@@ -650,6 +683,11 @@ angular.module('myApp.controllers')
 				});
 			};
 
+			/**
+			 * Create an annotation
+			 * @param {int} layerID 		ID of the layer
+			 * @param {array} annotation 	Annotation's data
+			 */
 			$scope.createAnnotation = function(layerID, annotation) {
 				camomileService.createAnnotation(layerID,
 												 annotation.id_medium,
@@ -868,6 +906,7 @@ angular.module('myApp.controllers')
 							if(!err) {
 								g = $scope.cleanLayer(data.name);
 
+								// load the items in the timeline
 								for (var i = 0; i < $scope.model.current_layer.length; i++) {
 									if ($scope.model.current_layer[i]['data'].indexOf("DELETE__") == -1) {
 										$scope.items.add({
@@ -879,6 +918,7 @@ angular.module('myApp.controllers')
 											start: $scope.model.current_layer[i]['fragment']['start']*1000,
 											end: $scope.model.current_layer[i]['fragment']['end']*1000
 										});
+										// remember which $scope.id corresponds to which layer._id
 										$scope.hashTable[$scope.id] = $scope.model.current_layer[i]['_id'];
 										$scope.id += 1;
 										$scope.$apply();
