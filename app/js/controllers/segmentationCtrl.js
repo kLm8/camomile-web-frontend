@@ -453,6 +453,7 @@ angular.module('myApp.controllers')
 					var content = '';
 					var annotations = {};
 
+					// TODO: Update usernames requirements (hardcode is bad)
 					// is user an annotator ?
 					if (Session.username.toLowerCase().indexOf("annotateur") > -1) {
 						content = $scope.groups.get(i).content + '_' + Session.username;
@@ -602,6 +603,7 @@ angular.module('myApp.controllers')
 			 */
 			$scope.saveLayer = function(content, id_layer, annotations, update) {
 				// TODO: update: async.waterfall() should be used there with getAnnotations()->checkAnnotation()->getAnnotation()->...
+				// 				 saving mechanism should be upgraded
 				camomileService.getAnnotations(function (err, data) {
 					if (!err) {
 						// first remove annotations already saved
