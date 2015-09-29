@@ -20,6 +20,33 @@ See all Camomile-* documentation at <https://github.com/camomile-project>
         -   <https://github.com/camomile-project/camomile-server#mongodb>
     -   frontend web : script `update-and-start.sh` or `ex.sh`
         - <https://github.com/kLm8/scripts>
+-   Rebuild
+    -   `export CMML_DB=/data/Camomile/mongodb/`
+    -   `docker run -d -v $CMML_DB:/data/db --name database mongo`
+
+    -   `export CMML_MEDIA=/data/Data_collection/2015-02/Corpus_Joker/Data`
+    -   `cd` to the folder containing <https://github.com/kLm8/camomile-server>
+    -   `docker build -t camomile/api .`
+    -   `docker run -d --restart=always -p 32781:3000 -v $CMML_MEDIA:/media:ro -e ROOT_PASSWORD=??? --link database:mongo --name camomile-dev camomile/api`
+    
+    -   `cd` to the folder containing <https://github.com/kLm8/camomile-web-frontend/tree/dev>
+    -   docker build -t klm8/camomile-web-frontend-dev .
+    -   `docker run -d --restart=always -p 8080:8070 -e CAMOMILE_API=http://vmjoker.limsi.fr:32781 -e CAMOMILE_LOGIN=??? -e CAMOMILE_PASSWORD=??? --name web-dev klm8/camomile-web-frontend-dev`
+
+
+-   Dump and Restore
+    -   `export CMML_DUMP=/data/backups/`
+    -   `docker run -i -t --rm \
+         --link database:mongo \
+         -v $CMML_DUMP:/dump \
+         mongo \
+         bash -c 'mongodump --host $MONGO_PORT_27017_TCP_ADDR -o /dump'`
+    -   `docker run -i -t --rm \
+         --link database:mongo \
+         -v $CMML_DUMP:/dump \
+         mongo \
+         bash -c 'mongorestore --host $MONGO_PORT_27017_TCP_ADDR /dump'`
+
 
 
 ## Python Client
